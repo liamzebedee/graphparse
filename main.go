@@ -5,8 +5,13 @@ import (
 	"go/parser"
 	"go/ast"
 	"go/token"
-	"strings"
+	// "io"
+	// "strings"
 	"path/filepath"
+	// "io/ioutil"
+	"bufio"
+	"os"
+	// "github.com/liamzebedee/graphparse/graphparse"
 	// "github.com/gonum/graph"
 )
 
@@ -23,60 +28,133 @@ func (s stack) Pop() (stack, string) {
 }
 
 
+// two approaches:
+// - big global canonical lookup table of scope (bad, error-prone)
+// - small recursive progressive graph AST approach (better)
+
+
+
+type node struct {
+	children []*node
+	value interface{}
+	label string
+}
+func (n *node) AddChild(val interface{}, label string) *node {
+	child := &node{value: val, label: label}
+	n.children = append(n.children, child)
+	return child
+}
+
+
+
+func (this *node) ToDot() {
+	f, err := os.OpenFile("/Users/liamz/parser/src/github.com/liamzebedee/graphparse/graph.dot", os.O_WRONLY, 0600)
+	if err != nil {
+		panic(err)
+	}
+	if true {
+		// f = os.Stdout
+		defer f.Close()
+	} else {
+		defer f.Close()
+	}
+	w := bufio.NewWriter(f)
+	defer w.Flush()
+
+
+	// root
+	w.WriteString("digraph graphname {\n")
+
+
+	addChildren(this, w)
+
+	w.WriteString("}\n")
+}
+
+// each child of children
+func addChildren(n *node, w *bufio.Writer) {
+	nodeA := n.label
+
+	for _, child := range n.children {
+		nodeB := child.label
+		w.WriteString("\""+nodeA+"\"" + " -> " + "\"" + nodeB + "\"" + ";\n")
+
+		if len(child.children) > 0 {
+			addChildren(child, w)
+		}
+	}
+}
+
 
 
 type Visitor struct {
-	parents stack
+	parent ast.Node
+	parentLabel string
+	Graph *node
 }
 
-func NewVisitor() Visitor {
-	return Visitor{}
+func NewVisitor(rootAstNode ast.Node) Visitor {
+	v := Visitor{}
+	// v.graph = graphparse.NewGraph()
+	v.Graph = &node{value: rootAstNode, label: "/"}
+	// v.parent = rootAstNode
+	// v.parentLabel = ""
+	return v
 }
 
-func (v Visitor) deeperStack(parentToAdd string) (w Visitor) {
-	w = Visitor{}
-	w.parents = v.parents.Push(parentToAdd)
+func (v Visitor) goDeeper(node ast.Node, label string) (w Visitor) {
+	w = v
+	w.Graph = w.Graph.AddChild(node, label)
 	return w
+}
+
+// will every child only belong to one parent? 
+// yeah, it's pagerank
+// maybe in v2 we will have variables linked based on lexic similarity
+
+func (v Visitor) registerNode(node ast.Node, label string) {
+	// v.graph.Add(v.parent, node)
+	v.Graph.AddChild(node, label)
 }
 
 func (v Visitor) Visit(node ast.Node) (w ast.Visitor) {
 	switch x := node.(type) {
 		case *ast.Package:
-			for path, f := range x.Files {
-				relpath, err := filepath.Rel(dir, path)
+			for abspath, srcfile := range x.Files {
+				path, err := filepath.Rel(dir, abspath)
 				if err != nil {
 					panic(err)
 				}
 
-				pkgName := x.Name
-	  			
-				// v.deeperStack("(" + relpath + ")").Visit(f)
-				ast.Walk(v.deeperStack(pkgName + "(" + relpath + ")"), f)
+				// pkgName := x.Name
 
-				fmt.Println(relpath)
+				// label := "(" + path + ")"
+				label := path
+
+				ast.Walk(v.goDeeper(srcfile, label), srcfile)
+				fmt.Println("Processing", path)
 	  		}
 
 		case *ast.TypeSpec:
-			return v.deeperStack(x.Name.Name)
+			return v.goDeeper(x, x.Name.Name)
 		
+		case *ast.StructType:
+			return v.goDeeper(x, x.Fields.List[0].Names[0].Name)
+
 		case *ast.FuncDecl:
-			// Functions have one receiver
-			// This is the parent
 			if recv := x.Recv; recv != nil {
 				// Method on struct
-				// ast.Print(nil,x)
 				structName := recv.List[0].Names[0].Name
-				// fmt.Println(recv.List[0].Names[0].Name)
-				// fmt.Println(structName)
 
-				return v.deeperStack(structName)	
+				return v.goDeeper(x, structName)
 			} else {
 				// Just a function
-				return v.deeperStack(x.Name.Name)
+				return v.goDeeper(x, x.Name.Name)
 			}
 
-		case *ast.Ident:
-			fmt.Println(strings.Join(v.parents, ".") + "." + x.Name)
+		// case *ast.Ident:
+			// v.registerNode(x, x.Name)
+			// fmt.Println(strings.Join(v.parents, ".") + "." + x.Name)
 
 		default:
 			return v
@@ -100,8 +178,9 @@ func main() {
 		fmt.Println("Package:", name)
 		// fmt.Println(name, pkg)
 
-		visitor := NewVisitor()
+		visitor := NewVisitor(pkg)
 		ast.Walk(visitor, pkg)
+		visitor.Graph.ToDot()
 
 		// for path, file := range pkg.Files {
 		// 	fmt.Println("File:", path)
@@ -140,6 +219,8 @@ func main() {
 		// 	fmt.Println(dec)
 		// }
 	}
+
+
 
 	// ast.Inspect(f, func(n ast.Node) bool {
 	// 	var s string
