@@ -11,7 +11,7 @@ import (
 	// "io/ioutil"
 	"bufio"
 	"os"
-	"strconv"
+	// "strconv"
 	"sort"
 	// "github.com/liamzebedee/graphparse/graphparse"
 	"github.com/dcadenas/pagerank"
@@ -35,53 +35,32 @@ import (
 
 
 
+// next goal: get methods on structs to be linked back to the struct type
+// really what this entails is changing the canonicalisation of the id
+
+
+var idmap map[string]nodeid = make(map[string]nodeid)
+var idmap_i int = 0
+
+func getIdForName(id string) nodeid {
+	if _, ok := idmap[id]; !ok {
+		idmap_i++
+		idmap[id] = nodeid(idmap_i)
+	}
+	return idmap[id]
+}
+
 type node struct {
 	children []*node
 	value interface{}
 	label string
+	parent *node
 }
 func (n *node) AddChild(val interface{}, label string) *node {
-	child := &node{value: val, label: label}
+	child := &node{value: val, label: label, parent: n}
 	n.children = append(n.children, child)
 	return child
 }
-
-// type Sortable interface {
-// 	Len() int
-// 	Less(i, j int) bool
-// 	Swap(i, j int)
-// }
-
-// func sortMap(data valueSortedMap) valueSortedMap {
-// 	sort.Sort(sort.Reverse(pl))
-// 	return pl
-// }
-
-// // type valueSortedMap 
-// type valueSortedMap map[nodeid]float64
-
-// type pair struct {
-// 	k nodeid
-// 	v float64
-// }
-
-// func sortMap(from map[nodeid]float64) map[nodeid]float64 {
-// 	tmp := []pair
-// 	for k, v := range from, i := 0 {
-// 		tmp = append(tmp, pair{k, v})
-// 	}
-
-// }
-// func (this valueSortedMap) Len() int {
-// 	return len(this)
-// }
-// func (this valueSortedMap) Less(i, j int) bool {
-// 	return this[i] < this[j]
-// }
-// func (this valueSortedMap) Swap(i, j int) {
-// 	this[i], this[j] = this[j], this[i]
-// }
-
 
 // we don't have to deal with duplicate words just yet
 // lets just use the addresses? 
@@ -98,6 +77,22 @@ func (p rankPairList) Len() int           { return len(p) }
 func (p rankPairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 func (p rankPairList) Less(i, j int) bool { return p[i].Rank < p[j].Rank }
 
+
+
+// now we need a canonical id
+// it's much better to use the type system to help with this
+// rather than defining a lookup map which is simply difficult
+
+// so we can use each file's scope
+
+// scope = file.Scope
+// ident = x.Name // or ident, idk
+// for ; scope != nil; scope = scope.Outer {
+// 	if obj := scope.Lookup(ident.Name); obj != nil {
+// 		ident.Obj = obj
+// 		return true
+// 	}
+// }
 
 
 func (this *node) ToDot() {
@@ -140,36 +135,43 @@ func (this *node) ToDot() {
 	w.WriteString("digraph graphname {\n")
 	
 	// 1. Node definitions
-	// maxNodeSize := 10.0 // inches
-	// min node size is 1
-	// ranks := make(map[nodeid]float64)
-	// ranks := treemap.NewWith(sortMapByValue)
-	// ranks := make(rankPairList)
 	var ranks rankPairList
 	graph.Rank(probability_of_following_a_link, tolerance, func(identifier int, rank float64) {
-		// ranks.Put(nodeid(identifier), rankpair{nodeid(identifier), rank})
 		ranks = append(ranks, rankPair{nodeid(identifier), rank})
 	})
 
 	// normalise ranks to something that is nice to look at
-	maxNodeSize := 3. // inches
 	sort.Sort(ranks)
-	biggestNode := ranks[len(ranks)-1].Rank
-	fmt.Println("biggest node is", biggestNode)
-	fmt.Println("smallest node is", ranks[0].Rank)
-	scaleFactor := maxNodeSize / biggestNode
+	minAllowed, maxAllowed := 1.0, 5.0
+	var min float64
+	var max float64
+	if len(ranks) == 0 {
+		min, max = 0., 1.
+	} else {
+		min, max = ranks[0].Rank, ranks[len(ranks)-1].Rank
+	}
+	
+	scaleRank := func(rank float64) float64 {
+		return (maxAllowed - minAllowed) * (rank - min) / (max - min) + minAllowed;
+	}
+	fmt.Println("smallest node is", scaleRank(min))
+	fmt.Println("biggest node is", scaleRank(max))
 
 	for _, rank := range ranks {
-		// fmt.Println(rank.Rank)
 		node := nodesLookup[rank.NodeId]
-		rankStretched := rank.Rank * scaleFactor
+		rankStretched := scaleRank(rank.Rank)
+
 		fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"];\n", rank.NodeId, rankStretched, rankStretched, node.label)
 	}
-
 
 	// 2. Edges
 	for _, edge := range edges {
 		fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge[0], edge[1])
+	}
+
+
+	for _, node := range nodesLookup {
+		fmt.Println(node.FQN())
 	}
 
 	w.WriteString("}\n")
@@ -187,11 +189,34 @@ func (n *node) walk(fn walkfn) {
 type nodeid int64
 type edge []nodeid
 
+// canonical format is as follows:
+// PACKAGE FILE DECLARATIONline
+
+func (this *node) FQN() string {
+	fqn := ""
+
+	p := this
+	for p != nil && p.label != "/" {
+		fqn = p.label + "/" + fqn
+		p = p.parent
+	}
+
+	return fqn
+}
 func (this *node) Id() nodeid {
-	if i, err := strconv.ParseInt(fmt.Sprintf("%p", this), 0, 64); err != nil {
-		panic(err)
-	} else { return nodeid(i) }
+	// if i, err := strconv.ParseInt(fmt.Sprintf("%p", this), 0, 64); err != nil {
+		// panic(err)
+	// } else { return nodeid(i) }
 	
+
+	// if this.label == "c" {
+	// 	fmt.Println(this.parent.label)
+	// }
+
+	// fmt.Println(fqn)
+
+	// return getIdForName(this.label)
+	return getIdForName(this.FQN())
 }
 
 // each child of children
@@ -212,17 +237,12 @@ func makeNodeLookup(nodeLookup map[nodeid]*node) walkfn {
 
 
 type Visitor struct {
-	parent ast.Node
-	parentLabel string
 	Graph *node
 }
 
 func NewVisitor(rootAstNode ast.Node) Visitor {
 	v := Visitor{}
-	// v.graph = graphparse.NewGraph()
-	v.Graph = &node{value: rootAstNode, label: "/"}
-	// v.parent = rootAstNode
-	// v.parentLabel = ""
+	v.Graph = &node{parent: nil, value: rootAstNode, label: "/"}
 	return v
 }
 
@@ -232,14 +252,17 @@ func (v Visitor) goDeeper(node ast.Node, label string) (w Visitor) {
 	return w
 }
 
+func (v Visitor) registerNode(node ast.Node, label string) {
+	v.Graph.AddChild(node, label)
+}
+
 // will every child only belong to one parent? 
 // yeah, it's pagerank
 // maybe in v2 we will have variables linked based on lexic similarity
 
-func (v Visitor) registerNode(node ast.Node, label string) {
-	// v.graph.Add(v.parent, node)
-	v.Graph.AddChild(node, label)
-}
+
+// next step: fix entries that have no .go file as canonical path ?? (wtf?!)
+
 
 func (v Visitor) Visit(node ast.Node) (w ast.Visitor) {
 	switch x := node.(type) {
@@ -250,44 +273,14 @@ func (v Visitor) Visit(node ast.Node) (w ast.Visitor) {
 					panic(err)
 				}
 
-				// pkgName := x.Name
-
-				// label := "(" + path + ")"
-				label := path
-
-				ast.Walk(v.goDeeper(srcfile, label), srcfile)
+				ast.Walk(v.goDeeper(srcfile, path), srcfile)
 				fmt.Println("Processing", path)
 			}
 
-		case *ast.TypeSpec:
-			return v.goDeeper(x, x.Name.Name)
-		
-		case *ast.StructType:
-			return v.goDeeper(x, x.Fields.List[0].Names[0].Name)
-
-		case *ast.FuncDecl:
-			if recv := x.Recv; recv != nil {
-				// Method on struct
-				structName := recv.List[0].Names[0].Name
-
-				return v.goDeeper(x, structName)
-			} else {
-				// Just a function
-				return v.goDeeper(x, x.Name.Name)
-			}
-
-		case *ast.ValueSpec:
-			v.registerNode(x, x.Names[0].Name)
-
-
-		// case *ast.Ident:
-			// v.registerNode(x, x.Name)
-			// fmt.Println(strings.Join(v.parents, ".") + "." + x.Name)
-
 		default:
-			return v
+			return w
 	}
-	return w
+	return v
 }
 
 const dir string = "/Users/liamz/parser/src/github.com/liamzebedee/graphparse/subnet/subnet/"
@@ -297,7 +290,6 @@ func main() {
 	// dir := "/Users/liamz/parser/src/github.com/liamzebedee/graphparse/testsrc/"
 
 	pkgs, err := parser.ParseDir(fset, dir, nil, 0)
-
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -307,6 +299,7 @@ func main() {
 
 		visitor := NewVisitor(pkg)
 		ast.Walk(visitor, pkg)
+		// ast.Print(fset, pkg)
 		visitor.Graph.ToDot()
 	}
 
