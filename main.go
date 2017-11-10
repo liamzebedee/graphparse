@@ -15,6 +15,9 @@ import (
 	"sort"
 	// "github.com/liamzebedee/graphparse/graphparse"
 	"github.com/dcadenas/pagerank"
+	// godsUtils "github.com/emirpasic/gods/utils" 
+	// "github.com/emirpasic/gods/trees/btree"
+	// "github.com/emirpasic/gods/maps/treemap"
 )
 
 
@@ -54,33 +57,48 @@ func (n *node) AddChild(val interface{}, label string) *node {
 // 	return pl
 // }
 
-// type valueSortedMap 
-type valueSortedMap map[nodeid]float64
+// // type valueSortedMap 
+// type valueSortedMap map[nodeid]float64
 
-type pair struct {
-	k nodeid
-	v float64
-}
+// type pair struct {
+// 	k nodeid
+// 	v float64
+// }
 
-func sortMap(from map[nodeid]float64) map[nodeid]float64 {
-	tmp := []pair
-	for k, v := range from, i := 0 {
-		tmp = append(tmp, pair{k, v})
-	}
-}
-func (this valueSortedMap) Len() int {
-	return len(this)
-}
-func (this valueSortedMap) Less(i, j int) bool {
-	return this[i] < this[j]
-}
-func (this valueSortedMap) Swap(i, j int) {
-	this[i], this[j] = this[j], this[i]
-}
+// func sortMap(from map[nodeid]float64) map[nodeid]float64 {
+// 	tmp := []pair
+// 	for k, v := range from, i := 0 {
+// 		tmp = append(tmp, pair{k, v})
+// 	}
+
+// }
+// func (this valueSortedMap) Len() int {
+// 	return len(this)
+// }
+// func (this valueSortedMap) Less(i, j int) bool {
+// 	return this[i] < this[j]
+// }
+// func (this valueSortedMap) Swap(i, j int) {
+// 	this[i], this[j] = this[j], this[i]
+// }
 
 
 // we don't have to deal with duplicate words just yet
 // lets just use the addresses? 
+
+type rankPair struct {
+	NodeId nodeid
+	Rank float64
+}
+
+// A slice of pairs that implements sort.Interface to sort by values
+type rankPairList []rankPair
+
+func (p rankPairList) Len() int           { return len(p) }
+func (p rankPairList) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p rankPairList) Less(i, j int) bool { return p[i].Rank < p[j].Rank }
+
+
 
 func (this *node) ToDot() {
 	printToStdout := false
@@ -105,6 +123,8 @@ func (this *node) ToDot() {
 
 	this.walk(makeEdges(&edges))
 	this.walk(makeNodeLookup(nodesLookup))
+
+	fmt.Println(len(edges), "edges and", len(nodesLookup), "nodes")
 	
 	// Compute PageRank distribution
 	graph := pagerank.New()
@@ -122,20 +142,28 @@ func (this *node) ToDot() {
 	// 1. Node definitions
 	// maxNodeSize := 10.0 // inches
 	// min node size is 1
-	ranks := make(valueSortedMap)
+	// ranks := make(map[nodeid]float64)
+	// ranks := treemap.NewWith(sortMapByValue)
+	// ranks := make(rankPairList)
+	var ranks rankPairList
 	graph.Rank(probability_of_following_a_link, tolerance, func(identifier int, rank float64) {
-		ranks[nodeid(identifier)] = rank
+		// ranks.Put(nodeid(identifier), rankpair{nodeid(identifier), rank})
+		ranks = append(ranks, rankPair{nodeid(identifier), rank})
 	})
 
 	// normalise ranks to something that is nice to look at
 	maxNodeSize := 3. // inches
 	sort.Sort(ranks)
+	biggestNode := ranks[len(ranks)-1].Rank
+	fmt.Println("biggest node is", biggestNode)
+	fmt.Println("smallest node is", ranks[0].Rank)
+	scaleFactor := maxNodeSize / biggestNode
 
-	scaleFactor := maxNodeSize / ranks[-1]
-	for identifier, rank := range ranks {
-		node := nodesLookup[nodeid(identifier)]
-		rankStretched := rank * scaleFactor
-		fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"];\n", identifier, rankStretched, rankStretched, node.label)
+	for _, rank := range ranks {
+		// fmt.Println(rank.Rank)
+		node := nodesLookup[rank.NodeId]
+		rankStretched := rank.Rank * scaleFactor
+		fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"];\n", rank.NodeId, rankStretched, rankStretched, node.label)
 	}
 
 
