@@ -11,21 +11,19 @@ import (
 	// "io/ioutil"
 	"bufio"
 	"os"
+	"strconv"
+	"sort"
 	// "github.com/liamzebedee/graphparse/graphparse"
-	// "github.com/gonum/graph"
+	"github.com/dcadenas/pagerank"
 )
 
 
-type stack []string
+// idea: actually model it like webpages
+//       looking for a piece of code? use current scope as starting page
+//       use the type system to autofill the vars? 
 
-func (s stack) Push(v string) stack {
-    return append(s, v)
-}
-
-func (s stack) Pop() (stack, string) {
-    l := len(s)
-    return  s[:l-1], s[l-1]
-}
+// other thing with VR:
+// need a visual shape-based constraint/design language
 
 
 // two approaches:
@@ -45,16 +43,55 @@ func (n *node) AddChild(val interface{}, label string) *node {
 	return child
 }
 
+// type Sortable interface {
+// 	Len() int
+// 	Less(i, j int) bool
+// 	Swap(i, j int)
+// }
 
+// func sortMap(data valueSortedMap) valueSortedMap {
+// 	sort.Sort(sort.Reverse(pl))
+// 	return pl
+// }
+
+// type valueSortedMap 
+type valueSortedMap map[nodeid]float64
+
+type pair struct {
+	k nodeid
+	v float64
+}
+
+func sortMap(from map[nodeid]float64) map[nodeid]float64 {
+	tmp := []pair
+	for k, v := range from, i := 0 {
+		tmp = append(tmp, pair{k, v})
+	}
+}
+func (this valueSortedMap) Len() int {
+	return len(this)
+}
+func (this valueSortedMap) Less(i, j int) bool {
+	return this[i] < this[j]
+}
+func (this valueSortedMap) Swap(i, j int) {
+	this[i], this[j] = this[j], this[i]
+}
+
+
+// we don't have to deal with duplicate words just yet
+// lets just use the addresses? 
 
 func (this *node) ToDot() {
+	printToStdout := false
+
+
 	f, err := os.OpenFile("/Users/liamz/parser/src/github.com/liamzebedee/graphparse/graph.dot", os.O_WRONLY, 0600)
 	if err != nil {
 		panic(err)
 	}
-	if true {
-		// f = os.Stdout
-		defer f.Close()
+	if printToStdout {
+		f = os.Stdout
 	} else {
 		defer f.Close()
 	}
@@ -62,26 +99,85 @@ func (this *node) ToDot() {
 	defer w.Flush()
 
 
-	// root
+	// Compute edges from pointers
+	var edges []edge
+	nodesLookup := make(map[nodeid]*node)
+
+	this.walk(makeEdges(&edges))
+	this.walk(makeNodeLookup(nodesLookup))
+	
+	// Compute PageRank distribution
+	graph := pagerank.New()
+	for _, edge := range edges {
+		graph.Link(int(edge[0]), int(edge[1]))
+	}
+
+	probability_of_following_a_link := 0.85
+	tolerance := 0.0001
+
+	// Generate .dot file for graphviz
+	// ------
 	w.WriteString("digraph graphname {\n")
+	
+	// 1. Node definitions
+	// maxNodeSize := 10.0 // inches
+	// min node size is 1
+	ranks := make(valueSortedMap)
+	graph.Rank(probability_of_following_a_link, tolerance, func(identifier int, rank float64) {
+		ranks[nodeid(identifier)] = rank
+	})
+
+	// normalise ranks to something that is nice to look at
+	maxNodeSize := 3. // inches
+	sort.Sort(ranks)
+
+	scaleFactor := maxNodeSize / ranks[-1]
+	for identifier, rank := range ranks {
+		node := nodesLookup[nodeid(identifier)]
+		rankStretched := rank * scaleFactor
+		fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"];\n", identifier, rankStretched, rankStretched, node.label)
+	}
 
 
-	addChildren(this, w)
+	// 2. Edges
+	for _, edge := range edges {
+		fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge[0], edge[1])
+	}
 
 	w.WriteString("}\n")
 }
 
-// each child of children
-func addChildren(n *node, w *bufio.Writer) {
-	nodeA := n.label
+type walkfn func(n *node)
 
+func (n *node) walk(fn walkfn) {
 	for _, child := range n.children {
-		nodeB := child.label
-		w.WriteString("\""+nodeA+"\"" + " -> " + "\"" + nodeB + "\"" + ";\n")
+		fn(child)
+		child.walk(fn)
+	}	
+}
 
-		if len(child.children) > 0 {
-			addChildren(child, w)
+type nodeid int64
+type edge []nodeid
+
+func (this *node) Id() nodeid {
+	if i, err := strconv.ParseInt(fmt.Sprintf("%p", this), 0, 64); err != nil {
+		panic(err)
+	} else { return nodeid(i) }
+	
+}
+
+// each child of children
+func makeEdges(edges *[]edge) walkfn {
+	return func(node *node) {
+		for _, child := range node.children {
+			*edges = append(*edges, edge{node.Id(), child.Id()})
 		}
+	}
+}
+
+func makeNodeLookup(nodeLookup map[nodeid]*node) walkfn {
+	return func(node *node) {
+		nodeLookup[node.Id()] = node
 	}
 }
 
@@ -133,7 +229,7 @@ func (v Visitor) Visit(node ast.Node) (w ast.Visitor) {
 
 				ast.Walk(v.goDeeper(srcfile, label), srcfile)
 				fmt.Println("Processing", path)
-	  		}
+			}
 
 		case *ast.TypeSpec:
 			return v.goDeeper(x, x.Name.Name)
@@ -151,6 +247,10 @@ func (v Visitor) Visit(node ast.Node) (w ast.Visitor) {
 				// Just a function
 				return v.goDeeper(x, x.Name.Name)
 			}
+
+		case *ast.ValueSpec:
+			v.registerNode(x, x.Names[0].Name)
+
 
 		// case *ast.Ident:
 			// v.registerNode(x, x.Name)
@@ -176,64 +276,10 @@ func main() {
 
 	for name, pkg := range pkgs {
 		fmt.Println("Package:", name)
-		// fmt.Println(name, pkg)
 
 		visitor := NewVisitor(pkg)
 		ast.Walk(visitor, pkg)
 		visitor.Graph.ToDot()
-
-		// for path, file := range pkg.Files {
-		// 	fmt.Println("File:", path)
-		// 	// ast.Print(fset, file)
-			
-		// 	// for _, decl := range file.Decls {
-		// 	// 	// var parent ast.Node = ast.Node(decl)
-		// 	// 	// var parent string = ""
-
-
-		// 	// 	// actually need to recurse and be able to keep track of the parent hierarchy 
-		// 	// 	// otherwise we would never know when we go up level, because parent wouldn't change
-		// 	// 	// H: does parent change suitably
-
-		// 	// 	// we need to know depth to make a stack
-
-				
-
-		// 	// 	// ast.Inspect(decl, func(node ast.Node) bool {
-					
-					
-		// 	// 	// 	return true
-		// 	// 	// })
-		// 	// }
-
-		// 	fmt.Println("")
-
-		// 	// fmt.Println(file)
-		// }
-
-		// fmt.Println("Merging package files...")
-		// pkgFile := ast.MergePackageFiles(pkg, ast.FilterFuncDuplicates & ast.FilterUnassociatedComments & ast.FilterImportDuplicates)
-
-		// // fmt.Println(pkgFile)
-		// for _, dec := range pkgFile.Decls {
-		// 	fmt.Println(dec)
-		// }
 	}
-
-
-
-	// ast.Inspect(f, func(n ast.Node) bool {
-	// 	var s string
-	// 	switch x := n.(type) {
-	// 	case *ast.BasicLit:
-	// 		s = x.Value
-	// 	case *ast.Ident:
-	// 		s = x.Name
-	// 	}
-	// 	if s != "" {
-	// 		fmt.Printf("%s:\t%s\n", fset.Position(n.Pos()), s)
-	// 	}
-	// 	return true
-	// })
 
 }
