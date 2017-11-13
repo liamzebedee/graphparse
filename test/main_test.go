@@ -6,13 +6,19 @@ import (
 	"go/parser"
 	"golang.org/x/tools/go/loader"
 	"go/token"
+	"fmt"
 )
 
+func ast0() {
+	fset := token.NewFileSet()
+	const dir string = "/Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go"
+	f, _ := parser.ParseFile(fset, dir, nil, 0)
+	ast.Print(fset, f)
+}
+
 func ast1() {
-	pkgpath := "github.com/twitchyliquid64/subnet"
+	pkgpath := "github.com/twitchyliquid64/subnet/subnet"
 
-
-	// imp := importer.Default()
 	conf := loader.Config{ParserMode: parser.ParseComments}
 	conf.Import(pkgpath)
 	prog, err := conf.Load()
@@ -25,17 +31,13 @@ func ast1() {
 	// pkg := pkginfo.Pkg
 	fset := prog.Fset
 
-	// /Users/liamz/parser/src/github.com/liamzebedee/graphparse/subnet/subnet/client.go
 	rootAst := pkginfo.Files[0]
-
 	ast.Print(fset, rootAst)
+
 }
 
 func TestAST(t *testing.T) {
-	fset := token.NewFileSet()
-	const dir string = "/Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go"
-	f, _ := parser.ParseFile(fset, dir, nil, 0)
-	ast.Print(fset, f)
+	ast1()
 }
 
 

@@ -2,9 +2,6 @@ package main
 
 import (
 	"fmt"
-	"go/parser"
-	"go/ast"
-	"go/token"
 	// "io"
 	// "strings"
 	"path/filepath"
@@ -19,7 +16,10 @@ import (
 	// "github.com/emirpasic/gods/trees/btree"
 	// "github.com/emirpasic/gods/maps/treemap"
 	"golang.org/x/tools/go/loader"
-	"go/importer"
+	"go/parser"
+	"go/ast"
+	"go/types"
+	// "go/token"
 )
 
 
@@ -240,10 +240,11 @@ func makeNodeLookup(nodeLookup map[nodeid]*node) walkfn {
 
 type Visitor struct {
 	Graph *node
+	Pkg *types.Package
 }
 
-func NewVisitor(rootAstNode ast.Node) Visitor {
-	v := Visitor{}
+func NewVisitor(rootAstNode ast.Node, pkg *types.Package) Visitor {
+	v := Visitor{Pkg: pkg}
 	v.Graph = &node{parent: nil, value: rootAstNode, label: "/"}
 	return v
 }
@@ -297,21 +298,23 @@ func (v Visitor) Visit(node ast.Node) (w ast.Visitor) {
 const dir string = "/Users/liamz/parser/src/github.com/liamzebedee/graphparse/subnet/subnet/"
 
 func main() {
-	fset := token.NewFileSet()
-	// dir := "/Users/liamz/parser/src/github.com/liamzebedee/graphparse/testsrc/"
+	pkgpath := "github.com/twitchyliquid64/subnet/subnet"
 
-	pkgs, err := parser.ParseDir(fset, dir, nil, 0)
+	conf := loader.Config{ParserMode: parser.ParseComments}
+	conf.Import(pkgpath)
+	prog, err := conf.Load()
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
 
-	for name, pkg := range pkgs {
-		fmt.Println("Package:", name)
+	pkginfo := prog.Package(pkgpath)
+	// fset := prog.Fset
+	// ast.Print(fset, rootAst)
 
-		visitor := NewVisitor(pkg)
-		ast.Walk(visitor, pkg)
-		// ast.Print(fset, pkg)
+	for _, f := range pkginfo.Files {
+		visitor := NewVisitor(f, pkginfo.Pkg)
+		ast.Walk(visitor, f)
 		visitor.Graph.ToDot()
+		// ast.Print(fset, f)
 	}
-
 }

@@ -1,5 +1,6 @@
 digraph graphname {
-1 [width=1] [height=1] [label="server_conn.go"];
+}
+[width=1] [height=1] [label="server_conn.go"];
 3 [width=1] [height=1] [label="reverser.go"];
 11 [width=1] [height=1] [label="client.go"];
 6 [width=1] [height=1] [label="dev_packet.go"];
