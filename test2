@@ -1,0 +1,2051 @@
+=== RUN   TestAST
+     0  *ast.File {
+     1  .  Package: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:1:1
+     2  .  Name: *ast.Ident {
+     3  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:1:9
+     4  .  .  Name: "main"
+     5  .  }
+     6  .  Decls: []ast.Decl (len = 14) {
+     7  .  .  0: *ast.GenDecl {
+     8  .  .  .  TokPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:3:1
+     9  .  .  .  Tok: import
+    10  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:3:8
+    11  .  .  .  Specs: []ast.Spec (len = 3) {
+    12  .  .  .  .  0: *ast.ImportSpec {
+    13  .  .  .  .  .  Path: *ast.BasicLit {
+    14  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:4:2
+    15  .  .  .  .  .  .  Kind: STRING
+    16  .  .  .  .  .  .  Value: "\"flag\""
+    17  .  .  .  .  .  }
+    18  .  .  .  .  .  EndPos: -
+    19  .  .  .  .  }
+    20  .  .  .  .  1: *ast.ImportSpec {
+    21  .  .  .  .  .  Path: *ast.BasicLit {
+    22  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:5:2
+    23  .  .  .  .  .  .  Kind: STRING
+    24  .  .  .  .  .  .  Value: "\"fmt\""
+    25  .  .  .  .  .  }
+    26  .  .  .  .  .  EndPos: -
+    27  .  .  .  .  }
+    28  .  .  .  .  2: *ast.ImportSpec {
+    29  .  .  .  .  .  Path: *ast.BasicLit {
+    30  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:6:2
+    31  .  .  .  .  .  .  Kind: STRING
+    32  .  .  .  .  .  .  Value: "\"os\""
+    33  .  .  .  .  .  }
+    34  .  .  .  .  .  EndPos: -
+    35  .  .  .  .  }
+    36  .  .  .  }
+    37  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:7:1
+    38  .  .  }
+    39  .  .  1: *ast.GenDecl {
+    40  .  .  .  TokPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:9:1
+    41  .  .  .  Tok: var
+    42  .  .  .  Lparen: -
+    43  .  .  .  Specs: []ast.Spec (len = 1) {
+    44  .  .  .  .  0: *ast.ValueSpec {
+    45  .  .  .  .  .  Names: []*ast.Ident (len = 1) {
+    46  .  .  .  .  .  .  0: *ast.Ident {
+    47  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:9:5
+    48  .  .  .  .  .  .  .  Name: "interfaceNameVar"
+    49  .  .  .  .  .  .  .  Obj: *ast.Object {
+    50  .  .  .  .  .  .  .  .  Kind: var
+    51  .  .  .  .  .  .  .  .  Name: "interfaceNameVar"
+    52  .  .  .  .  .  .  .  .  Decl: *(obj @ 44)
+    53  .  .  .  .  .  .  .  .  Data: 0
+    54  .  .  .  .  .  .  .  }
+    55  .  .  .  .  .  .  }
+    56  .  .  .  .  .  }
+    57  .  .  .  .  .  Type: *ast.Ident {
+    58  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:9:22
+    59  .  .  .  .  .  .  Name: "string"
+    60  .  .  .  .  .  }
+    61  .  .  .  .  }
+    62  .  .  .  }
+    63  .  .  .  Rparen: -
+    64  .  .  }
+    65  .  .  2: *ast.GenDecl {
+    66  .  .  .  TokPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:10:1
+    67  .  .  .  Tok: var
+    68  .  .  .  Lparen: -
+    69  .  .  .  Specs: []ast.Spec (len = 1) {
+    70  .  .  .  .  0: *ast.ValueSpec {
+    71  .  .  .  .  .  Names: []*ast.Ident (len = 1) {
+    72  .  .  .  .  .  .  0: *ast.Ident {
+    73  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:10:5
+    74  .  .  .  .  .  .  .  Name: "networkAddrVar"
+    75  .  .  .  .  .  .  .  Obj: *ast.Object {
+    76  .  .  .  .  .  .  .  .  Kind: var
+    77  .  .  .  .  .  .  .  .  Name: "networkAddrVar"
+    78  .  .  .  .  .  .  .  .  Decl: *(obj @ 70)
+    79  .  .  .  .  .  .  .  .  Data: 0
+    80  .  .  .  .  .  .  .  }
+    81  .  .  .  .  .  .  }
+    82  .  .  .  .  .  }
+    83  .  .  .  .  .  Type: *ast.Ident {
+    84  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:10:20
+    85  .  .  .  .  .  .  Name: "string"
+    86  .  .  .  .  .  }
+    87  .  .  .  .  }
+    88  .  .  .  }
+    89  .  .  .  Rparen: -
+    90  .  .  }
+    91  .  .  3: *ast.GenDecl {
+    92  .  .  .  TokPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:12:1
+    93  .  .  .  Tok: var
+    94  .  .  .  Lparen: -
+    95  .  .  .  Specs: []ast.Spec (len = 1) {
+    96  .  .  .  .  0: *ast.ValueSpec {
+    97  .  .  .  .  .  Names: []*ast.Ident (len = 1) {
+    98  .  .  .  .  .  .  0: *ast.Ident {
+    99  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:12:5
+   100  .  .  .  .  .  .  .  Name: "caCertPathVar"
+   101  .  .  .  .  .  .  .  Obj: *ast.Object {
+   102  .  .  .  .  .  .  .  .  Kind: var
+   103  .  .  .  .  .  .  .  .  Name: "caCertPathVar"
+   104  .  .  .  .  .  .  .  .  Decl: *(obj @ 96)
+   105  .  .  .  .  .  .  .  .  Data: 0
+   106  .  .  .  .  .  .  .  }
+   107  .  .  .  .  .  .  }
+   108  .  .  .  .  .  }
+   109  .  .  .  .  .  Type: *ast.Ident {
+   110  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:12:19
+   111  .  .  .  .  .  .  Name: "string"
+   112  .  .  .  .  .  }
+   113  .  .  .  .  }
+   114  .  .  .  }
+   115  .  .  .  Rparen: -
+   116  .  .  }
+   117  .  .  4: *ast.GenDecl {
+   118  .  .  .  TokPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:13:1
+   119  .  .  .  Tok: var
+   120  .  .  .  Lparen: -
+   121  .  .  .  Specs: []ast.Spec (len = 1) {
+   122  .  .  .  .  0: *ast.ValueSpec {
+   123  .  .  .  .  .  Names: []*ast.Ident (len = 1) {
+   124  .  .  .  .  .  .  0: *ast.Ident {
+   125  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:13:5
+   126  .  .  .  .  .  .  .  Name: "caKeyPathVar"
+   127  .  .  .  .  .  .  .  Obj: *ast.Object {
+   128  .  .  .  .  .  .  .  .  Kind: var
+   129  .  .  .  .  .  .  .  .  Name: "caKeyPathVar"
+   130  .  .  .  .  .  .  .  .  Decl: *(obj @ 122)
+   131  .  .  .  .  .  .  .  .  Data: 0
+   132  .  .  .  .  .  .  .  }
+   133  .  .  .  .  .  .  }
+   134  .  .  .  .  .  }
+   135  .  .  .  .  .  Type: *ast.Ident {
+   136  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:13:18
+   137  .  .  .  .  .  .  Name: "string"
+   138  .  .  .  .  .  }
+   139  .  .  .  .  }
+   140  .  .  .  }
+   141  .  .  .  Rparen: -
+   142  .  .  }
+   143  .  .  5: *ast.GenDecl {
+   144  .  .  .  TokPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:14:1
+   145  .  .  .  Tok: var
+   146  .  .  .  Lparen: -
+   147  .  .  .  Specs: []ast.Spec (len = 1) {
+   148  .  .  .  .  0: *ast.ValueSpec {
+   149  .  .  .  .  .  Names: []*ast.Ident (len = 1) {
+   150  .  .  .  .  .  .  0: *ast.Ident {
+   151  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:14:5
+   152  .  .  .  .  .  .  .  Name: "ourCertPathVar"
+   153  .  .  .  .  .  .  .  Obj: *ast.Object {
+   154  .  .  .  .  .  .  .  .  Kind: var
+   155  .  .  .  .  .  .  .  .  Name: "ourCertPathVar"
+   156  .  .  .  .  .  .  .  .  Decl: *(obj @ 148)
+   157  .  .  .  .  .  .  .  .  Data: 0
+   158  .  .  .  .  .  .  .  }
+   159  .  .  .  .  .  .  }
+   160  .  .  .  .  .  }
+   161  .  .  .  .  .  Type: *ast.Ident {
+   162  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:14:20
+   163  .  .  .  .  .  .  Name: "string"
+   164  .  .  .  .  .  }
+   165  .  .  .  .  }
+   166  .  .  .  }
+   167  .  .  .  Rparen: -
+   168  .  .  }
+   169  .  .  6: *ast.GenDecl {
+   170  .  .  .  TokPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:15:1
+   171  .  .  .  Tok: var
+   172  .  .  .  Lparen: -
+   173  .  .  .  Specs: []ast.Spec (len = 1) {
+   174  .  .  .  .  0: *ast.ValueSpec {
+   175  .  .  .  .  .  Names: []*ast.Ident (len = 1) {
+   176  .  .  .  .  .  .  0: *ast.Ident {
+   177  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:15:5
+   178  .  .  .  .  .  .  .  Name: "ourKeyPathVar"
+   179  .  .  .  .  .  .  .  Obj: *ast.Object {
+   180  .  .  .  .  .  .  .  .  Kind: var
+   181  .  .  .  .  .  .  .  .  Name: "ourKeyPathVar"
+   182  .  .  .  .  .  .  .  .  Decl: *(obj @ 174)
+   183  .  .  .  .  .  .  .  .  Data: 0
+   184  .  .  .  .  .  .  .  }
+   185  .  .  .  .  .  .  }
+   186  .  .  .  .  .  }
+   187  .  .  .  .  .  Type: *ast.Ident {
+   188  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:15:19
+   189  .  .  .  .  .  .  Name: "string"
+   190  .  .  .  .  .  }
+   191  .  .  .  .  }
+   192  .  .  .  }
+   193  .  .  .  Rparen: -
+   194  .  .  }
+   195  .  .  7: *ast.GenDecl {
+   196  .  .  .  TokPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:16:1
+   197  .  .  .  Tok: var
+   198  .  .  .  Lparen: -
+   199  .  .  .  Specs: []ast.Spec (len = 1) {
+   200  .  .  .  .  0: *ast.ValueSpec {
+   201  .  .  .  .  .  Names: []*ast.Ident (len = 1) {
+   202  .  .  .  .  .  .  0: *ast.Ident {
+   203  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:16:5
+   204  .  .  .  .  .  .  .  Name: "serverAddressVar"
+   205  .  .  .  .  .  .  .  Obj: *ast.Object {
+   206  .  .  .  .  .  .  .  .  Kind: var
+   207  .  .  .  .  .  .  .  .  Name: "serverAddressVar"
+   208  .  .  .  .  .  .  .  .  Decl: *(obj @ 200)
+   209  .  .  .  .  .  .  .  .  Data: 0
+   210  .  .  .  .  .  .  .  }
+   211  .  .  .  .  .  .  }
+   212  .  .  .  .  .  }
+   213  .  .  .  .  .  Type: *ast.Ident {
+   214  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:16:22
+   215  .  .  .  .  .  .  Name: "string"
+   216  .  .  .  .  .  }
+   217  .  .  .  .  }
+   218  .  .  .  }
+   219  .  .  .  Rparen: -
+   220  .  .  }
+   221  .  .  8: *ast.GenDecl {
+   222  .  .  .  TokPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:17:1
+   223  .  .  .  Tok: var
+   224  .  .  .  Lparen: -
+   225  .  .  .  Specs: []ast.Spec (len = 1) {
+   226  .  .  .  .  0: *ast.ValueSpec {
+   227  .  .  .  .  .  Names: []*ast.Ident (len = 1) {
+   228  .  .  .  .  .  .  0: *ast.Ident {
+   229  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:17:5
+   230  .  .  .  .  .  .  .  Name: "connPortVar"
+   231  .  .  .  .  .  .  .  Obj: *ast.Object {
+   232  .  .  .  .  .  .  .  .  Kind: var
+   233  .  .  .  .  .  .  .  .  Name: "connPortVar"
+   234  .  .  .  .  .  .  .  .  Decl: *(obj @ 226)
+   235  .  .  .  .  .  .  .  .  Data: 0
+   236  .  .  .  .  .  .  .  }
+   237  .  .  .  .  .  .  }
+   238  .  .  .  .  .  }
+   239  .  .  .  .  .  Type: *ast.Ident {
+   240  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:17:17
+   241  .  .  .  .  .  .  Name: "string"
+   242  .  .  .  .  .  }
+   243  .  .  .  .  }
+   244  .  .  .  }
+   245  .  .  .  Rparen: -
+   246  .  .  }
+   247  .  .  9: *ast.GenDecl {
+   248  .  .  .  TokPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:19:1
+   249  .  .  .  Tok: var
+   250  .  .  .  Lparen: -
+   251  .  .  .  Specs: []ast.Spec (len = 1) {
+   252  .  .  .  .  0: *ast.ValueSpec {
+   253  .  .  .  .  .  Names: []*ast.Ident (len = 1) {
+   254  .  .  .  .  .  .  0: *ast.Ident {
+   255  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:19:5
+   256  .  .  .  .  .  .  .  Name: "modeVar"
+   257  .  .  .  .  .  .  .  Obj: *ast.Object {
+   258  .  .  .  .  .  .  .  .  Kind: var
+   259  .  .  .  .  .  .  .  .  Name: "modeVar"
+   260  .  .  .  .  .  .  .  .  Decl: *(obj @ 252)
+   261  .  .  .  .  .  .  .  .  Data: 0
+   262  .  .  .  .  .  .  .  }
+   263  .  .  .  .  .  .  }
+   264  .  .  .  .  .  }
+   265  .  .  .  .  .  Type: *ast.Ident {
+   266  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:19:13
+   267  .  .  .  .  .  .  Name: "string"
+   268  .  .  .  .  .  }
+   269  .  .  .  .  }
+   270  .  .  .  }
+   271  .  .  .  Rparen: -
+   272  .  .  }
+   273  .  .  10: *ast.GenDecl {
+   274  .  .  .  TokPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:20:1
+   275  .  .  .  Tok: var
+   276  .  .  .  Lparen: -
+   277  .  .  .  Specs: []ast.Spec (len = 1) {
+   278  .  .  .  .  0: *ast.ValueSpec {
+   279  .  .  .  .  .  Names: []*ast.Ident (len = 1) {
+   280  .  .  .  .  .  .  0: *ast.Ident {
+   281  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:20:5
+   282  .  .  .  .  .  .  .  Name: "gatewayVar"
+   283  .  .  .  .  .  .  .  Obj: *ast.Object {
+   284  .  .  .  .  .  .  .  .  Kind: var
+   285  .  .  .  .  .  .  .  .  Name: "gatewayVar"
+   286  .  .  .  .  .  .  .  .  Decl: *(obj @ 278)
+   287  .  .  .  .  .  .  .  .  Data: 0
+   288  .  .  .  .  .  .  .  }
+   289  .  .  .  .  .  .  }
+   290  .  .  .  .  .  }
+   291  .  .  .  .  .  Type: *ast.Ident {
+   292  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:20:16
+   293  .  .  .  .  .  .  Name: "string"
+   294  .  .  .  .  .  }
+   295  .  .  .  .  }
+   296  .  .  .  }
+   297  .  .  .  Rparen: -
+   298  .  .  }
+   299  .  .  11: *ast.GenDecl {
+   300  .  .  .  TokPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:22:1
+   301  .  .  .  Tok: var
+   302  .  .  .  Lparen: -
+   303  .  .  .  Specs: []ast.Spec (len = 1) {
+   304  .  .  .  .  0: *ast.ValueSpec {
+   305  .  .  .  .  .  Names: []*ast.Ident (len = 1) {
+   306  .  .  .  .  .  .  0: *ast.Ident {
+   307  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:22:5
+   308  .  .  .  .  .  .  .  Name: "crlPathVar"
+   309  .  .  .  .  .  .  .  Obj: *ast.Object {
+   310  .  .  .  .  .  .  .  .  Kind: var
+   311  .  .  .  .  .  .  .  .  Name: "crlPathVar"
+   312  .  .  .  .  .  .  .  .  Decl: *(obj @ 304)
+   313  .  .  .  .  .  .  .  .  Data: 0
+   314  .  .  .  .  .  .  .  }
+   315  .  .  .  .  .  .  }
+   316  .  .  .  .  .  }
+   317  .  .  .  .  .  Type: *ast.Ident {
+   318  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:22:16
+   319  .  .  .  .  .  .  Name: "string"
+   320  .  .  .  .  .  }
+   321  .  .  .  .  }
+   322  .  .  .  }
+   323  .  .  .  Rparen: -
+   324  .  .  }
+   325  .  .  12: *ast.FuncDecl {
+   326  .  .  .  Name: *ast.Ident {
+   327  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:24:6
+   328  .  .  .  .  Name: "printUsage"
+   329  .  .  .  .  Obj: *ast.Object {
+   330  .  .  .  .  .  Kind: func
+   331  .  .  .  .  .  Name: "printUsage"
+   332  .  .  .  .  .  Decl: *(obj @ 325)
+   333  .  .  .  .  }
+   334  .  .  .  }
+   335  .  .  .  Type: *ast.FuncType {
+   336  .  .  .  .  Func: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:24:1
+   337  .  .  .  .  Params: *ast.FieldList {
+   338  .  .  .  .  .  Opening: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:24:16
+   339  .  .  .  .  .  Closing: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:24:17
+   340  .  .  .  .  }
+   341  .  .  .  }
+   342  .  .  .  Body: *ast.BlockStmt {
+   343  .  .  .  .  Lbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:24:19
+   344  .  .  .  .  List: []ast.Stmt (len = 3) {
+   345  .  .  .  .  .  0: *ast.ExprStmt {
+   346  .  .  .  .  .  .  X: *ast.CallExpr {
+   347  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+   348  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   349  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:25:2
+   350  .  .  .  .  .  .  .  .  .  Name: "fmt"
+   351  .  .  .  .  .  .  .  .  }
+   352  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   353  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:25:6
+   354  .  .  .  .  .  .  .  .  .  Name: "Fprintf"
+   355  .  .  .  .  .  .  .  .  }
+   356  .  .  .  .  .  .  .  }
+   357  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:25:13
+   358  .  .  .  .  .  .  .  Args: []ast.Expr (len = 3) {
+   359  .  .  .  .  .  .  .  .  0: *ast.SelectorExpr {
+   360  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   361  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:25:14
+   362  .  .  .  .  .  .  .  .  .  .  Name: "os"
+   363  .  .  .  .  .  .  .  .  .  }
+   364  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   365  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:25:17
+   366  .  .  .  .  .  .  .  .  .  .  Name: "Stderr"
+   367  .  .  .  .  .  .  .  .  .  }
+   368  .  .  .  .  .  .  .  .  }
+   369  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+   370  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:25:25
+   371  .  .  .  .  .  .  .  .  .  Kind: STRING
+   372  .  .  .  .  .  .  .  .  .  Value: "\"Usage of %s:\\n\""
+   373  .  .  .  .  .  .  .  .  }
+   374  .  .  .  .  .  .  .  .  2: *ast.IndexExpr {
+   375  .  .  .  .  .  .  .  .  .  X: *ast.SelectorExpr {
+   376  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   377  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:25:43
+   378  .  .  .  .  .  .  .  .  .  .  .  Name: "os"
+   379  .  .  .  .  .  .  .  .  .  .  }
+   380  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   381  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:25:46
+   382  .  .  .  .  .  .  .  .  .  .  .  Name: "Args"
+   383  .  .  .  .  .  .  .  .  .  .  }
+   384  .  .  .  .  .  .  .  .  .  }
+   385  .  .  .  .  .  .  .  .  .  Lbrack: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:25:50
+   386  .  .  .  .  .  .  .  .  .  Index: *ast.BasicLit {
+   387  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:25:51
+   388  .  .  .  .  .  .  .  .  .  .  Kind: INT
+   389  .  .  .  .  .  .  .  .  .  .  Value: "0"
+   390  .  .  .  .  .  .  .  .  .  }
+   391  .  .  .  .  .  .  .  .  .  Rbrack: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:25:52
+   392  .  .  .  .  .  .  .  .  }
+   393  .  .  .  .  .  .  .  }
+   394  .  .  .  .  .  .  .  Ellipsis: -
+   395  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:25:53
+   396  .  .  .  .  .  .  }
+   397  .  .  .  .  .  }
+   398  .  .  .  .  .  1: *ast.ExprStmt {
+   399  .  .  .  .  .  .  X: *ast.CallExpr {
+   400  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+   401  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   402  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:26:2
+   403  .  .  .  .  .  .  .  .  .  Name: "fmt"
+   404  .  .  .  .  .  .  .  .  }
+   405  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   406  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:26:6
+   407  .  .  .  .  .  .  .  .  .  Name: "Fprintf"
+   408  .  .  .  .  .  .  .  .  }
+   409  .  .  .  .  .  .  .  }
+   410  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:26:13
+   411  .  .  .  .  .  .  .  Args: []ast.Expr (len = 3) {
+   412  .  .  .  .  .  .  .  .  0: *ast.SelectorExpr {
+   413  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   414  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:26:14
+   415  .  .  .  .  .  .  .  .  .  .  Name: "os"
+   416  .  .  .  .  .  .  .  .  .  }
+   417  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   418  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:26:17
+   419  .  .  .  .  .  .  .  .  .  .  Name: "Stderr"
+   420  .  .  .  .  .  .  .  .  .  }
+   421  .  .  .  .  .  .  .  .  }
+   422  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+   423  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:26:25
+   424  .  .  .  .  .  .  .  .  .  Kind: STRING
+   425  .  .  .  .  .  .  .  .  .  Value: "\"%s <server address>\\n\""
+   426  .  .  .  .  .  .  .  .  }
+   427  .  .  .  .  .  .  .  .  2: *ast.IndexExpr {
+   428  .  .  .  .  .  .  .  .  .  X: *ast.SelectorExpr {
+   429  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   430  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:26:50
+   431  .  .  .  .  .  .  .  .  .  .  .  Name: "os"
+   432  .  .  .  .  .  .  .  .  .  .  }
+   433  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   434  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:26:53
+   435  .  .  .  .  .  .  .  .  .  .  .  Name: "Args"
+   436  .  .  .  .  .  .  .  .  .  .  }
+   437  .  .  .  .  .  .  .  .  .  }
+   438  .  .  .  .  .  .  .  .  .  Lbrack: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:26:57
+   439  .  .  .  .  .  .  .  .  .  Index: *ast.BasicLit {
+   440  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:26:58
+   441  .  .  .  .  .  .  .  .  .  .  Kind: INT
+   442  .  .  .  .  .  .  .  .  .  .  Value: "0"
+   443  .  .  .  .  .  .  .  .  .  }
+   444  .  .  .  .  .  .  .  .  .  Rbrack: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:26:59
+   445  .  .  .  .  .  .  .  .  }
+   446  .  .  .  .  .  .  .  }
+   447  .  .  .  .  .  .  .  Ellipsis: -
+   448  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:26:60
+   449  .  .  .  .  .  .  }
+   450  .  .  .  .  .  }
+   451  .  .  .  .  .  2: *ast.ExprStmt {
+   452  .  .  .  .  .  .  X: *ast.CallExpr {
+   453  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+   454  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   455  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:27:2
+   456  .  .  .  .  .  .  .  .  .  Name: "flag"
+   457  .  .  .  .  .  .  .  .  }
+   458  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   459  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:27:7
+   460  .  .  .  .  .  .  .  .  .  Name: "PrintDefaults"
+   461  .  .  .  .  .  .  .  .  }
+   462  .  .  .  .  .  .  .  }
+   463  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:27:20
+   464  .  .  .  .  .  .  .  Ellipsis: -
+   465  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:27:21
+   466  .  .  .  .  .  .  }
+   467  .  .  .  .  .  }
+   468  .  .  .  .  }
+   469  .  .  .  .  Rbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:28:1
+   470  .  .  .  }
+   471  .  .  }
+   472  .  .  13: *ast.FuncDecl {
+   473  .  .  .  Name: *ast.Ident {
+   474  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:30:6
+   475  .  .  .  .  Name: "parseFlags"
+   476  .  .  .  .  Obj: *ast.Object {
+   477  .  .  .  .  .  Kind: func
+   478  .  .  .  .  .  Name: "parseFlags"
+   479  .  .  .  .  .  Decl: *(obj @ 472)
+   480  .  .  .  .  }
+   481  .  .  .  }
+   482  .  .  .  Type: *ast.FuncType {
+   483  .  .  .  .  Func: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:30:1
+   484  .  .  .  .  Params: *ast.FieldList {
+   485  .  .  .  .  .  Opening: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:30:16
+   486  .  .  .  .  .  Closing: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:30:17
+   487  .  .  .  .  }
+   488  .  .  .  }
+   489  .  .  .  Body: *ast.BlockStmt {
+   490  .  .  .  .  Lbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:30:19
+   491  .  .  .  .  List: []ast.Stmt (len = 18) {
+   492  .  .  .  .  .  0: *ast.ExprStmt {
+   493  .  .  .  .  .  .  X: *ast.CallExpr {
+   494  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+   495  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   496  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:31:2
+   497  .  .  .  .  .  .  .  .  .  Name: "flag"
+   498  .  .  .  .  .  .  .  .  }
+   499  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   500  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:31:7
+   501  .  .  .  .  .  .  .  .  .  Name: "StringVar"
+   502  .  .  .  .  .  .  .  .  }
+   503  .  .  .  .  .  .  .  }
+   504  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:31:16
+   505  .  .  .  .  .  .  .  Args: []ast.Expr (len = 4) {
+   506  .  .  .  .  .  .  .  .  0: *ast.UnaryExpr {
+   507  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:31:17
+   508  .  .  .  .  .  .  .  .  .  Op: &
+   509  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   510  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:31:18
+   511  .  .  .  .  .  .  .  .  .  .  Name: "interfaceNameVar"
+   512  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 49)
+   513  .  .  .  .  .  .  .  .  .  }
+   514  .  .  .  .  .  .  .  .  }
+   515  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+   516  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:31:36
+   517  .  .  .  .  .  .  .  .  .  Kind: STRING
+   518  .  .  .  .  .  .  .  .  .  Value: "\"i\""
+   519  .  .  .  .  .  .  .  .  }
+   520  .  .  .  .  .  .  .  .  2: *ast.BasicLit {
+   521  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:31:41
+   522  .  .  .  .  .  .  .  .  .  Kind: STRING
+   523  .  .  .  .  .  .  .  .  .  Value: "\"\""
+   524  .  .  .  .  .  .  .  .  }
+   525  .  .  .  .  .  .  .  .  3: *ast.BasicLit {
+   526  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:31:45
+   527  .  .  .  .  .  .  .  .  .  Kind: STRING
+   528  .  .  .  .  .  .  .  .  .  Value: "\"TUN interface, one is picked if not specified\""
+   529  .  .  .  .  .  .  .  .  }
+   530  .  .  .  .  .  .  .  }
+   531  .  .  .  .  .  .  .  Ellipsis: -
+   532  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:31:92
+   533  .  .  .  .  .  .  }
+   534  .  .  .  .  .  }
+   535  .  .  .  .  .  1: *ast.ExprStmt {
+   536  .  .  .  .  .  .  X: *ast.CallExpr {
+   537  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+   538  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   539  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:32:2
+   540  .  .  .  .  .  .  .  .  .  Name: "flag"
+   541  .  .  .  .  .  .  .  .  }
+   542  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   543  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:32:7
+   544  .  .  .  .  .  .  .  .  .  Name: "StringVar"
+   545  .  .  .  .  .  .  .  .  }
+   546  .  .  .  .  .  .  .  }
+   547  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:32:16
+   548  .  .  .  .  .  .  .  Args: []ast.Expr (len = 4) {
+   549  .  .  .  .  .  .  .  .  0: *ast.UnaryExpr {
+   550  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:32:17
+   551  .  .  .  .  .  .  .  .  .  Op: &
+   552  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   553  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:32:18
+   554  .  .  .  .  .  .  .  .  .  .  Name: "caCertPathVar"
+   555  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 101)
+   556  .  .  .  .  .  .  .  .  .  }
+   557  .  .  .  .  .  .  .  .  }
+   558  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+   559  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:32:33
+   560  .  .  .  .  .  .  .  .  .  Kind: STRING
+   561  .  .  .  .  .  .  .  .  .  Value: "\"ca\""
+   562  .  .  .  .  .  .  .  .  }
+   563  .  .  .  .  .  .  .  .  2: *ast.BasicLit {
+   564  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:32:39
+   565  .  .  .  .  .  .  .  .  .  Kind: STRING
+   566  .  .  .  .  .  .  .  .  .  Value: "\"\""
+   567  .  .  .  .  .  .  .  .  }
+   568  .  .  .  .  .  .  .  .  3: *ast.BasicLit {
+   569  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:32:43
+   570  .  .  .  .  .  .  .  .  .  Kind: STRING
+   571  .  .  .  .  .  .  .  .  .  Value: "\"Path to PEM-encoded cert to validate client/serv\""
+   572  .  .  .  .  .  .  .  .  }
+   573  .  .  .  .  .  .  .  }
+   574  .  .  .  .  .  .  .  Ellipsis: -
+   575  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:32:93
+   576  .  .  .  .  .  .  }
+   577  .  .  .  .  .  }
+   578  .  .  .  .  .  2: *ast.ExprStmt {
+   579  .  .  .  .  .  .  X: *ast.CallExpr {
+   580  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+   581  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   582  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:33:2
+   583  .  .  .  .  .  .  .  .  .  Name: "flag"
+   584  .  .  .  .  .  .  .  .  }
+   585  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   586  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:33:7
+   587  .  .  .  .  .  .  .  .  .  Name: "StringVar"
+   588  .  .  .  .  .  .  .  .  }
+   589  .  .  .  .  .  .  .  }
+   590  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:33:16
+   591  .  .  .  .  .  .  .  Args: []ast.Expr (len = 4) {
+   592  .  .  .  .  .  .  .  .  0: *ast.UnaryExpr {
+   593  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:33:17
+   594  .  .  .  .  .  .  .  .  .  Op: &
+   595  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   596  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:33:18
+   597  .  .  .  .  .  .  .  .  .  .  Name: "caKeyPathVar"
+   598  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 127)
+   599  .  .  .  .  .  .  .  .  .  }
+   600  .  .  .  .  .  .  .  .  }
+   601  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+   602  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:33:32
+   603  .  .  .  .  .  .  .  .  .  Kind: STRING
+   604  .  .  .  .  .  .  .  .  .  Value: "\"ca_key\""
+   605  .  .  .  .  .  .  .  .  }
+   606  .  .  .  .  .  .  .  .  2: *ast.BasicLit {
+   607  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:33:42
+   608  .  .  .  .  .  .  .  .  .  Kind: STRING
+   609  .  .  .  .  .  .  .  .  .  Value: "\"\""
+   610  .  .  .  .  .  .  .  .  }
+   611  .  .  .  .  .  .  .  .  3: *ast.BasicLit {
+   612  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:33:46
+   613  .  .  .  .  .  .  .  .  .  Kind: STRING
+   614  .  .  .  .  .  .  .  .  .  Value: "\"Path to PEM-encoded key to use generating certificates\""
+   615  .  .  .  .  .  .  .  .  }
+   616  .  .  .  .  .  .  .  }
+   617  .  .  .  .  .  .  .  Ellipsis: -
+   618  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:33:102
+   619  .  .  .  .  .  .  }
+   620  .  .  .  .  .  }
+   621  .  .  .  .  .  3: *ast.ExprStmt {
+   622  .  .  .  .  .  .  X: *ast.CallExpr {
+   623  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+   624  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   625  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:34:2
+   626  .  .  .  .  .  .  .  .  .  Name: "flag"
+   627  .  .  .  .  .  .  .  .  }
+   628  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   629  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:34:7
+   630  .  .  .  .  .  .  .  .  .  Name: "StringVar"
+   631  .  .  .  .  .  .  .  .  }
+   632  .  .  .  .  .  .  .  }
+   633  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:34:16
+   634  .  .  .  .  .  .  .  Args: []ast.Expr (len = 4) {
+   635  .  .  .  .  .  .  .  .  0: *ast.UnaryExpr {
+   636  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:34:17
+   637  .  .  .  .  .  .  .  .  .  Op: &
+   638  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   639  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:34:18
+   640  .  .  .  .  .  .  .  .  .  .  Name: "ourCertPathVar"
+   641  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 153)
+   642  .  .  .  .  .  .  .  .  .  }
+   643  .  .  .  .  .  .  .  .  }
+   644  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+   645  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:34:34
+   646  .  .  .  .  .  .  .  .  .  Kind: STRING
+   647  .  .  .  .  .  .  .  .  .  Value: "\"cert\""
+   648  .  .  .  .  .  .  .  .  }
+   649  .  .  .  .  .  .  .  .  2: *ast.BasicLit {
+   650  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:34:42
+   651  .  .  .  .  .  .  .  .  .  Kind: STRING
+   652  .  .  .  .  .  .  .  .  .  Value: "\"\""
+   653  .  .  .  .  .  .  .  .  }
+   654  .  .  .  .  .  .  .  .  3: *ast.BasicLit {
+   655  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:34:46
+   656  .  .  .  .  .  .  .  .  .  Kind: STRING
+   657  .  .  .  .  .  .  .  .  .  Value: "\"Path to PEM-encoded cert for our side of the connection\""
+   658  .  .  .  .  .  .  .  .  }
+   659  .  .  .  .  .  .  .  }
+   660  .  .  .  .  .  .  .  Ellipsis: -
+   661  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:34:103
+   662  .  .  .  .  .  .  }
+   663  .  .  .  .  .  }
+   664  .  .  .  .  .  4: *ast.ExprStmt {
+   665  .  .  .  .  .  .  X: *ast.CallExpr {
+   666  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+   667  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   668  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:35:2
+   669  .  .  .  .  .  .  .  .  .  Name: "flag"
+   670  .  .  .  .  .  .  .  .  }
+   671  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   672  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:35:7
+   673  .  .  .  .  .  .  .  .  .  Name: "StringVar"
+   674  .  .  .  .  .  .  .  .  }
+   675  .  .  .  .  .  .  .  }
+   676  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:35:16
+   677  .  .  .  .  .  .  .  Args: []ast.Expr (len = 4) {
+   678  .  .  .  .  .  .  .  .  0: *ast.UnaryExpr {
+   679  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:35:17
+   680  .  .  .  .  .  .  .  .  .  Op: &
+   681  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   682  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:35:18
+   683  .  .  .  .  .  .  .  .  .  .  Name: "ourKeyPathVar"
+   684  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 179)
+   685  .  .  .  .  .  .  .  .  .  }
+   686  .  .  .  .  .  .  .  .  }
+   687  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+   688  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:35:33
+   689  .  .  .  .  .  .  .  .  .  Kind: STRING
+   690  .  .  .  .  .  .  .  .  .  Value: "\"key\""
+   691  .  .  .  .  .  .  .  .  }
+   692  .  .  .  .  .  .  .  .  2: *ast.BasicLit {
+   693  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:35:40
+   694  .  .  .  .  .  .  .  .  .  Kind: STRING
+   695  .  .  .  .  .  .  .  .  .  Value: "\"\""
+   696  .  .  .  .  .  .  .  .  }
+   697  .  .  .  .  .  .  .  .  3: *ast.BasicLit {
+   698  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:35:44
+   699  .  .  .  .  .  .  .  .  .  Kind: STRING
+   700  .  .  .  .  .  .  .  .  .  Value: "\"Path to PEM-encoded key for our cert\""
+   701  .  .  .  .  .  .  .  .  }
+   702  .  .  .  .  .  .  .  }
+   703  .  .  .  .  .  .  .  Ellipsis: -
+   704  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:35:82
+   705  .  .  .  .  .  .  }
+   706  .  .  .  .  .  }
+   707  .  .  .  .  .  5: *ast.ExprStmt {
+   708  .  .  .  .  .  .  X: *ast.CallExpr {
+   709  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+   710  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   711  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:36:2
+   712  .  .  .  .  .  .  .  .  .  Name: "flag"
+   713  .  .  .  .  .  .  .  .  }
+   714  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   715  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:36:7
+   716  .  .  .  .  .  .  .  .  .  Name: "StringVar"
+   717  .  .  .  .  .  .  .  .  }
+   718  .  .  .  .  .  .  .  }
+   719  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:36:16
+   720  .  .  .  .  .  .  .  Args: []ast.Expr (len = 4) {
+   721  .  .  .  .  .  .  .  .  0: *ast.UnaryExpr {
+   722  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:36:17
+   723  .  .  .  .  .  .  .  .  .  Op: &
+   724  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   725  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:36:18
+   726  .  .  .  .  .  .  .  .  .  .  Name: "connPortVar"
+   727  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 231)
+   728  .  .  .  .  .  .  .  .  .  }
+   729  .  .  .  .  .  .  .  .  }
+   730  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+   731  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:36:31
+   732  .  .  .  .  .  .  .  .  .  Kind: STRING
+   733  .  .  .  .  .  .  .  .  .  Value: "\"port\""
+   734  .  .  .  .  .  .  .  .  }
+   735  .  .  .  .  .  .  .  .  2: *ast.BasicLit {
+   736  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:36:39
+   737  .  .  .  .  .  .  .  .  .  Kind: STRING
+   738  .  .  .  .  .  .  .  .  .  Value: "\"3234\""
+   739  .  .  .  .  .  .  .  .  }
+   740  .  .  .  .  .  .  .  .  3: *ast.BasicLit {
+   741  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:36:47
+   742  .  .  .  .  .  .  .  .  .  Kind: STRING
+   743  .  .  .  .  .  .  .  .  .  Value: "\"Port for the VPN connection\""
+   744  .  .  .  .  .  .  .  .  }
+   745  .  .  .  .  .  .  .  }
+   746  .  .  .  .  .  .  .  Ellipsis: -
+   747  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:36:76
+   748  .  .  .  .  .  .  }
+   749  .  .  .  .  .  }
+   750  .  .  .  .  .  6: *ast.ExprStmt {
+   751  .  .  .  .  .  .  X: *ast.CallExpr {
+   752  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+   753  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   754  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:37:2
+   755  .  .  .  .  .  .  .  .  .  Name: "flag"
+   756  .  .  .  .  .  .  .  .  }
+   757  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   758  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:37:7
+   759  .  .  .  .  .  .  .  .  .  Name: "StringVar"
+   760  .  .  .  .  .  .  .  .  }
+   761  .  .  .  .  .  .  .  }
+   762  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:37:16
+   763  .  .  .  .  .  .  .  Args: []ast.Expr (len = 4) {
+   764  .  .  .  .  .  .  .  .  0: *ast.UnaryExpr {
+   765  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:37:17
+   766  .  .  .  .  .  .  .  .  .  Op: &
+   767  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   768  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:37:18
+   769  .  .  .  .  .  .  .  .  .  .  Name: "modeVar"
+   770  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 257)
+   771  .  .  .  .  .  .  .  .  .  }
+   772  .  .  .  .  .  .  .  .  }
+   773  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+   774  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:37:27
+   775  .  .  .  .  .  .  .  .  .  Kind: STRING
+   776  .  .  .  .  .  .  .  .  .  Value: "\"mode\""
+   777  .  .  .  .  .  .  .  .  }
+   778  .  .  .  .  .  .  .  .  2: *ast.BasicLit {
+   779  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:37:35
+   780  .  .  .  .  .  .  .  .  .  Kind: STRING
+   781  .  .  .  .  .  .  .  .  .  Value: "\"client\""
+   782  .  .  .  .  .  .  .  .  }
+   783  .  .  .  .  .  .  .  .  3: *ast.BasicLit {
+   784  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:37:45
+   785  .  .  .  .  .  .  .  .  .  Kind: STRING
+   786  .  .  .  .  .  .  .  .  .  Value: "\"Whether the process starts a server or as a client\""
+   787  .  .  .  .  .  .  .  .  }
+   788  .  .  .  .  .  .  .  }
+   789  .  .  .  .  .  .  .  Ellipsis: -
+   790  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:37:97
+   791  .  .  .  .  .  .  }
+   792  .  .  .  .  .  }
+   793  .  .  .  .  .  7: *ast.ExprStmt {
+   794  .  .  .  .  .  .  X: *ast.CallExpr {
+   795  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+   796  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   797  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:38:2
+   798  .  .  .  .  .  .  .  .  .  Name: "flag"
+   799  .  .  .  .  .  .  .  .  }
+   800  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   801  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:38:7
+   802  .  .  .  .  .  .  .  .  .  Name: "StringVar"
+   803  .  .  .  .  .  .  .  .  }
+   804  .  .  .  .  .  .  .  }
+   805  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:38:16
+   806  .  .  .  .  .  .  .  Args: []ast.Expr (len = 4) {
+   807  .  .  .  .  .  .  .  .  0: *ast.UnaryExpr {
+   808  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:38:17
+   809  .  .  .  .  .  .  .  .  .  Op: &
+   810  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   811  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:38:18
+   812  .  .  .  .  .  .  .  .  .  .  Name: "networkAddrVar"
+   813  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 75)
+   814  .  .  .  .  .  .  .  .  .  }
+   815  .  .  .  .  .  .  .  .  }
+   816  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+   817  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:38:34
+   818  .  .  .  .  .  .  .  .  .  Kind: STRING
+   819  .  .  .  .  .  .  .  .  .  Value: "\"network\""
+   820  .  .  .  .  .  .  .  .  }
+   821  .  .  .  .  .  .  .  .  2: *ast.BasicLit {
+   822  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:38:45
+   823  .  .  .  .  .  .  .  .  .  Kind: STRING
+   824  .  .  .  .  .  .  .  .  .  Value: "\"192.168.69.1/24\""
+   825  .  .  .  .  .  .  .  .  }
+   826  .  .  .  .  .  .  .  .  3: *ast.BasicLit {
+   827  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:38:64
+   828  .  .  .  .  .  .  .  .  .  Kind: STRING
+   829  .  .  .  .  .  .  .  .  .  Value: "\"Address for this interface with netmask\""
+   830  .  .  .  .  .  .  .  .  }
+   831  .  .  .  .  .  .  .  }
+   832  .  .  .  .  .  .  .  Ellipsis: -
+   833  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:38:105
+   834  .  .  .  .  .  .  }
+   835  .  .  .  .  .  }
+   836  .  .  .  .  .  8: *ast.ExprStmt {
+   837  .  .  .  .  .  .  X: *ast.CallExpr {
+   838  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+   839  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   840  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:39:2
+   841  .  .  .  .  .  .  .  .  .  Name: "flag"
+   842  .  .  .  .  .  .  .  .  }
+   843  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   844  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:39:7
+   845  .  .  .  .  .  .  .  .  .  Name: "StringVar"
+   846  .  .  .  .  .  .  .  .  }
+   847  .  .  .  .  .  .  .  }
+   848  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:39:16
+   849  .  .  .  .  .  .  .  Args: []ast.Expr (len = 4) {
+   850  .  .  .  .  .  .  .  .  0: *ast.UnaryExpr {
+   851  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:39:17
+   852  .  .  .  .  .  .  .  .  .  Op: &
+   853  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   854  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:39:18
+   855  .  .  .  .  .  .  .  .  .  .  Name: "gatewayVar"
+   856  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 283)
+   857  .  .  .  .  .  .  .  .  .  }
+   858  .  .  .  .  .  .  .  .  }
+   859  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+   860  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:39:30
+   861  .  .  .  .  .  .  .  .  .  Kind: STRING
+   862  .  .  .  .  .  .  .  .  .  Value: "\"gw\""
+   863  .  .  .  .  .  .  .  .  }
+   864  .  .  .  .  .  .  .  .  2: *ast.BasicLit {
+   865  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:39:36
+   866  .  .  .  .  .  .  .  .  .  Kind: STRING
+   867  .  .  .  .  .  .  .  .  .  Value: "\"\""
+   868  .  .  .  .  .  .  .  .  }
+   869  .  .  .  .  .  .  .  .  3: *ast.BasicLit {
+   870  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:39:40
+   871  .  .  .  .  .  .  .  .  .  Kind: STRING
+   872  .  .  .  .  .  .  .  .  .  Value: "\"(Client only) Set the default gateway to this value\""
+   873  .  .  .  .  .  .  .  .  }
+   874  .  .  .  .  .  .  .  }
+   875  .  .  .  .  .  .  .  Ellipsis: -
+   876  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:39:93
+   877  .  .  .  .  .  .  }
+   878  .  .  .  .  .  }
+   879  .  .  .  .  .  9: *ast.ExprStmt {
+   880  .  .  .  .  .  .  X: *ast.CallExpr {
+   881  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+   882  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   883  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:40:2
+   884  .  .  .  .  .  .  .  .  .  Name: "flag"
+   885  .  .  .  .  .  .  .  .  }
+   886  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   887  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:40:7
+   888  .  .  .  .  .  .  .  .  .  Name: "StringVar"
+   889  .  .  .  .  .  .  .  .  }
+   890  .  .  .  .  .  .  .  }
+   891  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:40:16
+   892  .  .  .  .  .  .  .  Args: []ast.Expr (len = 4) {
+   893  .  .  .  .  .  .  .  .  0: *ast.UnaryExpr {
+   894  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:40:17
+   895  .  .  .  .  .  .  .  .  .  Op: &
+   896  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   897  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:40:18
+   898  .  .  .  .  .  .  .  .  .  .  Name: "crlPathVar"
+   899  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 309)
+   900  .  .  .  .  .  .  .  .  .  }
+   901  .  .  .  .  .  .  .  .  }
+   902  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+   903  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:40:30
+   904  .  .  .  .  .  .  .  .  .  Kind: STRING
+   905  .  .  .  .  .  .  .  .  .  Value: "\"crl\""
+   906  .  .  .  .  .  .  .  .  }
+   907  .  .  .  .  .  .  .  .  2: *ast.BasicLit {
+   908  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:40:37
+   909  .  .  .  .  .  .  .  .  .  Kind: STRING
+   910  .  .  .  .  .  .  .  .  .  Value: "\"\""
+   911  .  .  .  .  .  .  .  .  }
+   912  .  .  .  .  .  .  .  .  3: *ast.BasicLit {
+   913  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:40:41
+   914  .  .  .  .  .  .  .  .  .  Kind: STRING
+   915  .  .  .  .  .  .  .  .  .  Value: "\"Optional path to JSON-CRL file\""
+   916  .  .  .  .  .  .  .  .  }
+   917  .  .  .  .  .  .  .  }
+   918  .  .  .  .  .  .  .  Ellipsis: -
+   919  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:40:73
+   920  .  .  .  .  .  .  }
+   921  .  .  .  .  .  }
+   922  .  .  .  .  .  10: *ast.AssignStmt {
+   923  .  .  .  .  .  .  Lhs: []ast.Expr (len = 1) {
+   924  .  .  .  .  .  .  .  0: *ast.SelectorExpr {
+   925  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   926  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:42:2
+   927  .  .  .  .  .  .  .  .  .  Name: "flag"
+   928  .  .  .  .  .  .  .  .  }
+   929  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   930  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:42:7
+   931  .  .  .  .  .  .  .  .  .  Name: "Usage"
+   932  .  .  .  .  .  .  .  .  }
+   933  .  .  .  .  .  .  .  }
+   934  .  .  .  .  .  .  }
+   935  .  .  .  .  .  .  TokPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:42:13
+   936  .  .  .  .  .  .  Tok: =
+   937  .  .  .  .  .  .  Rhs: []ast.Expr (len = 1) {
+   938  .  .  .  .  .  .  .  0: *ast.Ident {
+   939  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:42:15
+   940  .  .  .  .  .  .  .  .  Name: "printUsage"
+   941  .  .  .  .  .  .  .  .  Obj: *(obj @ 329)
+   942  .  .  .  .  .  .  .  }
+   943  .  .  .  .  .  .  }
+   944  .  .  .  .  .  }
+   945  .  .  .  .  .  11: *ast.ExprStmt {
+   946  .  .  .  .  .  .  X: *ast.CallExpr {
+   947  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+   948  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   949  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:43:2
+   950  .  .  .  .  .  .  .  .  .  Name: "flag"
+   951  .  .  .  .  .  .  .  .  }
+   952  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   953  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:43:7
+   954  .  .  .  .  .  .  .  .  .  Name: "Parse"
+   955  .  .  .  .  .  .  .  .  }
+   956  .  .  .  .  .  .  .  }
+   957  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:43:12
+   958  .  .  .  .  .  .  .  Ellipsis: -
+   959  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:43:13
+   960  .  .  .  .  .  .  }
+   961  .  .  .  .  .  }
+   962  .  .  .  .  .  12: *ast.IfStmt {
+   963  .  .  .  .  .  .  If: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:2
+   964  .  .  .  .  .  .  Cond: *ast.BinaryExpr {
+   965  .  .  .  .  .  .  .  X: *ast.BinaryExpr {
+   966  .  .  .  .  .  .  .  .  X: *ast.BinaryExpr {
+   967  .  .  .  .  .  .  .  .  .  X: *ast.BinaryExpr {
+   968  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   969  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:5
+   970  .  .  .  .  .  .  .  .  .  .  .  Name: "modeVar"
+   971  .  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 257)
+   972  .  .  .  .  .  .  .  .  .  .  }
+   973  .  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:13
+   974  .  .  .  .  .  .  .  .  .  .  Op: !=
+   975  .  .  .  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+   976  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:16
+   977  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+   978  .  .  .  .  .  .  .  .  .  .  .  Value: "\"init-server-certs\""
+   979  .  .  .  .  .  .  .  .  .  .  }
+   980  .  .  .  .  .  .  .  .  .  }
+   981  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:36
+   982  .  .  .  .  .  .  .  .  .  Op: &&
+   983  .  .  .  .  .  .  .  .  .  Y: *ast.BinaryExpr {
+   984  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   985  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:39
+   986  .  .  .  .  .  .  .  .  .  .  .  Name: "modeVar"
+   987  .  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 257)
+   988  .  .  .  .  .  .  .  .  .  .  }
+   989  .  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:47
+   990  .  .  .  .  .  .  .  .  .  .  Op: !=
+   991  .  .  .  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+   992  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:50
+   993  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+   994  .  .  .  .  .  .  .  .  .  .  .  Value: "\"make-client-cert\""
+   995  .  .  .  .  .  .  .  .  .  .  }
+   996  .  .  .  .  .  .  .  .  .  }
+   997  .  .  .  .  .  .  .  .  }
+   998  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:69
+   999  .  .  .  .  .  .  .  .  Op: &&
+  1000  .  .  .  .  .  .  .  .  Y: *ast.BinaryExpr {
+  1001  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1002  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:72
+  1003  .  .  .  .  .  .  .  .  .  .  Name: "modeVar"
+  1004  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 257)
+  1005  .  .  .  .  .  .  .  .  .  }
+  1006  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:80
+  1007  .  .  .  .  .  .  .  .  .  Op: !=
+  1008  .  .  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+  1009  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:83
+  1010  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+  1011  .  .  .  .  .  .  .  .  .  .  Value: "\"blacklist-cert\""
+  1012  .  .  .  .  .  .  .  .  .  }
+  1013  .  .  .  .  .  .  .  .  }
+  1014  .  .  .  .  .  .  .  }
+  1015  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:100
+  1016  .  .  .  .  .  .  .  Op: &&
+  1017  .  .  .  .  .  .  .  Y: *ast.BinaryExpr {
+  1018  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1019  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1020  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1021  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:103
+  1022  .  .  .  .  .  .  .  .  .  .  .  Name: "flag"
+  1023  .  .  .  .  .  .  .  .  .  .  }
+  1024  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1025  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:108
+  1026  .  .  .  .  .  .  .  .  .  .  .  Name: "NArg"
+  1027  .  .  .  .  .  .  .  .  .  .  }
+  1028  .  .  .  .  .  .  .  .  .  }
+  1029  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:112
+  1030  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1031  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:113
+  1032  .  .  .  .  .  .  .  .  }
+  1033  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:115
+  1034  .  .  .  .  .  .  .  .  Op: !=
+  1035  .  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+  1036  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:118
+  1037  .  .  .  .  .  .  .  .  .  Kind: INT
+  1038  .  .  .  .  .  .  .  .  .  Value: "1"
+  1039  .  .  .  .  .  .  .  .  }
+  1040  .  .  .  .  .  .  .  }
+  1041  .  .  .  .  .  .  }
+  1042  .  .  .  .  .  .  Body: *ast.BlockStmt {
+  1043  .  .  .  .  .  .  .  Lbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:45:120
+  1044  .  .  .  .  .  .  .  List: []ast.Stmt (len = 2) {
+  1045  .  .  .  .  .  .  .  .  0: *ast.ExprStmt {
+  1046  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1047  .  .  .  .  .  .  .  .  .  .  Fun: *ast.Ident {
+  1048  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:46:3
+  1049  .  .  .  .  .  .  .  .  .  .  .  Name: "printUsage"
+  1050  .  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 329)
+  1051  .  .  .  .  .  .  .  .  .  .  }
+  1052  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:46:13
+  1053  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1054  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:46:14
+  1055  .  .  .  .  .  .  .  .  .  }
+  1056  .  .  .  .  .  .  .  .  }
+  1057  .  .  .  .  .  .  .  .  1: *ast.ExprStmt {
+  1058  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1059  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1060  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1061  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:47:3
+  1062  .  .  .  .  .  .  .  .  .  .  .  .  Name: "os"
+  1063  .  .  .  .  .  .  .  .  .  .  .  }
+  1064  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1065  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:47:6
+  1066  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Exit"
+  1067  .  .  .  .  .  .  .  .  .  .  .  }
+  1068  .  .  .  .  .  .  .  .  .  .  }
+  1069  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:47:10
+  1070  .  .  .  .  .  .  .  .  .  .  Args: []ast.Expr (len = 1) {
+  1071  .  .  .  .  .  .  .  .  .  .  .  0: *ast.BasicLit {
+  1072  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:47:11
+  1073  .  .  .  .  .  .  .  .  .  .  .  .  Kind: INT
+  1074  .  .  .  .  .  .  .  .  .  .  .  .  Value: "2"
+  1075  .  .  .  .  .  .  .  .  .  .  .  }
+  1076  .  .  .  .  .  .  .  .  .  .  }
+  1077  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1078  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:47:12
+  1079  .  .  .  .  .  .  .  .  .  }
+  1080  .  .  .  .  .  .  .  .  }
+  1081  .  .  .  .  .  .  .  }
+  1082  .  .  .  .  .  .  .  Rbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:48:2
+  1083  .  .  .  .  .  .  }
+  1084  .  .  .  .  .  }
+  1085  .  .  .  .  .  13: *ast.IfStmt {
+  1086  .  .  .  .  .  .  If: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:50:2
+  1087  .  .  .  .  .  .  Cond: *ast.BinaryExpr {
+  1088  .  .  .  .  .  .  .  X: *ast.Ident {
+  1089  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:50:5
+  1090  .  .  .  .  .  .  .  .  Name: "modeVar"
+  1091  .  .  .  .  .  .  .  .  Obj: *(obj @ 257)
+  1092  .  .  .  .  .  .  .  }
+  1093  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:50:13
+  1094  .  .  .  .  .  .  .  Op: ==
+  1095  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+  1096  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:50:16
+  1097  .  .  .  .  .  .  .  .  Kind: STRING
+  1098  .  .  .  .  .  .  .  .  Value: "\"server\""
+  1099  .  .  .  .  .  .  .  }
+  1100  .  .  .  .  .  .  }
+  1101  .  .  .  .  .  .  Body: *ast.BlockStmt {
+  1102  .  .  .  .  .  .  .  Lbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:50:25
+  1103  .  .  .  .  .  .  .  List: []ast.Stmt (len = 1) {
+  1104  .  .  .  .  .  .  .  .  0: *ast.IfStmt {
+  1105  .  .  .  .  .  .  .  .  .  If: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:51:3
+  1106  .  .  .  .  .  .  .  .  .  Cond: *ast.BinaryExpr {
+  1107  .  .  .  .  .  .  .  .  .  .  X: *ast.BinaryExpr {
+  1108  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1109  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:51:6
+  1110  .  .  .  .  .  .  .  .  .  .  .  .  Name: "ourCertPathVar"
+  1111  .  .  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 153)
+  1112  .  .  .  .  .  .  .  .  .  .  .  }
+  1113  .  .  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:51:21
+  1114  .  .  .  .  .  .  .  .  .  .  .  Op: ==
+  1115  .  .  .  .  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+  1116  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:51:24
+  1117  .  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+  1118  .  .  .  .  .  .  .  .  .  .  .  .  Value: "\"\""
+  1119  .  .  .  .  .  .  .  .  .  .  .  }
+  1120  .  .  .  .  .  .  .  .  .  .  }
+  1121  .  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:51:27
+  1122  .  .  .  .  .  .  .  .  .  .  Op: ||
+  1123  .  .  .  .  .  .  .  .  .  .  Y: *ast.BinaryExpr {
+  1124  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1125  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:51:30
+  1126  .  .  .  .  .  .  .  .  .  .  .  .  Name: "ourKeyPathVar"
+  1127  .  .  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 179)
+  1128  .  .  .  .  .  .  .  .  .  .  .  }
+  1129  .  .  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:51:44
+  1130  .  .  .  .  .  .  .  .  .  .  .  Op: ==
+  1131  .  .  .  .  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+  1132  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:51:47
+  1133  .  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+  1134  .  .  .  .  .  .  .  .  .  .  .  .  Value: "\"\""
+  1135  .  .  .  .  .  .  .  .  .  .  .  }
+  1136  .  .  .  .  .  .  .  .  .  .  }
+  1137  .  .  .  .  .  .  .  .  .  }
+  1138  .  .  .  .  .  .  .  .  .  Body: *ast.BlockStmt {
+  1139  .  .  .  .  .  .  .  .  .  .  Lbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:51:50
+  1140  .  .  .  .  .  .  .  .  .  .  List: []ast.Stmt (len = 3) {
+  1141  .  .  .  .  .  .  .  .  .  .  .  0: *ast.ExprStmt {
+  1142  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1143  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1144  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1145  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:52:4
+  1146  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "fmt"
+  1147  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1148  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1149  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:52:8
+  1150  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Fprintf"
+  1151  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1152  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1153  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:52:15
+  1154  .  .  .  .  .  .  .  .  .  .  .  .  .  Args: []ast.Expr (len = 2) {
+  1155  .  .  .  .  .  .  .  .  .  .  .  .  .  .  0: *ast.SelectorExpr {
+  1156  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1157  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:52:16
+  1158  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "os"
+  1159  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1160  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1161  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:52:19
+  1162  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Stderr"
+  1163  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1164  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1165  .  .  .  .  .  .  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+  1166  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:52:27
+  1167  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+  1168  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Value: "\"Err: Certificate and key must be specified for server mode.\\n\""
+  1169  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1170  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1171  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1172  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:52:90
+  1173  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1174  .  .  .  .  .  .  .  .  .  .  .  }
+  1175  .  .  .  .  .  .  .  .  .  .  .  1: *ast.ExprStmt {
+  1176  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1177  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1178  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1179  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:53:4
+  1180  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "flag"
+  1181  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1182  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1183  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:53:9
+  1184  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "PrintDefaults"
+  1185  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1186  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1187  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:53:22
+  1188  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1189  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:53:23
+  1190  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1191  .  .  .  .  .  .  .  .  .  .  .  }
+  1192  .  .  .  .  .  .  .  .  .  .  .  2: *ast.ExprStmt {
+  1193  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1194  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1195  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1196  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:54:4
+  1197  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "os"
+  1198  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1199  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1200  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:54:7
+  1201  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Exit"
+  1202  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1203  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1204  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:54:11
+  1205  .  .  .  .  .  .  .  .  .  .  .  .  .  Args: []ast.Expr (len = 1) {
+  1206  .  .  .  .  .  .  .  .  .  .  .  .  .  .  0: *ast.BasicLit {
+  1207  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:54:12
+  1208  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Kind: INT
+  1209  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Value: "2"
+  1210  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1211  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1212  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1213  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:54:13
+  1214  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1215  .  .  .  .  .  .  .  .  .  .  .  }
+  1216  .  .  .  .  .  .  .  .  .  .  }
+  1217  .  .  .  .  .  .  .  .  .  .  Rbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:55:3
+  1218  .  .  .  .  .  .  .  .  .  }
+  1219  .  .  .  .  .  .  .  .  }
+  1220  .  .  .  .  .  .  .  }
+  1221  .  .  .  .  .  .  .  Rbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:56:2
+  1222  .  .  .  .  .  .  }
+  1223  .  .  .  .  .  }
+  1224  .  .  .  .  .  14: *ast.IfStmt {
+  1225  .  .  .  .  .  .  If: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:58:2
+  1226  .  .  .  .  .  .  Cond: *ast.BinaryExpr {
+  1227  .  .  .  .  .  .  .  X: *ast.Ident {
+  1228  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:58:5
+  1229  .  .  .  .  .  .  .  .  Name: "modeVar"
+  1230  .  .  .  .  .  .  .  .  Obj: *(obj @ 257)
+  1231  .  .  .  .  .  .  .  }
+  1232  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:58:13
+  1233  .  .  .  .  .  .  .  Op: ==
+  1234  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+  1235  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:58:16
+  1236  .  .  .  .  .  .  .  .  Kind: STRING
+  1237  .  .  .  .  .  .  .  .  Value: "\"init-server-certs\""
+  1238  .  .  .  .  .  .  .  }
+  1239  .  .  .  .  .  .  }
+  1240  .  .  .  .  .  .  Body: *ast.BlockStmt {
+  1241  .  .  .  .  .  .  .  Lbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:58:36
+  1242  .  .  .  .  .  .  .  List: []ast.Stmt (len = 2) {
+  1243  .  .  .  .  .  .  .  .  0: *ast.IfStmt {
+  1244  .  .  .  .  .  .  .  .  .  If: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:59:3
+  1245  .  .  .  .  .  .  .  .  .  Cond: *ast.BinaryExpr {
+  1246  .  .  .  .  .  .  .  .  .  .  X: *ast.BinaryExpr {
+  1247  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1248  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:59:6
+  1249  .  .  .  .  .  .  .  .  .  .  .  .  Name: "ourCertPathVar"
+  1250  .  .  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 153)
+  1251  .  .  .  .  .  .  .  .  .  .  .  }
+  1252  .  .  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:59:21
+  1253  .  .  .  .  .  .  .  .  .  .  .  Op: ==
+  1254  .  .  .  .  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+  1255  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:59:24
+  1256  .  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+  1257  .  .  .  .  .  .  .  .  .  .  .  .  Value: "\"\""
+  1258  .  .  .  .  .  .  .  .  .  .  .  }
+  1259  .  .  .  .  .  .  .  .  .  .  }
+  1260  .  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:59:27
+  1261  .  .  .  .  .  .  .  .  .  .  Op: ||
+  1262  .  .  .  .  .  .  .  .  .  .  Y: *ast.BinaryExpr {
+  1263  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1264  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:59:30
+  1265  .  .  .  .  .  .  .  .  .  .  .  .  Name: "ourKeyPathVar"
+  1266  .  .  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 179)
+  1267  .  .  .  .  .  .  .  .  .  .  .  }
+  1268  .  .  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:59:44
+  1269  .  .  .  .  .  .  .  .  .  .  .  Op: ==
+  1270  .  .  .  .  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+  1271  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:59:47
+  1272  .  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+  1273  .  .  .  .  .  .  .  .  .  .  .  .  Value: "\"\""
+  1274  .  .  .  .  .  .  .  .  .  .  .  }
+  1275  .  .  .  .  .  .  .  .  .  .  }
+  1276  .  .  .  .  .  .  .  .  .  }
+  1277  .  .  .  .  .  .  .  .  .  Body: *ast.BlockStmt {
+  1278  .  .  .  .  .  .  .  .  .  .  Lbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:59:50
+  1279  .  .  .  .  .  .  .  .  .  .  List: []ast.Stmt (len = 3) {
+  1280  .  .  .  .  .  .  .  .  .  .  .  0: *ast.ExprStmt {
+  1281  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1282  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1283  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1284  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:60:4
+  1285  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "fmt"
+  1286  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1287  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1288  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:60:8
+  1289  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Fprintf"
+  1290  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1291  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1292  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:60:15
+  1293  .  .  .  .  .  .  .  .  .  .  .  .  .  Args: []ast.Expr (len = 2) {
+  1294  .  .  .  .  .  .  .  .  .  .  .  .  .  .  0: *ast.SelectorExpr {
+  1295  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1296  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:60:16
+  1297  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "os"
+  1298  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1299  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1300  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:60:19
+  1301  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Stderr"
+  1302  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1303  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1304  .  .  .  .  .  .  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+  1305  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:60:27
+  1306  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+  1307  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Value: "\"Err: Certificate and key path must be specified for generating certs.\\n\""
+  1308  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1309  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1310  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1311  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:60:100
+  1312  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1313  .  .  .  .  .  .  .  .  .  .  .  }
+  1314  .  .  .  .  .  .  .  .  .  .  .  1: *ast.ExprStmt {
+  1315  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1316  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1317  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1318  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:61:4
+  1319  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "flag"
+  1320  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1321  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1322  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:61:9
+  1323  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "PrintDefaults"
+  1324  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1325  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1326  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:61:22
+  1327  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1328  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:61:23
+  1329  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1330  .  .  .  .  .  .  .  .  .  .  .  }
+  1331  .  .  .  .  .  .  .  .  .  .  .  2: *ast.ExprStmt {
+  1332  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1333  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1334  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1335  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:62:4
+  1336  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "os"
+  1337  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1338  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1339  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:62:7
+  1340  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Exit"
+  1341  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1342  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1343  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:62:11
+  1344  .  .  .  .  .  .  .  .  .  .  .  .  .  Args: []ast.Expr (len = 1) {
+  1345  .  .  .  .  .  .  .  .  .  .  .  .  .  .  0: *ast.BasicLit {
+  1346  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:62:12
+  1347  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Kind: INT
+  1348  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Value: "2"
+  1349  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1350  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1351  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1352  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:62:13
+  1353  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1354  .  .  .  .  .  .  .  .  .  .  .  }
+  1355  .  .  .  .  .  .  .  .  .  .  }
+  1356  .  .  .  .  .  .  .  .  .  .  Rbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:63:3
+  1357  .  .  .  .  .  .  .  .  .  }
+  1358  .  .  .  .  .  .  .  .  }
+  1359  .  .  .  .  .  .  .  .  1: *ast.IfStmt {
+  1360  .  .  .  .  .  .  .  .  .  If: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:64:3
+  1361  .  .  .  .  .  .  .  .  .  Cond: *ast.BinaryExpr {
+  1362  .  .  .  .  .  .  .  .  .  .  X: *ast.BinaryExpr {
+  1363  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1364  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:64:6
+  1365  .  .  .  .  .  .  .  .  .  .  .  .  Name: "caCertPathVar"
+  1366  .  .  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 101)
+  1367  .  .  .  .  .  .  .  .  .  .  .  }
+  1368  .  .  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:64:20
+  1369  .  .  .  .  .  .  .  .  .  .  .  Op: ==
+  1370  .  .  .  .  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+  1371  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:64:23
+  1372  .  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+  1373  .  .  .  .  .  .  .  .  .  .  .  .  Value: "\"\""
+  1374  .  .  .  .  .  .  .  .  .  .  .  }
+  1375  .  .  .  .  .  .  .  .  .  .  }
+  1376  .  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:64:26
+  1377  .  .  .  .  .  .  .  .  .  .  Op: ||
+  1378  .  .  .  .  .  .  .  .  .  .  Y: *ast.BinaryExpr {
+  1379  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1380  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:64:29
+  1381  .  .  .  .  .  .  .  .  .  .  .  .  Name: "caKeyPathVar"
+  1382  .  .  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 127)
+  1383  .  .  .  .  .  .  .  .  .  .  .  }
+  1384  .  .  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:64:42
+  1385  .  .  .  .  .  .  .  .  .  .  .  Op: ==
+  1386  .  .  .  .  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+  1387  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:64:45
+  1388  .  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+  1389  .  .  .  .  .  .  .  .  .  .  .  .  Value: "\"\""
+  1390  .  .  .  .  .  .  .  .  .  .  .  }
+  1391  .  .  .  .  .  .  .  .  .  .  }
+  1392  .  .  .  .  .  .  .  .  .  }
+  1393  .  .  .  .  .  .  .  .  .  Body: *ast.BlockStmt {
+  1394  .  .  .  .  .  .  .  .  .  .  Lbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:64:48
+  1395  .  .  .  .  .  .  .  .  .  .  List: []ast.Stmt (len = 3) {
+  1396  .  .  .  .  .  .  .  .  .  .  .  0: *ast.ExprStmt {
+  1397  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1398  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1399  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1400  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:65:4
+  1401  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "fmt"
+  1402  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1403  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1404  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:65:8
+  1405  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Fprintf"
+  1406  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1407  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1408  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:65:15
+  1409  .  .  .  .  .  .  .  .  .  .  .  .  .  Args: []ast.Expr (len = 2) {
+  1410  .  .  .  .  .  .  .  .  .  .  .  .  .  .  0: *ast.SelectorExpr {
+  1411  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1412  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:65:16
+  1413  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "os"
+  1414  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1415  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1416  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:65:19
+  1417  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Stderr"
+  1418  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1419  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1420  .  .  .  .  .  .  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+  1421  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:65:27
+  1422  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+  1423  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Value: "\"Err: CA Certificate and key path must be specified for generating certs.\\n\""
+  1424  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1425  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1426  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1427  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:65:103
+  1428  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1429  .  .  .  .  .  .  .  .  .  .  .  }
+  1430  .  .  .  .  .  .  .  .  .  .  .  1: *ast.ExprStmt {
+  1431  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1432  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1433  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1434  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:66:4
+  1435  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "flag"
+  1436  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1437  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1438  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:66:9
+  1439  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "PrintDefaults"
+  1440  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1441  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1442  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:66:22
+  1443  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1444  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:66:23
+  1445  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1446  .  .  .  .  .  .  .  .  .  .  .  }
+  1447  .  .  .  .  .  .  .  .  .  .  .  2: *ast.ExprStmt {
+  1448  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1449  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1450  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1451  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:67:4
+  1452  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "os"
+  1453  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1454  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1455  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:67:7
+  1456  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Exit"
+  1457  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1458  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1459  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:67:11
+  1460  .  .  .  .  .  .  .  .  .  .  .  .  .  Args: []ast.Expr (len = 1) {
+  1461  .  .  .  .  .  .  .  .  .  .  .  .  .  .  0: *ast.BasicLit {
+  1462  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:67:12
+  1463  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Kind: INT
+  1464  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Value: "2"
+  1465  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1466  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1467  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1468  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:67:13
+  1469  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1470  .  .  .  .  .  .  .  .  .  .  .  }
+  1471  .  .  .  .  .  .  .  .  .  .  }
+  1472  .  .  .  .  .  .  .  .  .  .  Rbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:68:3
+  1473  .  .  .  .  .  .  .  .  .  }
+  1474  .  .  .  .  .  .  .  .  }
+  1475  .  .  .  .  .  .  .  }
+  1476  .  .  .  .  .  .  .  Rbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:69:2
+  1477  .  .  .  .  .  .  }
+  1478  .  .  .  .  .  }
+  1479  .  .  .  .  .  15: *ast.IfStmt {
+  1480  .  .  .  .  .  .  If: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:71:2
+  1481  .  .  .  .  .  .  Cond: *ast.BinaryExpr {
+  1482  .  .  .  .  .  .  .  X: *ast.Ident {
+  1483  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:71:5
+  1484  .  .  .  .  .  .  .  .  Name: "modeVar"
+  1485  .  .  .  .  .  .  .  .  Obj: *(obj @ 257)
+  1486  .  .  .  .  .  .  .  }
+  1487  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:71:13
+  1488  .  .  .  .  .  .  .  Op: ==
+  1489  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+  1490  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:71:16
+  1491  .  .  .  .  .  .  .  .  Kind: STRING
+  1492  .  .  .  .  .  .  .  .  Value: "\"make-client-cert\""
+  1493  .  .  .  .  .  .  .  }
+  1494  .  .  .  .  .  .  }
+  1495  .  .  .  .  .  .  Body: *ast.BlockStmt {
+  1496  .  .  .  .  .  .  .  Lbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:71:35
+  1497  .  .  .  .  .  .  .  List: []ast.Stmt (len = 2) {
+  1498  .  .  .  .  .  .  .  .  0: *ast.IfStmt {
+  1499  .  .  .  .  .  .  .  .  .  If: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:72:3
+  1500  .  .  .  .  .  .  .  .  .  Cond: *ast.BinaryExpr {
+  1501  .  .  .  .  .  .  .  .  .  .  X: *ast.BinaryExpr {
+  1502  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1503  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:72:6
+  1504  .  .  .  .  .  .  .  .  .  .  .  .  Name: "caCertPathVar"
+  1505  .  .  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 101)
+  1506  .  .  .  .  .  .  .  .  .  .  .  }
+  1507  .  .  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:72:20
+  1508  .  .  .  .  .  .  .  .  .  .  .  Op: ==
+  1509  .  .  .  .  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+  1510  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:72:23
+  1511  .  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+  1512  .  .  .  .  .  .  .  .  .  .  .  .  Value: "\"\""
+  1513  .  .  .  .  .  .  .  .  .  .  .  }
+  1514  .  .  .  .  .  .  .  .  .  .  }
+  1515  .  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:72:26
+  1516  .  .  .  .  .  .  .  .  .  .  Op: ||
+  1517  .  .  .  .  .  .  .  .  .  .  Y: *ast.BinaryExpr {
+  1518  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1519  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:72:29
+  1520  .  .  .  .  .  .  .  .  .  .  .  .  Name: "caKeyPathVar"
+  1521  .  .  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 127)
+  1522  .  .  .  .  .  .  .  .  .  .  .  }
+  1523  .  .  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:72:42
+  1524  .  .  .  .  .  .  .  .  .  .  .  Op: ==
+  1525  .  .  .  .  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+  1526  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:72:45
+  1527  .  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+  1528  .  .  .  .  .  .  .  .  .  .  .  .  Value: "\"\""
+  1529  .  .  .  .  .  .  .  .  .  .  .  }
+  1530  .  .  .  .  .  .  .  .  .  .  }
+  1531  .  .  .  .  .  .  .  .  .  }
+  1532  .  .  .  .  .  .  .  .  .  Body: *ast.BlockStmt {
+  1533  .  .  .  .  .  .  .  .  .  .  Lbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:72:48
+  1534  .  .  .  .  .  .  .  .  .  .  List: []ast.Stmt (len = 3) {
+  1535  .  .  .  .  .  .  .  .  .  .  .  0: *ast.ExprStmt {
+  1536  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1537  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1538  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1539  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:73:4
+  1540  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "fmt"
+  1541  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1542  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1543  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:73:8
+  1544  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Fprintf"
+  1545  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1546  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1547  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:73:15
+  1548  .  .  .  .  .  .  .  .  .  .  .  .  .  Args: []ast.Expr (len = 2) {
+  1549  .  .  .  .  .  .  .  .  .  .  .  .  .  .  0: *ast.SelectorExpr {
+  1550  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1551  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:73:16
+  1552  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "os"
+  1553  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1554  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1555  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:73:19
+  1556  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Stderr"
+  1557  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1558  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1559  .  .  .  .  .  .  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+  1560  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:73:27
+  1561  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+  1562  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Value: "\"Err: CA Certificate and key path must be specified for generating certs.\\n\""
+  1563  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1564  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1565  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1566  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:73:103
+  1567  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1568  .  .  .  .  .  .  .  .  .  .  .  }
+  1569  .  .  .  .  .  .  .  .  .  .  .  1: *ast.ExprStmt {
+  1570  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1571  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1572  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1573  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:74:4
+  1574  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "flag"
+  1575  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1576  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1577  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:74:9
+  1578  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "PrintDefaults"
+  1579  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1580  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1581  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:74:22
+  1582  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1583  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:74:23
+  1584  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1585  .  .  .  .  .  .  .  .  .  .  .  }
+  1586  .  .  .  .  .  .  .  .  .  .  .  2: *ast.ExprStmt {
+  1587  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1588  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1589  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1590  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:75:4
+  1591  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "os"
+  1592  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1593  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1594  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:75:7
+  1595  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Exit"
+  1596  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1597  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1598  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:75:11
+  1599  .  .  .  .  .  .  .  .  .  .  .  .  .  Args: []ast.Expr (len = 1) {
+  1600  .  .  .  .  .  .  .  .  .  .  .  .  .  .  0: *ast.BasicLit {
+  1601  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:75:12
+  1602  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Kind: INT
+  1603  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Value: "2"
+  1604  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1605  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1606  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1607  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:75:13
+  1608  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1609  .  .  .  .  .  .  .  .  .  .  .  }
+  1610  .  .  .  .  .  .  .  .  .  .  }
+  1611  .  .  .  .  .  .  .  .  .  .  Rbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:76:3
+  1612  .  .  .  .  .  .  .  .  .  }
+  1613  .  .  .  .  .  .  .  .  }
+  1614  .  .  .  .  .  .  .  .  1: *ast.IfStmt {
+  1615  .  .  .  .  .  .  .  .  .  If: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:77:3
+  1616  .  .  .  .  .  .  .  .  .  Cond: *ast.BinaryExpr {
+  1617  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1618  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1619  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1620  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:77:6
+  1621  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "flag"
+  1622  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1623  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1624  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:77:11
+  1625  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "NArg"
+  1626  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1627  .  .  .  .  .  .  .  .  .  .  .  }
+  1628  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:77:15
+  1629  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1630  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:77:16
+  1631  .  .  .  .  .  .  .  .  .  .  }
+  1632  .  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:77:18
+  1633  .  .  .  .  .  .  .  .  .  .  Op: !=
+  1634  .  .  .  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+  1635  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:77:21
+  1636  .  .  .  .  .  .  .  .  .  .  .  Kind: INT
+  1637  .  .  .  .  .  .  .  .  .  .  .  Value: "2"
+  1638  .  .  .  .  .  .  .  .  .  .  }
+  1639  .  .  .  .  .  .  .  .  .  }
+  1640  .  .  .  .  .  .  .  .  .  Body: *ast.BlockStmt {
+  1641  .  .  .  .  .  .  .  .  .  .  Lbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:77:23
+  1642  .  .  .  .  .  .  .  .  .  .  List: []ast.Stmt (len = 2) {
+  1643  .  .  .  .  .  .  .  .  .  .  .  0: *ast.ExprStmt {
+  1644  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1645  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1646  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1647  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:78:4
+  1648  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "fmt"
+  1649  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1650  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1651  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:78:8
+  1652  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Fprintf"
+  1653  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1654  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1655  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:78:15
+  1656  .  .  .  .  .  .  .  .  .  .  .  .  .  Args: []ast.Expr (len = 2) {
+  1657  .  .  .  .  .  .  .  .  .  .  .  .  .  .  0: *ast.SelectorExpr {
+  1658  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1659  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:78:16
+  1660  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "os"
+  1661  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1662  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1663  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:78:19
+  1664  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Stderr"
+  1665  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1666  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1667  .  .  .  .  .  .  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+  1668  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:78:27
+  1669  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+  1670  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Value: "\"Err: Expected 2 arguments. EG: ./subnet OPTIONS certPath keyPath\\n\""
+  1671  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1672  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1673  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1674  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:78:95
+  1675  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1676  .  .  .  .  .  .  .  .  .  .  .  }
+  1677  .  .  .  .  .  .  .  .  .  .  .  1: *ast.ExprStmt {
+  1678  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1679  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1680  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1681  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:79:4
+  1682  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "os"
+  1683  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1684  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1685  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:79:7
+  1686  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Exit"
+  1687  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1688  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1689  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:79:11
+  1690  .  .  .  .  .  .  .  .  .  .  .  .  .  Args: []ast.Expr (len = 1) {
+  1691  .  .  .  .  .  .  .  .  .  .  .  .  .  .  0: *ast.BasicLit {
+  1692  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:79:12
+  1693  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Kind: INT
+  1694  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Value: "2"
+  1695  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1696  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1697  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1698  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:79:13
+  1699  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1700  .  .  .  .  .  .  .  .  .  .  .  }
+  1701  .  .  .  .  .  .  .  .  .  .  }
+  1702  .  .  .  .  .  .  .  .  .  .  Rbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:80:3
+  1703  .  .  .  .  .  .  .  .  .  }
+  1704  .  .  .  .  .  .  .  .  }
+  1705  .  .  .  .  .  .  .  }
+  1706  .  .  .  .  .  .  .  Rbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:81:2
+  1707  .  .  .  .  .  .  }
+  1708  .  .  .  .  .  }
+  1709  .  .  .  .  .  16: *ast.IfStmt {
+  1710  .  .  .  .  .  .  If: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:83:2
+  1711  .  .  .  .  .  .  Cond: *ast.BinaryExpr {
+  1712  .  .  .  .  .  .  .  X: *ast.Ident {
+  1713  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:83:5
+  1714  .  .  .  .  .  .  .  .  Name: "modeVar"
+  1715  .  .  .  .  .  .  .  .  Obj: *(obj @ 257)
+  1716  .  .  .  .  .  .  .  }
+  1717  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:83:13
+  1718  .  .  .  .  .  .  .  Op: ==
+  1719  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+  1720  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:83:16
+  1721  .  .  .  .  .  .  .  .  Kind: STRING
+  1722  .  .  .  .  .  .  .  .  Value: "\"blacklist-cert\""
+  1723  .  .  .  .  .  .  .  }
+  1724  .  .  .  .  .  .  }
+  1725  .  .  .  .  .  .  Body: *ast.BlockStmt {
+  1726  .  .  .  .  .  .  .  Lbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:83:33
+  1727  .  .  .  .  .  .  .  List: []ast.Stmt (len = 2) {
+  1728  .  .  .  .  .  .  .  .  0: *ast.IfStmt {
+  1729  .  .  .  .  .  .  .  .  .  If: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:84:3
+  1730  .  .  .  .  .  .  .  .  .  Cond: *ast.BinaryExpr {
+  1731  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1732  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:84:6
+  1733  .  .  .  .  .  .  .  .  .  .  .  Name: "crlPathVar"
+  1734  .  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 309)
+  1735  .  .  .  .  .  .  .  .  .  .  }
+  1736  .  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:84:17
+  1737  .  .  .  .  .  .  .  .  .  .  Op: ==
+  1738  .  .  .  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+  1739  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:84:20
+  1740  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+  1741  .  .  .  .  .  .  .  .  .  .  .  Value: "\"\""
+  1742  .  .  .  .  .  .  .  .  .  .  }
+  1743  .  .  .  .  .  .  .  .  .  }
+  1744  .  .  .  .  .  .  .  .  .  Body: *ast.BlockStmt {
+  1745  .  .  .  .  .  .  .  .  .  .  Lbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:84:23
+  1746  .  .  .  .  .  .  .  .  .  .  List: []ast.Stmt (len = 3) {
+  1747  .  .  .  .  .  .  .  .  .  .  .  0: *ast.ExprStmt {
+  1748  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1749  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1750  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1751  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:85:4
+  1752  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "fmt"
+  1753  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1754  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1755  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:85:8
+  1756  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Fprintf"
+  1757  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1758  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1759  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:85:15
+  1760  .  .  .  .  .  .  .  .  .  .  .  .  .  Args: []ast.Expr (len = 2) {
+  1761  .  .  .  .  .  .  .  .  .  .  .  .  .  .  0: *ast.SelectorExpr {
+  1762  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1763  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:85:16
+  1764  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "os"
+  1765  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1766  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1767  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:85:19
+  1768  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Stderr"
+  1769  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1770  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1771  .  .  .  .  .  .  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+  1772  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:85:27
+  1773  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+  1774  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Value: "\"Err: CRL path must be specified.\\n\""
+  1775  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1776  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1777  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1778  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:85:63
+  1779  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1780  .  .  .  .  .  .  .  .  .  .  .  }
+  1781  .  .  .  .  .  .  .  .  .  .  .  1: *ast.ExprStmt {
+  1782  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1783  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1784  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1785  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:86:4
+  1786  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "flag"
+  1787  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1788  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1789  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:86:9
+  1790  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "PrintDefaults"
+  1791  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1792  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1793  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:86:22
+  1794  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1795  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:86:23
+  1796  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1797  .  .  .  .  .  .  .  .  .  .  .  }
+  1798  .  .  .  .  .  .  .  .  .  .  .  2: *ast.ExprStmt {
+  1799  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1800  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1801  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1802  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:87:4
+  1803  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "os"
+  1804  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1805  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1806  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:87:7
+  1807  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Exit"
+  1808  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1809  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1810  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:87:11
+  1811  .  .  .  .  .  .  .  .  .  .  .  .  .  Args: []ast.Expr (len = 1) {
+  1812  .  .  .  .  .  .  .  .  .  .  .  .  .  .  0: *ast.BasicLit {
+  1813  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:87:12
+  1814  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Kind: INT
+  1815  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Value: "2"
+  1816  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1817  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1818  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1819  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:87:13
+  1820  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1821  .  .  .  .  .  .  .  .  .  .  .  }
+  1822  .  .  .  .  .  .  .  .  .  .  }
+  1823  .  .  .  .  .  .  .  .  .  .  Rbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:88:3
+  1824  .  .  .  .  .  .  .  .  .  }
+  1825  .  .  .  .  .  .  .  .  }
+  1826  .  .  .  .  .  .  .  .  1: *ast.IfStmt {
+  1827  .  .  .  .  .  .  .  .  .  If: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:89:3
+  1828  .  .  .  .  .  .  .  .  .  Cond: *ast.BinaryExpr {
+  1829  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1830  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1831  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1832  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:89:6
+  1833  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "flag"
+  1834  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1835  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1836  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:89:11
+  1837  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "NArg"
+  1838  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1839  .  .  .  .  .  .  .  .  .  .  .  }
+  1840  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:89:15
+  1841  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1842  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:89:16
+  1843  .  .  .  .  .  .  .  .  .  .  }
+  1844  .  .  .  .  .  .  .  .  .  .  OpPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:89:18
+  1845  .  .  .  .  .  .  .  .  .  .  Op: !=
+  1846  .  .  .  .  .  .  .  .  .  .  Y: *ast.BasicLit {
+  1847  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:89:21
+  1848  .  .  .  .  .  .  .  .  .  .  .  Kind: INT
+  1849  .  .  .  .  .  .  .  .  .  .  .  Value: "2"
+  1850  .  .  .  .  .  .  .  .  .  .  }
+  1851  .  .  .  .  .  .  .  .  .  }
+  1852  .  .  .  .  .  .  .  .  .  Body: *ast.BlockStmt {
+  1853  .  .  .  .  .  .  .  .  .  .  Lbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:89:23
+  1854  .  .  .  .  .  .  .  .  .  .  List: []ast.Stmt (len = 2) {
+  1855  .  .  .  .  .  .  .  .  .  .  .  0: *ast.ExprStmt {
+  1856  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1857  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1858  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1859  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:90:4
+  1860  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "fmt"
+  1861  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1862  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1863  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:90:8
+  1864  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Fprintf"
+  1865  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1866  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1867  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:90:15
+  1868  .  .  .  .  .  .  .  .  .  .  .  .  .  Args: []ast.Expr (len = 2) {
+  1869  .  .  .  .  .  .  .  .  .  .  .  .  .  .  0: *ast.SelectorExpr {
+  1870  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1871  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:90:16
+  1872  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "os"
+  1873  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1874  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1875  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:90:19
+  1876  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Stderr"
+  1877  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1878  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1879  .  .  .  .  .  .  .  .  .  .  .  .  .  .  1: *ast.BasicLit {
+  1880  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:90:27
+  1881  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Kind: STRING
+  1882  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Value: "\"Err: Expected 2 arguments. EG: ./subnet -crl <crlPath> -mode blacklist-cert <certPath> \\\"justification\\\"\\n\""
+  1883  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1884  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1885  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1886  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:90:135
+  1887  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1888  .  .  .  .  .  .  .  .  .  .  .  }
+  1889  .  .  .  .  .  .  .  .  .  .  .  1: *ast.ExprStmt {
+  1890  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  1891  .  .  .  .  .  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1892  .  .  .  .  .  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1893  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:91:4
+  1894  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "os"
+  1895  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1896  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1897  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:91:7
+  1898  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "Exit"
+  1899  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1900  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1901  .  .  .  .  .  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:91:11
+  1902  .  .  .  .  .  .  .  .  .  .  .  .  .  Args: []ast.Expr (len = 1) {
+  1903  .  .  .  .  .  .  .  .  .  .  .  .  .  .  0: *ast.BasicLit {
+  1904  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:91:12
+  1905  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Kind: INT
+  1906  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Value: "2"
+  1907  .  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1908  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1909  .  .  .  .  .  .  .  .  .  .  .  .  .  Ellipsis: -
+  1910  .  .  .  .  .  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:91:13
+  1911  .  .  .  .  .  .  .  .  .  .  .  .  }
+  1912  .  .  .  .  .  .  .  .  .  .  .  }
+  1913  .  .  .  .  .  .  .  .  .  .  }
+  1914  .  .  .  .  .  .  .  .  .  .  Rbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:92:3
+  1915  .  .  .  .  .  .  .  .  .  }
+  1916  .  .  .  .  .  .  .  .  }
+  1917  .  .  .  .  .  .  .  }
+  1918  .  .  .  .  .  .  .  Rbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:93:2
+  1919  .  .  .  .  .  .  }
+  1920  .  .  .  .  .  }
+  1921  .  .  .  .  .  17: *ast.AssignStmt {
+  1922  .  .  .  .  .  .  Lhs: []ast.Expr (len = 1) {
+  1923  .  .  .  .  .  .  .  0: *ast.Ident {
+  1924  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:95:2
+  1925  .  .  .  .  .  .  .  .  Name: "serverAddressVar"
+  1926  .  .  .  .  .  .  .  .  Obj: *(obj @ 205)
+  1927  .  .  .  .  .  .  .  }
+  1928  .  .  .  .  .  .  }
+  1929  .  .  .  .  .  .  TokPos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:95:19
+  1930  .  .  .  .  .  .  Tok: =
+  1931  .  .  .  .  .  .  Rhs: []ast.Expr (len = 1) {
+  1932  .  .  .  .  .  .  .  0: *ast.CallExpr {
+  1933  .  .  .  .  .  .  .  .  Fun: *ast.SelectorExpr {
+  1934  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+  1935  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:95:21
+  1936  .  .  .  .  .  .  .  .  .  .  Name: "flag"
+  1937  .  .  .  .  .  .  .  .  .  }
+  1938  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+  1939  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:95:26
+  1940  .  .  .  .  .  .  .  .  .  .  Name: "Arg"
+  1941  .  .  .  .  .  .  .  .  .  }
+  1942  .  .  .  .  .  .  .  .  }
+  1943  .  .  .  .  .  .  .  .  Lparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:95:29
+  1944  .  .  .  .  .  .  .  .  Args: []ast.Expr (len = 1) {
+  1945  .  .  .  .  .  .  .  .  .  0: *ast.BasicLit {
+  1946  .  .  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:95:30
+  1947  .  .  .  .  .  .  .  .  .  .  Kind: INT
+  1948  .  .  .  .  .  .  .  .  .  .  Value: "0"
+  1949  .  .  .  .  .  .  .  .  .  }
+  1950  .  .  .  .  .  .  .  .  }
+  1951  .  .  .  .  .  .  .  .  Ellipsis: -
+  1952  .  .  .  .  .  .  .  .  Rparen: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:95:31
+  1953  .  .  .  .  .  .  .  }
+  1954  .  .  .  .  .  .  }
+  1955  .  .  .  .  .  }
+  1956  .  .  .  .  }
+  1957  .  .  .  .  Rbrace: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go:96:1
+  1958  .  .  .  }
+  1959  .  .  }
+  1960  .  }
+  1961  .  Scope: *ast.Scope {
+  1962  .  .  Objects: map[string]*ast.Object (len = 13) {
+  1963  .  .  .  "ourKeyPathVar": *(obj @ 179)
+  1964  .  .  .  "serverAddressVar": *(obj @ 205)
+  1965  .  .  .  "crlPathVar": *(obj @ 309)
+  1966  .  .  .  "printUsage": *(obj @ 329)
+  1967  .  .  .  "interfaceNameVar": *(obj @ 49)
+  1968  .  .  .  "networkAddrVar": *(obj @ 75)
+  1969  .  .  .  "caCertPathVar": *(obj @ 101)
+  1970  .  .  .  "caKeyPathVar": *(obj @ 127)
+  1971  .  .  .  "ourCertPathVar": *(obj @ 153)
+  1972  .  .  .  "connPortVar": *(obj @ 231)
+  1973  .  .  .  "modeVar": *(obj @ 257)
+  1974  .  .  .  "gatewayVar": *(obj @ 283)
+  1975  .  .  .  "parseFlags": *(obj @ 476)
+  1976  .  .  }
+  1977  .  }
+  1978  .  Imports: []*ast.ImportSpec (len = 3) {
+  1979  .  .  0: *(obj @ 12)
+  1980  .  .  1: *(obj @ 20)
+  1981  .  .  2: *(obj @ 28)
+  1982  .  }
+  1983  .  Unresolved: []*ast.Ident (len = 61) {
+  1984  .  .  0: *(obj @ 57)
+  1985  .  .  1: *(obj @ 83)
+  1986  .  .  2: *(obj @ 109)
+  1987  .  .  3: *(obj @ 135)
+  1988  .  .  4: *(obj @ 161)
+  1989  .  .  5: *(obj @ 187)
+  1990  .  .  6: *(obj @ 213)
+  1991  .  .  7: *(obj @ 239)
+  1992  .  .  8: *(obj @ 265)
+  1993  .  .  9: *(obj @ 291)
+  1994  .  .  10: *(obj @ 317)
+  1995  .  .  11: *(obj @ 348)
+  1996  .  .  12: *(obj @ 360)
+  1997  .  .  13: *(obj @ 376)
+  1998  .  .  14: *(obj @ 401)
+  1999  .  .  15: *(obj @ 413)
+  2000  .  .  16: *(obj @ 429)
+  2001  .  .  17: *(obj @ 454)
+  2002  .  .  18: *(obj @ 495)
+  2003  .  .  19: *(obj @ 538)
+  2004  .  .  20: *(obj @ 581)
+  2005  .  .  21: *(obj @ 624)
+  2006  .  .  22: *(obj @ 667)
+  2007  .  .  23: *(obj @ 710)
+  2008  .  .  24: *(obj @ 753)
+  2009  .  .  25: *(obj @ 796)
+  2010  .  .  26: *(obj @ 839)
+  2011  .  .  27: *(obj @ 882)
+  2012  .  .  28: *(obj @ 925)
+  2013  .  .  29: *(obj @ 948)
+  2014  .  .  30: *(obj @ 1020)
+  2015  .  .  31: *(obj @ 1060)
+  2016  .  .  32: *(obj @ 1144)
+  2017  .  .  33: *(obj @ 1156)
+  2018  .  .  34: *(obj @ 1178)
+  2019  .  .  35: *(obj @ 1195)
+  2020  .  .  36: *(obj @ 1283)
+  2021  .  .  37: *(obj @ 1295)
+  2022  .  .  38: *(obj @ 1317)
+  2023  .  .  39: *(obj @ 1334)
+  2024  .  .  40: *(obj @ 1399)
+  2025  .  .  41: *(obj @ 1411)
+  2026  .  .  42: *(obj @ 1433)
+  2027  .  .  43: *(obj @ 1450)
+  2028  .  .  44: *(obj @ 1538)
+  2029  .  .  45: *(obj @ 1550)
+  2030  .  .  46: *(obj @ 1572)
+  2031  .  .  47: *(obj @ 1589)
+  2032  .  .  48: *(obj @ 1619)
+  2033  .  .  49: *(obj @ 1646)
+  2034  .  .  50: *(obj @ 1658)
+  2035  .  .  51: *(obj @ 1680)
+  2036  .  .  52: *(obj @ 1750)
+  2037  .  .  53: *(obj @ 1762)
+  2038  .  .  54: *(obj @ 1784)
+  2039  .  .  55: *(obj @ 1801)
+  2040  .  .  56: *(obj @ 1831)
+  2041  .  .  57: *(obj @ 1858)
+  2042  .  .  58: *(obj @ 1870)
+  2043  .  .  59: *(obj @ 1892)
+  2044  .  .  60: *(obj @ 1934)
+  2045  .  }
+  2046  }
+--- PASS: TestAST (0.04s)
+PASS
+ok  	command-line-arguments	0.052s

@@ -3,17 +3,65 @@ package testing
 import (
 	"testing"
 	"go/ast"
-	"go/token"
 	"go/parser"
+	"golang.org/x/tools/go/loader"
+	"go/token"
 )
 
+func ast1() {
+	pkgpath := "github.com/twitchyliquid64/subnet"
+
+
+	// imp := importer.Default()
+	conf := loader.Config{ParserMode: parser.ParseComments}
+	conf.Import(pkgpath)
+	prog, err := conf.Load()
+	if err != nil {
+		panic(err)
+	}
+
+
+	pkginfo := prog.Package(pkgpath)
+	// pkg := pkginfo.Pkg
+	fset := prog.Fset
+
+	// /Users/liamz/parser/src/github.com/liamzebedee/graphparse/subnet/subnet/client.go
+	rootAst := pkginfo.Files[0]
+
+	ast.Print(fset, rootAst)
+}
 
 func TestAST(t *testing.T) {
 	fset := token.NewFileSet()
-	const dir string = "/Users/liamz/parser/src/github.com/liamzebedee/graphparse/subnet/subnet/client.go"
+	const dir string = "/Users/liamz/parser/src/github.com/twitchyliquid64/subnet/flags.go"
 	f, _ := parser.ParseFile(fset, dir, nil, 0)
 	ast.Print(fset, f)
 }
+
+
+/*
+
+    // Defs maps identifiers to the objects they define (including
+    // package names, dots "." of dot-imports, and blank "_" identifiers).
+    // For identifiers that do not denote objects (e.g., the package name
+    // in package clauses, or symbolic variables t in t := x.(type) of
+    // type switch headers), the corresponding objects are nil.
+    //
+    // For an anonymous field, Defs returns the field *Var it defines.
+    //
+    // Invariant: Defs[id] == nil || Defs[id].Pos() == id.Pos()
+    Defs map[*ast.Ident]Object
+
+   // Uses maps identifiers to the objects they denote.
+    //
+    // For an anonymous field, Uses returns the *TypeName it denotes.
+    //
+    // Invariant: Uses[id].Pos() != id.Pos()
+    Uses map[*ast.Ident]Object
+
+
+
+*/
 
 
 /*
@@ -83,6 +131,23 @@ Methods on structs
   229					NamePos: /Users/liamz/parser/src/github.com/liamzebedee/graphparse/subnet/subnet/client.go:128:18
   229					Name: "Run"
   229				}
+
+
+
+References to external packages
+
+Args: []ast.Expr (len = 1) {
+  317																0: *ast.SelectorExpr {
+  317																	X: *ast.Ident {
+  318																		NamePos: /Users/liamz/parser/src/github.com/liamzebedee/graphparse/subnet/subnet/client.go:172:26
+  318																		Name: "conn"
+  318																	}
+  318																	Sel: *ast.Ident {
+  318																		NamePos: /Users/liamz/parser/src/github.com/liamzebedee/graphparse/subnet/subnet/client.go:172:31
+  318																		Name: "PktIPPkt"
+  318																	}
+  318																}
+  318															}
 
 
 */
