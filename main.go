@@ -18,6 +18,8 @@ import (
 	// godsUtils "github.com/emirpasic/gods/utils" 
 	// "github.com/emirpasic/gods/trees/btree"
 	// "github.com/emirpasic/gods/maps/treemap"
+	"golang.org/x/tools/go/loader"
+	"go/importer"
 )
 
 
@@ -267,6 +269,7 @@ func (v Visitor) registerNode(node ast.Node, label string) {
 func (v Visitor) Visit(node ast.Node) (w ast.Visitor) {
 	switch x := node.(type) {
 		case *ast.Package:
+			fmt.Println("#pkg")
 			for abspath, srcfile := range x.Files {
 				path, err := filepath.Rel(dir, abspath)
 				if err != nil {
@@ -277,8 +280,16 @@ func (v Visitor) Visit(node ast.Node) (w ast.Visitor) {
 				fmt.Println("Processing", path)
 			}
 
+		// case *ast.StructType:
+			// fmt.Println("#struct")
+			// v.goDeeper(x, x.Fields.List[0].Names[0].Name)
+
+		// case *ast.Ident:
+			// v.registerNode(x, x.Name)
+			// fmt.Println(strings.Join(v.parents, ".") + "." + x.Name)
+
 		default:
-			return w
+			return v
 	}
 	return v
 }
