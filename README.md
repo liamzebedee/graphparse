@@ -1,0 +1,12 @@
+PageRank AST
+============
+
+WIP implementation of PageRank on the Abstract Syntax Trees of Go source code.
+
+ - parse and 'link' Go source
+ - walk AST and extract relationships between nodes (subject to design experimentation)
+ - build a new graph from this
+ - run PageRank on this graph
+ - convert the graph to .dot GRAPHVIZ format, with node sizes normalised according to their importance
+ - visualise in browser
+
