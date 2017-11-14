@@ -30,12 +30,18 @@ func Stuff() {
 	pkginfo := prog.Package(pkgpath)
 	// fset := prog.Fset
 	// ast.Print(fset, rootAst)
+	
+	visitor := NewVisitor(nil, pkginfo.Pkg)
 
 	for i, f := range pkginfo.Files {
-		visitor := NewVisitor(f, pkginfo.Pkg)
+		if i < 3 { continue }
 		ast.Walk(visitor, f)
-		visitor.Graph.ToDot()
-		if i == 2 { break }
+		if i == 3 { break }
+		
+		
+
 		// ast.Print(fset, f)
 	}
+	visitor.Graph.ToDot()
+	visitor.Graph.String()
 }

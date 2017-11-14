@@ -12,7 +12,7 @@ import (
 
 type node struct {
 	children []*node
-	value interface{}
+	_value interface{}
 	label string
 	parent *node
 	id nodeid
@@ -22,13 +22,14 @@ type nodeid int64
 
 type edge []nodeid
 
-func (n *node) AddChild(val interface{}, label string, id nodeid) *node {
+func (this *node) AddChild(val interface{}, label string, id nodeid) *node {
 	child := node{}
-	child.value = val
+	child._value = val
 	child.label = label
-	child.parent = n
-	child.id = nodeid
-	n.children = append(n.children, &child)
+	child.parent = this
+	child.id = id
+
+	this.children = append(this.children, &child)
 	return &child
 }
 
@@ -46,10 +47,40 @@ func (this *node) Id() nodeid {
 
 	// return getIdForName(this.label)
 	// return getIdForName(this.FQN())
-	return this.nodeid
+	return this.id
+}
+
+type walkfn func(n *node, depth int)
+
+
+func (n *node) walk(fn walkfn, depth int) {
+	for _, child := range n.children {
+		fn(child, depth + 1)
+		child.walk(fn, depth + 1)
+	}
+}
+
+func makeEdges(edges *[]edge) walkfn {
+	return func(node *node, depth int) {
+		for _, child := range node.children {
+			*edges = append(*edges, edge{node.Id(), child.Id()})
+		}
+	}
+}
+
+func (this *node) String() {
+	this.walk(func(n *node, depth int) {
+		depthStr := ""
+		for i := 0; i < depth; i++ {
+			depthStr += "\t"
+		}
+		fmt.Println(depthStr, n.id)
+	}, 0)
 }
 
 func (this *node) ToDot() {
+	// fmt.Println(this)
+
 	printToStdout := false
 
 
@@ -70,7 +101,8 @@ func (this *node) ToDot() {
 	var edges []edge
 	nodesLookup := make(map[nodeid]*node)
 
-	this.walk(makeEdges(&edges))
+	this.walk(makeEdges(&edges), 0)
+	fmt.Println(edges)
 	// this.walk(makeNodeLookup(nodesLookup))
 
 	fmt.Println(len(edges), "edges and", len(nodesLookup), "nodes")
@@ -108,8 +140,8 @@ func (this *node) ToDot() {
 	scaleRank := func(rank float64) float64 {
 		return (maxAllowed - minAllowed) * (rank - min) / (max - min) + minAllowed;
 	}
-	fmt.Println("smallest node is", scaleRank(min))
-	fmt.Println("biggest node is", scaleRank(max))
+	// fmt.Println("smallest node is", scaleRank(min))
+	// fmt.Println("biggest node is", scaleRank(max))
 
 	for _, rank := range ranks {
 		node := nodesLookup[rank.NodeId]
@@ -131,14 +163,7 @@ func (this *node) ToDot() {
 	w.WriteString("}\n")
 }
 
-type walkfn func(n *node)
 
-func (n *node) walk(fn walkfn) {
-	for _, child := range n.children {
-		fn(child)
-		child.walk(fn)
-	}	
-}
 
 
 

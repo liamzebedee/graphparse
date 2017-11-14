@@ -1,18 +1,13 @@
 package graphparse
 
 import (
-	
+	"strconv"
 	"go/types"
 	"go/ast"
+	"fmt"
 )
 
-func makeEdges(edges *[]edge) walkfn {
-	return func(node *node) {
-		for _, child := range node.children {
-			*edges = append(*edges, edge{node.Id(), child.Id()})
-		}
-	}
-}
+
 
 type Visitor struct {
 	Graph *node
@@ -21,27 +16,51 @@ type Visitor struct {
 
 func NewVisitor(rootAstNode ast.Node, pkg *types.Package) Visitor {
 	v := Visitor{Pkg: pkg}
-	v.Graph = &node{parent: nil, value: rootAstNode, label: "/"}
+	v.Graph = &node{parent: nil, _value: rootAstNode, label: "/"}
 	return v
 }
 
-func (v Visitor) goDeeper(node ast.Node, label string) (w Visitor) {
+func (v Visitor) goDeeper(node ast.Node, label string, id nodeid) (w Visitor) {
 	w = v
-	w.Graph = w.Graph.AddChild(node, label)
+	w.Graph = w.Graph.AddChild(node, label, id)
 	return w
 }
 
-func (v Visitor) registerNode(node ast.Node, label string) {
-	v.Graph.AddChild(node, label)
+var idcounter int = 0
+func newNodeId() nodeid {
+	idcounter++
+	return nodeid(idcounter)
 }
+var parent ast.Node
+func (v Visitor) Visit(node ast.Node) (ast.Visitor) {
+	// defer func() { parent = node }()
+	if(node == nil) {
+		fmt.Println("0")
+	}
 
-
-
-func (v Visitor) Visit(node ast.Node) (w ast.Visitor) {
 	switch x := node.(type) {
 		case *ast.Ident:
-			// go deeper
-			return v.goDeeper(x, x.Name)
+			var id nodeid
+			if x.Obj != nil {
+				if i, err := strconv.ParseInt(fmt.Sprintf("%p", x.Obj), 0, 64); err != nil {
+					panic(err)
+				} else {
+					id = nodeid(i)
+				}				
+			} else {
+				id = newNodeId()
+			}
+
+			// v.Pkg.Scope()
+			if x.Obj != nil {
+				// fmt.Println(x.Obj)
+			} else {
+				fmt.Println(parent, x.Name)
+			}
+
+			fmt.Println(1)
+
+			return v.goDeeper(x, x.Name, id)
 
 		// case *ast.Package:
 		// 	fmt.Println("#pkg")

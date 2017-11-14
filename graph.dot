@@ -1,22 +1,2 @@
 digraph graphname {
 }
-[width=1] [height=1] [label="server_conn.go"];
-3 [width=1] [height=1] [label="reverser.go"];
-11 [width=1] [height=1] [label="client.go"];
-6 [width=1] [height=1] [label="dev_packet.go"];
-9 [width=1] [height=1] [label="server.go"];
-8 [width=2.9999999999999996] [height=2.9999999999999996] [label="pkt"];
-4 [width=2.9999999999999996] [height=2.9999999999999996] [label="RouteDeletions"];
-7 [width=2.9999999999999996] [height=2.9999999999999996] [label="Raw"];
-5 [width=2.9999999999999996] [height=2.9999999999999996] [label="dest"];
-2 [width=5] [height=5] [label="conn"];
-10 [width=5] [height=5] [label="tlsConf"];
-12 [width=5] [height=5] [label="debugMessages"];
-"1" -> "2";
-"3" -> "4";
-"3" -> "5";
-"6" -> "7";
-"6" -> "8";
-"9" -> "10";
-"11" -> "12";
-}
