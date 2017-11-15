@@ -74,7 +74,7 @@ func (this *node) String() {
 		for i := 0; i < depth; i++ {
 			depthStr += "\t"
 		}
-		fmt.Println(depthStr, n.id)
+		fmt.Println(depthStr, n._value)
 	}, 0)
 }
 

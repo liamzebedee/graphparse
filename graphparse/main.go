@@ -13,6 +13,7 @@ import (
 	"go/parser"
 	"go/ast"
 	// "go/token"
+	"fmt"
 )
 
 const dir string = "/Users/liamz/parser/src/github.com/liamzebedee/graphparse/subnet/subnet/"
@@ -28,20 +29,17 @@ func Stuff() {
 	}
 
 	pkginfo := prog.Package(pkgpath)
-	// fset := prog.Fset
-	// ast.Print(fset, rootAst)
+	fset := prog.Fset
 	
-	visitor := NewVisitor(nil, pkginfo.Pkg)
+	visitor := NewVisitor(nil, pkginfo.Pkg, fset)
 
 	for i, f := range pkginfo.Files {
-		if i < 3 { continue }
+		fmt.Println("Processing", fset.File(f.Package).Name())
 		ast.Walk(visitor, f)
-		if i == 3 { break }
-		
-		
+		if i == 1 { break }
 
-		// ast.Print(fset, f)
+		ast.Print(fset, f)
 	}
-	visitor.Graph.ToDot()
+	// visitor.Graph.ToDot()
 	visitor.Graph.String()
 }
