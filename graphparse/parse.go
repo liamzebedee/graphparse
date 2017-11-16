@@ -6,6 +6,7 @@ import (
 	"go/token"
 	"go/ast"
 	"fmt"
+	"errors"
 	"os"
 )
 
@@ -46,59 +47,69 @@ func pointerToNodeid(ptr interface{}) nodeid {
 	if i, err := strconv.ParseInt(fmt.Sprintf("%p", &ptr), 0, 64); err != nil {
 		panic(err)
 	} else {
-		// fmt.Fprintln(os.Stderr, i)
 		return nodeid(i)
 	}
 }
 
-func (vis Visitor) getIdFromPointer(node *ast.Ident) nodeid {
+func (vis Visitor) getIdFromPointer(node *ast.Ident) (nodeid, error) {
+	// defer func() {
+ //        if r := recover(); r != nil {
+ //            fmt.Println("BAD BAD NODE without Obj")
+ //            // ast.Fprint(os.Stderr, vis.fset, node, nil)
+ //        }
+ //    }() 
+	
 	if node.Obj != nil {
-		return pointerToNodeid(node.Obj)
+		return pointerToNodeid(node.Obj), nil
 	} else {
-		fmt.Fprintln(os.Stderr, "ERR:", node, "\tno node.Obj found")
-		return nodeid(-1)
+		if obj := vis.Pkg.Scope().Lookup(node.Name); obj != nil {
+			return pointerToNodeid(node.Obj), nil
+		}
+
+		return nodeid(-1), errors.New("couldn't get node Obj")
 		// fmt.Println(node)
 		// panic("no node.Obj found")
 	}
 }
 
-// func debug(val ...interface{}) {
-// 	fmt.Fprintln(os.Stderr, val)
-// }
 
-
-type astVisitor func(ast.Node) ast.Visitor
-type FuncVisitor struct {
-	fn astVisitor
+type FindIdentVisitor struct {
+	Ident *ast.Ident
 }
-func (this FuncVisitor) Visit(node ast.Node) ast.Visitor {
-	return this.fn(node)
+func (this FindIdentVisitor) Visit(node ast.Node) ast.Visitor {
+	switch x := node.(type) {
+		case *ast.Ident:
+			this.Ident = x
+			return nil
+		default:
+			return this
+	}
+
+	return nil
 }
 
 
-func (vis Visitor) walkNodeFindIdent(parent ast.Node) *ast.Ident {
+func (vis Visitor) walkNodeFindIdent(parent ast.Node) (*ast.Ident, error) {
+	// identVis := new(FindIdentVisitor)
+	// ast.Walk(identVis, parent)
 	var ident *ast.Ident
-	anonVis := FuncVisitor{}
-	anonVis.fn = func(node ast.Node) (ast.Visitor) {
-		fmt.Println(1)
+	ast.Inspect(parent, func(node ast.Node) bool {
 		switch x := node.(type) {
 			case *ast.Ident:
 				ident = x
+				return false
 			default:
-				return anonVis
+				return true
 		}
-		return anonVis
-	}}
-
-	ast.Walk(anonVis, parent)
+		return true
+	})
+	// ident := identVis.Ident
 
 	if ident == nil {
-		ast.Fprint(os.Stderr, vis.fset, parent, nil)
-		fmt.Fprintln(os.Stderr, "ERR:", parent, "\tno ident found")
-		panic("this is not the ident you are looking for")
+		return nil, errors.New("no ident found")
 	}
 
-	return ident
+	return ident, nil
 }
 
 
@@ -129,17 +140,37 @@ func (vis Visitor) Visit(node ast.Node) (ast.Visitor) {
 
 	switch x := node.(type) {
 		case *ast.FuncDecl:
+
+			// defer func() {
+		 //        if r := recover(); r != nil {
+		 //            fmt.Println("BAD BAD NODE without Type.Results.List")
+		 //            ast.Fprint(os.Stderr, vis.fset, x, nil)
+		 //        }
+		 //    }() 
+
 			// ast.Fprint(os.Stderr, vis.fset, x, nil)
 			fmt.Println("FUNC:", x.Name.Name)
 
 			// Function as parent
-			newVis := vis.newVisitorWithParent(x, vis.getIdFromPointer(x.Name))
+			id, err := vis.getIdFromPointer(x.Name)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Can't get id for node", x.Name)
+				return vis
+			}
+			newVis := vis.newVisitorWithParent(x, id)
 
 			// Edges between (Func => ReturnType)
-			for _, funcResult := range x.Type.Results.List {
-				// walk get Ident.Obj
-				/*ident := */vis.walkNodeFindIdent(funcResult)
-			// 	newVis.registerChild(ident, vis.getIdFromPointer(ident.Name))
+			if x.Type.Results != nil {
+				for _, funcResult := range x.Type.Results.List {
+					// walk get Ident.Obj
+					// /*ident := */funcResult)
+					_, err := vis.walkNodeFindIdent(funcResult.Type)
+					if err != nil {
+						fmt.Fprintf(os.Stderr, "Can't find Ident within node", funcResult.Type)
+						return newVis
+					}
+					// newVis.registerChild(ident, vis.getIdFromPointer(ident.Name))
+				}				
 			}
 
 			return newVis
