@@ -162,19 +162,20 @@ func (vis Visitor) Visit(node ast.Node) (ast.Visitor) {
 
 					// resolve to the object
 					// link back
-					fmt.Println(funcResult.Type)
+					// fmt.Println(funcResult.Type)
 
-					// resultTypeIdent, err := vis.walkNodeFindIdent(funcResult.Type)
-					// if err != nil {
-					// 	fmt.Fprintln(os.Stderr, "can't find Ident within node")
-					// 	return newVis
-					// }
+					resultTypeIdent, err := vis.walkNodeFindIdent(funcResult.Type)
+					if err != nil {
+						fmt.Println(funcResult.Type)
+						// fmt.Fprintln(os.Stderr, "can't find Ident within node")
+						return newVis
+					}
 
-					// resultTypeIdentId, err := vis.getIdFromPointer(resultTypeIdent)
-					// if err != nil {
-					// 	fmt.Fprintln(os.Stderr, err.Error())
-					// 	return vis
-					// }
+					resultTypeIdentId, err := vis.getIdFromPointer(resultTypeIdent)
+					if err != nil {
+						fmt.Fprintln(os.Stderr, err.Error())
+						return vis
+					}
 
 					// newVis.registerChild(resultTypeIdent, resultTypeIdentId)
 				}				

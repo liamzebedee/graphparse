@@ -10,6 +10,8 @@ import (
 	"github.com/dcadenas/pagerank"
 )
 
+
+
 type node struct {
 	children []*node
 	_value interface{}
@@ -21,6 +23,7 @@ type node struct {
 type nodeid int64
 
 type edge []nodeid
+
 
 func (this *node) AddChild(val interface{}, label string, id nodeid) *node {
 	child := node{}
