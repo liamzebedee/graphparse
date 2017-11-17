@@ -6,7 +6,7 @@ import (
 	"go/token"
 	"go/ast"
 	"fmt"
-	"errors"
+
 	"os"
 )
 
@@ -51,6 +51,10 @@ func pointerToNodeid(ptr interface{}) nodeid {
 	}
 }
 
+type CanonicalUnresolvedObj struct {
+	ident *ast.Ident
+}
+
 func (vis Visitor) getIdFromPointer(node *ast.Ident) (nodeid, error) {
 	// defer func() {
  //        if r := recover(); r != nil {
@@ -62,31 +66,23 @@ func (vis Visitor) getIdFromPointer(node *ast.Ident) (nodeid, error) {
 	if node.Obj != nil {
 		return pointerToNodeid(node.Obj), nil
 	} else {
-		if obj := vis.Pkg.Scope().Lookup(node.Name); obj != nil {
+		if _, obj := vis.Pkg.Scope().LookupParent(node.Name, token.NoPos); obj != nil {
 			return pointerToNodeid(node.Obj), nil
 		}
 
-		return nodeid(-1), errors.New("couldn't get node Obj")
+		fmt.Fprintln(os.Stderr, "making canonical id for ident -", node.Name)
+
+		obj := CanonicalUnresolvedObj{node}
+		return pointerToNodeid(obj), nil
+
+
+		// return nodeid(-1), fmt.Errorf("couldn't get node Obj -", node)
+
 		// fmt.Println(node)
 		// panic("no node.Obj found")
 	}
 }
 
-
-type FindIdentVisitor struct {
-	Ident *ast.Ident
-}
-func (this FindIdentVisitor) Visit(node ast.Node) ast.Visitor {
-	switch x := node.(type) {
-		case *ast.Ident:
-			this.Ident = x
-			return nil
-		default:
-			return this
-	}
-
-	return nil
-}
 
 
 func (vis Visitor) walkNodeFindIdent(parent ast.Node) (*ast.Ident, error) {
@@ -106,7 +102,7 @@ func (vis Visitor) walkNodeFindIdent(parent ast.Node) (*ast.Ident, error) {
 	// ident := identVis.Ident
 
 	if ident == nil {
-		return nil, errors.New("no ident found")
+		return nil, fmt.Errorf("no ident found -", parent)
 	}
 
 	return ident, nil
@@ -149,27 +145,38 @@ func (vis Visitor) Visit(node ast.Node) (ast.Visitor) {
 		 //    }() 
 
 			// ast.Fprint(os.Stderr, vis.fset, x, nil)
-			fmt.Println("FUNC:", x.Name.Name)
 
 			// Function as parent
-			id, err := vis.getIdFromPointer(x.Name)
+			funcId, err := vis.getIdFromPointer(x.Name)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Can't get id for node", x.Name)
+				fmt.Fprintln(os.Stderr, err.Error())
 				return vis
 			}
-			newVis := vis.newVisitorWithParent(x, id)
+			fmt.Println("FUNC:", x.Name.Name)
+			newVis := vis.newVisitorWithParent(x, funcId)
 
 			// Edges between (Func => ReturnType)
 			if x.Type.Results != nil {
 				for _, funcResult := range x.Type.Results.List {
-					// walk get Ident.Obj
-					// /*ident := */funcResult)
-					_, err := vis.walkNodeFindIdent(funcResult.Type)
-					if err != nil {
-						fmt.Fprintf(os.Stderr, "Can't find Ident within node", funcResult.Type)
-						return newVis
-					}
-					// newVis.registerChild(ident, vis.getIdFromPointer(ident.Name))
+					// each *ast.Field
+
+					// resolve to the object
+					// link back
+					fmt.Println(funcResult.Type)
+
+					// resultTypeIdent, err := vis.walkNodeFindIdent(funcResult.Type)
+					// if err != nil {
+					// 	fmt.Fprintln(os.Stderr, "can't find Ident within node")
+					// 	return newVis
+					// }
+
+					// resultTypeIdentId, err := vis.getIdFromPointer(resultTypeIdent)
+					// if err != nil {
+					// 	fmt.Fprintln(os.Stderr, err.Error())
+					// 	return vis
+					// }
+
+					// newVis.registerChild(resultTypeIdent, resultTypeIdentId)
 				}				
 			}
 

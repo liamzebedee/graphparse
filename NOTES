@@ -1,0 +1,82 @@
+// Obj returns the object denoted by x.f; a *Var for
+// a field selection, and a *Func in all other cases.
+func (s *Selection) Obj() Object { return s.obj }
+
+
+
+
+We can't find the Obj for the following:
+
+couldn't get node Obj -%!(EXTRA *ast.Ident=init)
+couldn't get node Obj -%!(EXTRA *ast.Ident=Run)
+couldn't get node Obj -%!(EXTRA *ast.Ident=netSendRoutine)
+couldn't get node Obj -%!(EXTRA *ast.Ident=netRecvRoutine)
+couldn't get node Obj -%!(EXTRA *ast.Ident=connectionProblem)
+couldn't get node Obj -%!(EXTRA *ast.Ident=sendLocalAddr)
+couldn't get node Obj -%!(EXTRA *ast.Ident=Close)
+
+
+But we can for:
+
+FUNC: NewClient
+FUNC: dropSendBuffer
+
+
+Observation: Run and Close are uppercase, thus public, yet they don't have a defined object?
+Hypothesis: Object's are only defined for variables that are shared across different ast.File's
+Observation: Run/Close are defined on lines that are in the Unresolved table
+
+Hypothesis: NewClient/dropSendBuffer aren't in the Unresolved table because they're used by other files 
+
+Observation: dropSendBuffer is only used in client.go, but is used in two different functions
+Observation: NewClient is used in another file main.go
+
+
+Observation: in the AST, dropSendBuffer is defined as so-
+
+  3419  .  .  .  .  .  .  .  .  5: *ast.ExprStmt {
+  3420  .  .  .  .  .  .  .  .  .  X: *ast.CallExpr {
+  3421  .  .  .  .  .  .  .  .  .  .  Fun: *ast.Ident {
+  3422  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/subnet/client.go:186:3
+  3423  .  .  .  .  .  .  .  .  .  .  .  Name: "dropSendBuffer"
+  3424  .  .  .  .  .  .  .  .  .  .  .  Obj: *ast.Object {
+  3425  .  .  .  .  .  .  .  .  .  .  .  .  Kind: func
+  3426  .  .  .  .  .  .  .  .  .  .  .  .  Name: "dropSendBuffer"
+  3427  .  .  .  .  .  .  .  .  .  .  .  .  Decl: *ast.FuncDecl {
+  3428  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: *ast.Ident {
+  3429  .  .  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/subnet/client.go:190:6
+  3430  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "dropSendBuffer"
+  3431  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Obj: *(obj @ 3424)
+  3432  .  .  .  .  .  .  .  .  .  .  .  .  .  }
+  3433  .  .  .  .  .  .  .  .  .  .  .  .  .  Type: *ast.FuncType {
+  3434  .  .  .  .  .  .  .  .  .  .  .  .  .  .  Func: /Users/liamz/parser/src/github.com/twitchyliquid64/subnet/subnet/client.go:190:1
+
+In client.go, it's defined as so:
+
+	func (c *Client) netSendRoutine() {
+		...
+
+		for !c.isShuttingDown {
+			...
+			dropSendBuffer(c.packetsIn)
+		}
+	}
+
+	func dropSendBuffer(buffer chan *IPPacket) {
+
+
+Hypothesis: Go optimises the AST damn it! Makes this graph a bit harder to parse hehe.
+Hypothesis: canonical rep of Ident without Obj is File.Name() + File.Unresolved.Index(Ident)
+
+Observation: netSendRoutine doesn't have Obj yet it is used twice in client.go. Once as a StarExpr c.netSendRoutine() and once as the method name (c *Client) netSendRoutine()
+
+
+
+
+
+
+
+
+Design Thinking and iteration
+
+Premature optimisation is a way of being confused about the best way to the solution because while you know the concept, the solution is based in exploring the problem space

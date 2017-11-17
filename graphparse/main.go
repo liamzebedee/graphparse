@@ -38,7 +38,8 @@ func Stuff() {
 		fmt.Println("Processing", fset.File(f.Package).Name())
 		ast.Walk(visitor, f)
 		if i == 1 { break }
+		// ast.Print(fset, f)
 	}
-	// visitor.Graph.ToDot()
+	visitor.Graph.ToDot()
 	visitor.Graph.String()
 }
