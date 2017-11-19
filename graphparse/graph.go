@@ -5,85 +5,44 @@ import (
 	"sort"
 	"bufio"
 	"os"
-
-	
 	"github.com/dcadenas/pagerank"
+
 )
 
 
 
 type node struct {
-	children []*node
-	_value interface{}
-	label string
-	parent *node
+	value interface{}
 	id nodeid
+	label string
+}
+
+func NewNode(value interface{}, id nodeid, label string) *node {
+	return &node{value, id, label}
 }
 
 type nodeid int64
 
-type edge []nodeid
+type edge []*node
 
-
-func (this *node) AddChild(val interface{}, label string, id nodeid) *node {
-	child := node{}
-	child._value = val
-	child.label = label
-	child.parent = this
-	child.id = id
-
-	this.children = append(this.children, &child)
-	return &child
+type graph struct {
+	edges []edge
 }
 
-func (this *node) Id() nodeid {
-	// if i, err := strconv.ParseInt(fmt.Sprintf("%p", this), 0, 64); err != nil {
-		// panic(err)
-	// } else { return nodeid(i) }
-	
-
-	// if this.label == "c" {
-	// 	fmt.Println(this.parent.label)
-	// }
-
-	// fmt.Println(fqn)
-
-	// return getIdForName(this.label)
-	// return getIdForName(this.FQN())
-	return this.id
+func NewGraph() *graph {
+	return &graph{}
 }
 
-type walkfn func(n *node, depth int)
-
-
-func (n *node) walk(fn walkfn, depth int) {
-	for _, child := range n.children {
-		fn(child, depth + 1)
-		child.walk(fn, depth + 1)
-	}
+func (this *graph) AddEdge(from, to *node) {
+	e := edge{from, to}
+	this.edges = append(this.edges, e)
 }
 
-func makeEdges(edges *[]edge) walkfn {
-	return func(node *node, depth int) {
-		for _, child := range node.children {
-			*edges = append(*edges, edge{node.Id(), child.Id()})
-		}
-	}
+func (this *graph) String() string {
+	return ""
 }
 
-func (this *node) String() {
-	this.walk(func(n *node, depth int) {
-		depthStr := ""
-		for i := 0; i < depth; i++ {
-			depthStr += "\t"
-		}
-		fmt.Println(depthStr, n._value)
-	}, 0)
-}
-
-func (this *node) ToDot() {
-	// fmt.Println(this)
-
+func (this *graph) ToDot() {
 	printToStdout := false
 
 
@@ -100,20 +59,21 @@ func (this *node) ToDot() {
 	defer w.Flush()
 
 
+
 	// Compute edges from pointers
-	var edges []edge
 	nodesLookup := make(map[nodeid]*node)
-
-	this.walk(makeEdges(&edges), 0)
-	fmt.Println(edges)
-	// this.walk(makeNodeLookup(nodesLookup))
-
-	fmt.Println(len(edges), "edges and", len(nodesLookup), "nodes")
+	for _, edge := range this.edges {
+		node1 := edge[0]
+		node2 := edge[1]
+		nodesLookup[node1.id] = node1
+		nodesLookup[node2.id] = node2
+	}
+	fmt.Println(len(this.edges), "edges and", len(nodesLookup), "nodes")
 	
 	// Compute PageRank distribution
 	graph := pagerank.New()
-	for _, edge := range edges {
-		graph.Link(int(edge[0]), int(edge[1]))
+	for _, edge := range this.edges {
+		graph.Link(int(edge[0].id), int(edge[1].id))
 	}
 
 	probability_of_following_a_link := 0.85
@@ -154,14 +114,10 @@ func (this *node) ToDot() {
 	}
 
 	// 2. Edges
-	for _, edge := range edges {
-		fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge[0], edge[1])
+	for _, edge := range this.edges {
+		fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge[0].id, edge[1].id)
 	}
 
-
-	// for _, node := range nodesLookup {
-	// 	fmt.Println(node.FQN())
-	// }
 
 	w.WriteString("}\n")
 }
@@ -171,29 +127,3 @@ func (this *node) ToDot() {
 
 
 
-// var idmap map[string]nodeid = make(map[string]nodeid)
-// var idmap_i int = 0
-
-// func getIdForName(id string) nodeid {
-// 	if _, ok := idmap[id]; !ok {
-// 		idmap_i++
-// 		idmap[id] = nodeid(idmap_i)
-// 	}
-// 	return idmap[id]
-// }
-
-
-
-// // canonical format is as follows:
-// // PACKAGE FILE DECLARATIONline
-// func (this *node) FQN() string {
-// 	fqn := ""
-
-// 	p := this
-// 	for p != nil && p.label != "/" {
-// 		fqn = p.label + "/" + fqn
-// 		p = p.parent
-// 	}
-
-// 	return fqn
-// }

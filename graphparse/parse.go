@@ -7,39 +7,46 @@ import (
 	"go/ast"
 	"fmt"
 
+	"golang.org/x/tools/go/loader"
 	"os"
 )
 
+var pkgpath string
+func DoMainStuff() {
+	pkgpath := "github.com/twitchyliquid64/subnet/subnet"
 
+	// conf := loader.Config{ParserMode: parser.ParseComments}
+	conf := loader.Config{ParserMode: 0}
+	conf.Import(pkgpath)
+	prog, err := conf.Load()
+	if err != nil {
+		panic(err)
+	}
 
+	pkginfo := prog.Package(pkgpath)
+	Pkg = pkginfo.Pkg
+	fset = prog.Fset
+	
+	Graph = NewGraph()
+
+	for i, f := range pkginfo.Files {
+		currentFile = f
+
+		fmt.Println("Processing", fset.File(f.Package).Name())
+		ast.Inspect(f, Visit)
+		if i == 1 { break }
+		// ast.Print(fset, f)
+	}
+	Graph.ToDot()
+}
+
+var Graph *graph
+var Pkg *types.Package
+var fset *token.FileSet
+var currentFile *ast.File
+var unresolvedIdentToId map[*ast.Ident]nodeid
 
 type Visitor struct {
-	Graph *node
-	Pkg *types.Package
-	fset *token.FileSet
-}
-
-func NewVisitor(rootAstNode ast.Node, pkg *types.Package, fset *token.FileSet) Visitor {
-	v := Visitor{Pkg: pkg, fset: fset}
-	v.Graph = &node{parent: nil, _value: rootAstNode, label: "/"}
-	return v
-}
-
-func (v Visitor) newVisitorWithParent(parent ast.Node, id nodeid) (w Visitor) {
-	w = v
-	w.Graph = w.Graph.AddChild(parent, "", id)
-	return w
-}
-
-func (v Visitor) registerChild(child ast.Node, id nodeid) {
-	v.Graph.AddChild(child, "", id)
-}
-
-
-var idcounter int = 0
-func newNodeId() nodeid {
-	idcounter++
-	return nodeid(idcounter)
 }
 
 
@@ -51,38 +58,56 @@ func pointerToNodeid(ptr interface{}) nodeid {
 	}
 }
 
-type CanonicalUnresolvedObj struct {
+type CanonicalUnresolvedIdent struct {
 	ident *ast.Ident
 }
 
-func (vis Visitor) getIdFromPointer(node *ast.Ident) (nodeid, error) {
+
+func getIdFromPointer(node *ast.Ident) (nodeid, error) {
 	// defer func() {
  //        if r := recover(); r != nil {
  //            fmt.Println("BAD BAD NODE without Obj")
- //            // ast.Fprint(os.Stderr, vis.fset, node, nil)
+ //            // ast.Fprint(os.Stderr, fset, node, nil)
  //        }
  //    }() 
 	
 	if node.Obj != nil {
 		return pointerToNodeid(node.Obj), nil
 	} else {
-		if _, obj := vis.Pkg.Scope().LookupParent(node.Name, token.NoPos); obj != nil {
+		if _, obj := Pkg.Scope().LookupParent(node.Name, token.NoPos); obj != nil {
 			return pointerToNodeid(node.Obj), nil
 		}
 
-		fmt.Fprintln(os.Stderr, "making canonical id for ident -", node.Name)
+		// fmt.Fprintln(os.Stderr, "making canonical id for ident -", node.Name)
+		if id, ok := unresolvedIdentToId[node]; ok {
+			return id, nil
+		}
 
-		obj := CanonicalUnresolvedObj{node}
-		return pointerToNodeid(obj), nil
+		if currentFile == nil {
+			ast.Print(fset, node)
+		}
 
+		for _, ident := range currentFile.Unresolved {
+			if ident == node {
 
-		// return nodeid(-1), fmt.Errorf("couldn't get node Obj -", node)
+				x := &CanonicalUnresolvedIdent{node}
+
+				id := pointerToNodeid(x)
+
+				unresolvedIdentToId[ident] = id
+				return id, nil
+			}
+		}
+
+		// obj := CanonicalUnresolvedObj{node}
+		// return pointerToNodeid(obj), nil
+
+		return nodeid(-1), fmt.Errorf("couldn't get node Obj -", node)
 
 		// fmt.Println(node)
 		// panic("no node.Obj found")
 	}
 }
-
 
 
 func (vis Visitor) walkNodeFindIdent(parent ast.Node) (*ast.Ident, error) {
@@ -99,7 +124,7 @@ func (vis Visitor) walkNodeFindIdent(parent ast.Node) (*ast.Ident, error) {
 		}
 		return true
 	})
-	// ident := identVis.Ident
+	// ident := identIdent
 
 	if ident == nil {
 		return nil, fmt.Errorf("no ident found -", parent)
@@ -109,7 +134,7 @@ func (vis Visitor) walkNodeFindIdent(parent ast.Node) (*ast.Ident, error) {
 }
 
 
-func (vis Visitor) Visit(node ast.Node) (ast.Visitor) {
+func Visit(node ast.Node) bool {
 	// goDeeperWithIdent := func(parent *ast.Node, x *ast.Ident) Visitor {
 	// 	var id nodeid
 	// 	if x.Obj != nil {
@@ -131,7 +156,7 @@ func (vis Visitor) Visit(node ast.Node) (ast.Visitor) {
 
 	// 	// fmt.Println(1)
 
-	// 	return vis.goDeeper(x, x.Name, id)
+	// 	return goDeeper(x, x.Name, id)
 	// }
 
 	switch x := node.(type) {
@@ -140,53 +165,58 @@ func (vis Visitor) Visit(node ast.Node) (ast.Visitor) {
 			// defer func() {
 		 //        if r := recover(); r != nil {
 		 //            fmt.Println("BAD BAD NODE without Type.Results.List")
-		 //            ast.Fprint(os.Stderr, vis.fset, x, nil)
+		 //            ast.Fprint(os.Stderr, fset, x, nil)
 		 //        }
 		 //    }() 
 
-			// ast.Fprint(os.Stderr, vis.fset, x, nil)
+			// ast.Fprint(os.Stderr, fset, x, nil)
 
 			// Function as parent
-			funcId, err := vis.getIdFromPointer(x.Name)
+			funcId, err := getIdFromPointer(x.Name)
 			if err != nil {
+				// Function is not referenced outside of this file
+				// Thus does not have a .Obj
 				fmt.Fprintln(os.Stderr, err.Error())
-				return vis
+				return true
 			}
-			fmt.Println("FUNC:", x.Name.Name)
-			newVis := vis.newVisitorWithParent(x, funcId)
 
-			// Edges between (Func => ReturnType)
+			funcNode := NewNode(x, funcId, x.Name.Name)
+
+			// newVis := newVisitorWithParent(x, funcId)
+
+			// Loop over return values
 			if x.Type.Results != nil {
 				for _, funcResult := range x.Type.Results.List {
 					// each *ast.Field
+					switch y := funcResult.Type.(type) {
+					case *ast.StarExpr:
+						starExprIdent := y.X.(*ast.Ident)
 
-					// resolve to the object
-					// link back
-					// fmt.Println(funcResult.Type)
+						funcResultId := pointerToNodeid(starExprIdent.Obj)
+						funcResultNode := NewNode(funcResult, funcResultId, starExprIdent.Name)
+						Graph.AddEdge(funcNode, funcResultNode)
 
-					resultTypeIdent, err := vis.walkNodeFindIdent(funcResult.Type)
-					if err != nil {
-						fmt.Println(funcResult.Type)
-						// fmt.Fprintln(os.Stderr, "can't find Ident within node")
-						return newVis
+					case *ast.Ident:
+						funcResultId, err := getIdFromPointer(y)
+						if err != nil {
+							// Function is not referenced outside of this file
+							// Thus does not have a .Obj
+							fmt.Fprintln(os.Stderr, err.Error())
+							return true
+						}
+
+						funcResultNode := NewNode(funcResult, funcResultId, y.Name)
+						Graph.AddEdge(funcNode, funcResultNode)
 					}
-
-					resultTypeIdentId, err := vis.getIdFromPointer(resultTypeIdent)
-					if err != nil {
-						fmt.Fprintln(os.Stderr, err.Error())
-						return vis
-					}
-
-					// newVis.registerChild(resultTypeIdent, resultTypeIdentId)
 				}				
 			}
 
-			return newVis
-			// return vis
+			// return newVis
+			return true
 
 
 		// case *ast.TypeSpec:
-			// return vis.newVisitorWithParent(x, vis.getIdFromPointer(x.Name))
+			// return newVisitorWithParent(x, getIdFromPointer(x.Name))
 
 		// case *ast.AssignStmt:
 			// Link as such:
@@ -277,9 +307,9 @@ func (vis Visitor) Visit(node ast.Node) (ast.Visitor) {
 			// return goDeeperWithIdent(x, x.Name)
 
 		default:
-			return vis
+			return true
 	}
-	return vis
+	return true
 }
 
 // case *ast.Package:
