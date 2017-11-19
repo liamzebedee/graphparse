@@ -17,7 +17,16 @@ type node struct {
 	label string
 }
 
+var clientseen bool = false
 func NewNode(value interface{}, id nodeid, label string) *node {
+	if label == "Client" {
+		if !clientseen {
+			clientseen = true
+		} else {
+			// panic("client seen")
+		}
+		// fmt.Println("clients", value)
+	}
 	return &node{value, id, label}
 }
 

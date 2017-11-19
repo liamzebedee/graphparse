@@ -16,6 +16,19 @@ func DoMainStuff() {
 	pkgpath := "github.com/twitchyliquid64/subnet/subnet"
 
 	// conf := loader.Config{ParserMode: parser.ParseComments}
+
+	// conf := types.Config{}
+	// info := &types.Info{
+	// 	Defs: make(map[*ast.Ident]types.Object),
+	// 	Uses: make(map[*ast.Ident]types.Object),
+	// }
+	// _, err := conf.Check("hello", fset, files, info)
+	// if err != nil {
+	// 	return err // type error
+	// }
+
+
+
 	conf := loader.Config{ParserMode: 0}
 	conf.Import(pkgpath)
 	prog, err := conf.Load()
@@ -23,28 +36,35 @@ func DoMainStuff() {
 		panic(err)
 	}
 
-	pkginfo := prog.Package(pkgpath)
+	pkginfo = prog.Package(pkgpath)
+
 	Pkg = pkginfo.Pkg
 	fset = prog.Fset
 	
 	Graph = NewGraph()
+	unresolvedIdentToId = make(map[*ast.Ident]nodeid)
+	objsIdentified = make(map[string]nodeid)
 
 	for i, f := range pkginfo.Files {
 		currentFile = f
 
 		fmt.Println("Processing", fset.File(f.Package).Name())
 		ast.Inspect(f, Visit)
-		if i == 1 { break }
+		if i == 12*1000 { break }
 		// ast.Print(fset, f)
 	}
 	Graph.ToDot()
 }
 
+var pkginfo *loader.PackageInfo
 var Graph *graph
 var Pkg *types.Package
 var fset *token.FileSet
 var currentFile *ast.File
 var unresolvedIdentToId map[*ast.Ident]nodeid
+var pkgIdentNode *node
+
+var objsIdentified map[string]nodeid
 
 type Visitor struct {
 }
@@ -64,48 +84,59 @@ type CanonicalUnresolvedIdent struct {
 
 
 func getIdFromPointer(node *ast.Ident) (nodeid, error) {
-	// defer func() {
- //        if r := recover(); r != nil {
- //            fmt.Println("BAD BAD NODE without Obj")
- //            // ast.Fprint(os.Stderr, fset, node, nil)
- //        }
- //    }() 
-	
+	// objDef := pkginfo.Defs[node]
+	// objUse := pkginfo.Uses[node]
+
+	// https://golang.org/src/go/types/universe.go
+	if obj := types.Universe.Lookup(node.Name); obj != nil {
+		return nodeid(-1), fmt.Errorf("universe object ", node)
+	}
+
+	obj := pkginfo.ObjectOf(node)
+	objId := obj.Id()
+	if obj != nil {
+		if id, ok := objsIdentified[objId]; ok {
+			return id, nil
+		} else {
+			id := pointerToNodeid(obj)
+			objsIdentified[objId] = id
+			return id, nil
+		}
+	}
+
+	obj = pkginfo.Implicits[node]
+	if obj != nil {
+		return pointerToNodeid(obj), nil
+	}
+
+
 	if node.Obj != nil {
 		return pointerToNodeid(node.Obj), nil
 	} else {
 		if _, obj := Pkg.Scope().LookupParent(node.Name, token.NoPos); obj != nil {
-			return pointerToNodeid(node.Obj), nil
+			return pointerToNodeid(obj), nil
 		}
 
-		// fmt.Fprintln(os.Stderr, "making canonical id for ident -", node.Name)
 		if id, ok := unresolvedIdentToId[node]; ok {
 			return id, nil
 		}
-
-		if currentFile == nil {
-			ast.Print(fset, node)
-		}
-
 		for _, ident := range currentFile.Unresolved {
 			if ident == node {
-
 				x := &CanonicalUnresolvedIdent{node}
 
 				id := pointerToNodeid(x)
 
-				unresolvedIdentToId[ident] = id
+				unresolvedIdentToId[node] = id
 				return id, nil
 			}
 		}
 
-		// obj := CanonicalUnresolvedObj{node}
-		// return pointerToNodeid(obj), nil
+		x := &CanonicalUnresolvedIdent{node}
+		id := pointerToNodeid(x)
+		unresolvedIdentToId[node] = id
+		return id, nil
 
 		return nodeid(-1), fmt.Errorf("couldn't get node Obj -", node)
-
-		// fmt.Println(node)
-		// panic("no node.Obj found")
 	}
 }
 
@@ -135,42 +166,43 @@ func (vis Visitor) walkNodeFindIdent(parent ast.Node) (*ast.Ident, error) {
 
 
 func Visit(node ast.Node) bool {
-	// goDeeperWithIdent := func(parent *ast.Node, x *ast.Ident) Visitor {
-	// 	var id nodeid
-	// 	if x.Obj != nil {
-	// 		if i, err := strconv.ParseInt(fmt.Sprintf("%p", x.Obj), 0, 64); err != nil {
-	// 			panic(err)
-	// 		} else {
-	// 			id = nodeid(i)
-	// 		}				
-	// 	} else {
-	// 		id = newNodeId()
-	// 	}
-
-	// 	// // v.Pkg.Scope()
-	// 	// if x.Obj != nil {
-	// 	// 	// fmt.Println(x.Obj)
-	// 	// } else {
-	// 	// 	fmt.Println(parent, x.Name)
-	// 	// }
-
-	// 	// fmt.Println(1)
-
-	// 	return goDeeper(x, x.Name, id)
-	// }
-
 	switch x := node.(type) {
+		case *ast.File:
+			if pkgIdentNode == nil {
+				pkgIdent := x.Name
+				pkgIdentId := pointerToNodeid(pkgIdent)
+				pkgIdentNode = NewNode(pkgIdent, pkgIdentId, x.Name.Name)
+			}
+
+		case *ast.TypeSpec:
+			typeId, err := getIdFromPointer(x.Name)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err.Error())
+				return true
+			}
+
+			typeNode := NewNode(x, typeId, x.Name.Name)
+			Graph.AddEdge(pkgIdentNode, typeNode)
+
+			// If struct, loop over fields
+			switch y := x.Type.(type) {
+			case *ast.StructType:
+				if y.Fields != nil {
+					// for _, field := range y.Fields.List {
+						// fmt.Printf("%T\n", field.Type)
+					// }
+				}
+			}
+
+			/*
+*ast.Ident
+*ast.SelectorExpr
+*ast.StarExpr
+*ast.ChanType
+
+			*/
+
 		case *ast.FuncDecl:
-
-			// defer func() {
-		 //        if r := recover(); r != nil {
-		 //            fmt.Println("BAD BAD NODE without Type.Results.List")
-		 //            ast.Fprint(os.Stderr, fset, x, nil)
-		 //        }
-		 //    }() 
-
-			// ast.Fprint(os.Stderr, fset, x, nil)
-
 			// Function as parent
 			funcId, err := getIdFromPointer(x.Name)
 			if err != nil {
@@ -181,8 +213,25 @@ func Visit(node ast.Node) bool {
 			}
 
 			funcNode := NewNode(x, funcId, x.Name.Name)
+			Graph.AddEdge(pkgIdentNode, funcNode)
 
-			// newVis := newVisitorWithParent(x, funcId)
+			if x.Recv != nil && len(x.Recv.List) == 1 {
+				recv := x.Recv.List[0]
+				switch y := recv.Type.(type) {
+				case *ast.StarExpr:
+					recvId, err := getIdFromPointer(y.X.(*ast.Ident))
+					fmt.Println(y.X.(*ast.Ident))
+					
+					if err != nil {
+						fmt.Fprintln(os.Stderr, err.Error())
+						return true
+					}
+					recvNode := NewNode(y, recvId, recv.Names[0].Name)
+
+					Graph.AddEdge(recvNode, funcNode)
+				}
+
+			}
 
 			// Loop over return values
 			if x.Type.Results != nil {
@@ -192,7 +241,11 @@ func Visit(node ast.Node) bool {
 					case *ast.StarExpr:
 						starExprIdent := y.X.(*ast.Ident)
 
-						funcResultId := pointerToNodeid(starExprIdent.Obj)
+						funcResultId, err := getIdFromPointer(starExprIdent)
+						if err != nil {
+							fmt.Fprintln(os.Stderr, err.Error())
+							return true
+						}
 						funcResultNode := NewNode(funcResult, funcResultId, starExprIdent.Name)
 						Graph.AddEdge(funcNode, funcResultNode)
 
@@ -211,7 +264,6 @@ func Visit(node ast.Node) bool {
 				}				
 			}
 
-			// return newVis
 			return true
 
 
