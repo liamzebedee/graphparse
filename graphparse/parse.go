@@ -95,35 +95,35 @@ func getIdFromPointer(node *ast.Ident) (nodeid, error) {
 		return pointerToNodeid(obj), nil
 	}
 
+	
+	// if node.Obj != nil {
+	// 	return pointerToNodeid(node.Obj), nil
+	// } else {
+	// 	if _, obj := Pkg.Scope().LookupParent(node.Name, token.NoPos); obj != nil {
+	// 		return pointerToNodeid(obj), nil
+	// 	}
 
-	if node.Obj != nil {
-		return pointerToNodeid(node.Obj), nil
-	} else {
-		if _, obj := Pkg.Scope().LookupParent(node.Name, token.NoPos); obj != nil {
-			return pointerToNodeid(obj), nil
-		}
+	// 	if id, ok := unresolvedIdentToId[node]; ok {
+	// 		return id, nil
+	// 	}
+	// 	for _, ident := range currentFile.Unresolved {
+	// 		if ident == node {
+	// 			x := &CanonicalUnresolvedIdent{node}
 
-		if id, ok := unresolvedIdentToId[node]; ok {
-			return id, nil
-		}
-		for _, ident := range currentFile.Unresolved {
-			if ident == node {
-				x := &CanonicalUnresolvedIdent{node}
+	// 			id := pointerToNodeid(x)
 
-				id := pointerToNodeid(x)
+	// 			unresolvedIdentToId[node] = id
+	// 			return id, nil
+	// 		}
+	// 	}
 
-				unresolvedIdentToId[node] = id
-				return id, nil
-			}
-		}
+	// 	x := &CanonicalUnresolvedIdent{node}
+	// 	id := pointerToNodeid(x)
+	// 	unresolvedIdentToId[node] = id
+	// 	return id, nil
 
-		x := &CanonicalUnresolvedIdent{node}
-		id := pointerToNodeid(x)
-		unresolvedIdentToId[node] = id
-		return id, nil
-
-		return nodeid(-1), fmt.Errorf("couldn't get node Obj -", node)
-	}
+	return nodeid(-1), fmt.Errorf("couldn't get node Obj -", node)
+	// }
 }
 
 // TODO  Names: []*ast.Ident (len = 2)
