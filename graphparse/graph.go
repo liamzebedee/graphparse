@@ -15,11 +15,12 @@ type node struct {
 	value interface{}
 	id nodeid
 	label string
+	extraAttrs string
 }
 
 var clientseen bool = false
 func NewNode(value interface{}, id nodeid, label string) *node {
-	return &node{value, id, label}
+	return &node{value, id, label, ""}
 }
 
 type nodeid int64
@@ -110,13 +111,12 @@ func (this *graph) ToDot() {
 	for _, rank := range ranks {
 		node := nodesLookup[rank.NodeId]
 		rankStretched := scaleRank(rank.Rank)
-
-		fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"];\n", rank.NodeId, rankStretched, rankStretched, node.label)
+		fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"] %v;\n", rank.NodeId, rankStretched, rankStretched, node.label, node.extraAttrs)
 	}
 
 	// 2. Edges
 	for _, edge := range this.edges {
-		fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge[0].id, edge[1].id)
+		fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge[1].id, edge[0].id)
 	}
 
 

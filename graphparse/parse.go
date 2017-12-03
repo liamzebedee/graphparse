@@ -69,16 +69,7 @@ type CanonicalUnresolvedIdent struct {
 	ident *ast.Ident
 }
 
-
-func getIdFromPointer(node *ast.Ident) (nodeid, error) {
-	// https://golang.org/src/go/types/universe.go
-	if obj := types.Universe.Lookup(node.Name); obj != nil {
-		return nodeid(-1), fmt.Errorf("universe object ", node)
-	}
-
-
-	// I wrote this in a subconcious spree of, "I have a gut feeling that this will do it"
-	obj := pkginfo.ObjectOf(node)
+func getIdOfObj(obj types.Object) (nodeid, error) {
 	objId := obj.Id()
 	if obj != nil {
 		if id, ok := objsIdentified[objId]; ok {
@@ -89,46 +80,29 @@ func getIdFromPointer(node *ast.Ident) (nodeid, error) {
 			return id, nil
 		}
 	}
+	return nodeid(-1), fmt.Errorf("unexpected error", obj)
+}
 
-	obj = pkginfo.Implicits[node]
-	if obj != nil {
-		return pointerToNodeid(obj), nil
+
+func getIdFromPointer(node *ast.Ident) (nodeid, error) {
+	// https://golang.org/src/go/types/universe.go
+	if obj := types.Universe.Lookup(node.Name); obj != nil {
+		return nodeid(-1), fmt.Errorf("universe object ", node)
 	}
 
+
+	// I wrote this in a subconcious spree of, "I have a gut feeling that this will do it"
+	obj := pkginfo.ObjectOf(node)
+	return getIdOfObj(obj)
 	
-	// if node.Obj != nil {
-	// 	return pointerToNodeid(node.Obj), nil
-	// } else {
-	// 	if _, obj := Pkg.Scope().LookupParent(node.Name, token.NoPos); obj != nil {
-	// 		return pointerToNodeid(obj), nil
-	// 	}
-
-	// 	if id, ok := unresolvedIdentToId[node]; ok {
-	// 		return id, nil
-	// 	}
-	// 	for _, ident := range currentFile.Unresolved {
-	// 		if ident == node {
-	// 			x := &CanonicalUnresolvedIdent{node}
-
-	// 			id := pointerToNodeid(x)
-
-	// 			unresolvedIdentToId[node] = id
-	// 			return id, nil
-	// 		}
-	// 	}
-
-	// 	x := &CanonicalUnresolvedIdent{node}
-	// 	id := pointerToNodeid(x)
-	// 	unresolvedIdentToId[node] = id
-	// 	return id, nil
-
-	return nodeid(-1), fmt.Errorf("couldn't get node Obj -", node)
+	// obj = pkginfo.Implicits[node]
+	// if obj != nil {
+	// 	return pointerToNodeid(obj), nil
 	// }
+
 }
 
 // TODO  Names: []*ast.Ident (len = 2)
-
-
 func Visit(node ast.Node) bool {
 	switch x := node.(type) {
 		case *ast.File:
@@ -138,6 +112,21 @@ func Visit(node ast.Node) bool {
 				pkgIdentNode = NewNode(pkgIdent, pkgIdentId, x.Name.Name)
 			}
 
+		case *ast.ImportSpec:
+			// pkgId, err := getIdFromPointer()
+			obj := pkginfo.Implicits[x]
+			importId, err := getIdOfObj(obj)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err.Error())
+				return true
+			}
+
+			importedPackageNode := NewNode(x, importId, obj.Name())
+			Graph.AddEdge(importedPackageNode, pkgIdentNode)
+			// THIS IS BAD BELOW:
+			// Graph.AddEdge(pkgIdentNode, importedPackageNode)
+			return true
+
 		case *ast.TypeSpec:
 			typeId, err := getIdFromPointer(x.Name)
 			if err != nil {
@@ -145,7 +134,8 @@ func Visit(node ast.Node) bool {
 				return true
 			}
 
-			typeNode := NewNode(x, typeId, x.Name.Name)
+			typeNode := NewNode(x.Name, typeId, x.Name.Name)
+			typeNode.extraAttrs = "[color=\"red\"]"
 			Graph.AddEdge(pkgIdentNode, typeNode)
 
 			// If struct, loop over fields
@@ -165,21 +155,63 @@ func Visit(node ast.Node) bool {
 
 							Graph.AddEdge(typeNode, fieldType)
 						case *ast.Ident:
-							fmt.Fprintln(os.Stderr, "parsing type - missed Ident field", field)
-						case *ast.StarExpr:
-							fmt.Fprintln(os.Stderr, "parsing type - missed StarExpr field", field)
-						case *ast.ChanType:
-							// fieldTypeId, err := getIdFromPointer(y.Sel)
-							// if err != nil {
-							// 	fmt.Fprintln(os.Stderr, err.Error())
-							// 	return true
-							// }
-							
-							// fieldType := NewNode(y, fieldTypeId, y.Sel.Name)
+							// fmt.Fprintln(os.Stderr, "parsing type - missed Ident field", field)
+							// ast.Print(fset, field.Names[0])
+							identId, err := getIdFromPointer(field.Names[0])
+
+							if err != nil {
+								fmt.Fprintln(os.Stderr, err.Error())
+								return true
+							}
+
+							// fieldType := NewNode(field.Names[0], identId, y.Name)
+							fieldNode := NewNode(field.Names[0], identId, field.Names[0].Name)
 
 							// Graph.AddEdge(typeNode, fieldType)
-							fmt.Fprintln(os.Stderr, "parsing type - missed ChanType field", field)
-							break
+							Graph.AddEdge(typeNode, fieldNode)
+
+						case *ast.StarExpr:
+							var fieldTypeIdent *ast.Ident
+
+							switch z := y.X.(type) {
+							case *ast.Ident:
+								fieldTypeIdent = z
+							case *ast.SelectorExpr:
+								fieldTypeIdent = z.Sel
+							default:
+								fmt.Fprintln(os.Stderr, "parsing StarExpr field - missed StarExpr.X type", field)
+								return true
+							}
+
+							fieldTypeId, err := getIdFromPointer(fieldTypeIdent)
+							if err != nil {
+								fmt.Fprintln(os.Stderr, err.Error())
+								return true
+							}
+
+							fieldType := NewNode(fieldTypeIdent, fieldTypeId, fieldTypeIdent.Name)
+							Graph.AddEdge(typeNode, fieldType)
+
+						
+						case *ast.ChanType:
+							var fieldType *ast.Ident
+							switch z := y.Value.(type) {
+							case *ast.StarExpr:
+								fieldType = z.X.(*ast.Ident)
+							default:
+								fmt.Fprintln(os.Stderr, "parsing ChanType field - missed Value type", field)
+							}
+
+							fieldTypeId, err := getIdFromPointer(fieldType)
+							if err != nil {
+								fmt.Fprintln(os.Stderr, err.Error())
+								return true
+							}
+
+							fieldTypeNode := NewNode(fieldType, fieldTypeId, fieldType.Name)
+							Graph.AddEdge(typeNode, fieldTypeNode)
+							// fmt.Fprintln(os.Stderr, "parsing type - missed ChanType field", field)
+							// ast.Print(fset, field)
 						}
 
 					}
@@ -200,7 +232,6 @@ func Visit(node ast.Node) bool {
 			}
 
 			funcNode := NewNode(x, funcId, x.Name.Name)
-			Graph.AddEdge(pkgIdentNode, funcNode)
 
 			if x.Recv != nil && len(x.Recv.List) == 1 {
 				recv := x.Recv.List[0]
@@ -213,18 +244,19 @@ func Visit(node ast.Node) bool {
 						return true
 					}
 
-					// recvName is 'c' in (c *Client)
-					// recvVar := NewNode(y, recvId, recv.Names[0].Name)
-					recvVar := NewNode(y, recvId, y.X.(*ast.Ident).Name)
+					// recvVarName is the 'c' in (c *Client)
+					// recvVarName := recv.Names[0].Name
+					recvTypeName := y.X.(*ast.Ident).Name
+					recvType := NewNode(y, recvId, recvVarName)
 
-					// recvType := NewNode(y, )
-					Graph.AddEdge(funcNode, recvVar)
-					break
+					Graph.AddEdge(funcNode, recvType)
 				default:
 					fmt.Fprintln(os.Stderr, "parsing receiver - missed type", recv)
 				}
-				
 
+				// Graph.AddEdge(pkgIdentNode, funcNode)
+			} else {
+				Graph.AddEdge(pkgIdentNode, funcNode)
 			}
 
 			// Loop over return values
@@ -266,6 +298,7 @@ func Visit(node ast.Node) bool {
 			return true
 
 		default:
+			// fmt.Fprintf(os.Stderr, "parsing - missed type %T\n", x)
 			return true
 	}
 	return true
