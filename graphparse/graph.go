@@ -47,8 +47,7 @@ func (this *graph) String() string {
 func (this *graph) ToDot() {
 	printToStdout := false
 
-
-	f, err := os.OpenFile("/Users/liamz/parser/src/github.com/liamzebedee/graphparse/graph.dot", os.O_WRONLY, 0600)
+	f, err := os.Create("/Users/liamz/parser/src/github.com/liamzebedee/graphparse/graph.dot")
 	if err != nil {
 		panic(err)
 	}
@@ -93,7 +92,7 @@ func (this *graph) ToDot() {
 
 	// normalise ranks to something that is nice to look at
 	sort.Sort(ranks)
-	minAllowed, maxAllowed := 1.0, 5.0
+	minAllowed, maxAllowed := 1.0, 6.0
 	var min float64
 	var max float64
 	if len(ranks) == 0 {

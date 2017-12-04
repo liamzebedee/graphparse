@@ -8,13 +8,25 @@ import (
 	"fmt"
 	"path/filepath"
 
+
 	"golang.org/x/tools/go/loader"
 	"os"
 )
 
-var pkgpath string
+var packageFilePath string = "/Users/liamz/parser/src/github.com/twitchyliquid64/subnet/"
+var optIncludeFilesAsNodes bool = true
+
+var pkginfo *loader.PackageInfo
+var Graph *graph
+var fset *token.FileSet
+var currentFile *ast.File
+
+var canonicalRefsToNodes map[string]CanonicalNode
+var objsIdentified map[string]nodeid
+var importedPackages map[string]*node
+
 func DoMainStuff() {
-	pkgpath = "github.com/twitchyliquid64/subnet/subnet"
+	pkgpath := "github.com/twitchyliquid64/subnet/subnet"
 	// pkgpath := "github.com/liamzebedee/graphparse/graphparse"
 
 	conf := loader.Config{ParserMode: 0}
@@ -25,15 +37,13 @@ func DoMainStuff() {
 	}
 
 	pkginfo = prog.Package(pkgpath)
-
-	Pkg = pkginfo.Pkg
 	fset = prog.Fset
-	
 	Graph = NewGraph()
 	canonicalRefsToNodes = make(map[string]CanonicalNode)
 	objsIdentified = make(map[string]nodeid)
+	importedPackages = make(map[string]*node)
 
-	for i, f := range pkginfo.Files {
+	for _, f := range pkginfo.Files {
 		currentFile = f
 		currentFileName := fset.File(f.Package).Name()
 		// if currentFileName == "/Users/liamz/parser/src/github.com/twitchyliquid64/subnet/subnet/server.go" {
@@ -43,24 +53,11 @@ func DoMainStuff() {
 
 		fmt.Println("Processing", currentFileName)
 		ast.Inspect(f, Visit)
-		if i == 12*1000 { break }
 		// ast.Print(fset, f)
 	}
 	Graph.ToDot()
 }
 
-var pkginfo *loader.PackageInfo
-var Graph *graph
-var Pkg *types.Package
-var fset *token.FileSet
-var currentFile *ast.File
-var canonicalRefsToNodes map[string]CanonicalNode
-
-
-var objsIdentified map[string]nodeid
-
-type Visitor struct {
-}
 
 type CanonicalNode struct {
 	val interface{}
@@ -72,68 +69,77 @@ func GetCanonicalNode(ref string, val interface{}) (CanonicalNode, nodeid) {
 		cnode = CanonicalNode{val}
 		canonicalRefsToNodes[ref] = cnode
 	}
-	return cnode, pointerToNodeid(cnode)
+	return cnode, pointerToId(cnode)
 }
 
-func pointerToNodeid(ptr interface{}) nodeid {
-	if i, err := strconv.ParseInt(fmt.Sprintf("%p", &ptr), 0, 64); err != nil {
+func pointerToStr(ptr interface{}) string {
+	return fmt.Sprintf("%p", &ptr)
+}
+
+func pointerToId(ptr interface{}) nodeid {
+	if i, err := strconv.ParseInt(pointerToStr(ptr), 0, 64); err != nil {
 		panic(err)
 	} else {
 		return nodeid(i)
 	}
 }
 
+// func getIdOfObj(obj types.Object) (nodeid, error) {
+// 	// objId := pointerToStr(obj.Parent()) + obj.Id()
+	
+// }
 
-func getIdOfObj(obj types.Object) (nodeid, error) {
-	objId := obj.Id()
-	fmt.Println(objId)
-
-	if obj != nil {
-		if id, ok := objsIdentified[objId]; ok {
-			return id, nil
-		} else {
-			id := pointerToNodeid(obj)
-			objsIdentified[objId] = id
-			return id, nil
-		}
-	}
-	return nodeid(-1), fmt.Errorf("unexpected error", obj)
-}
-
-
-func getIdFromPointer(node *ast.Ident) (nodeid, error) {
+func getIdOfIdent(node *ast.Ident) (nodeid, error) {
 	// https://golang.org/src/go/types/universe.go
 	if obj := types.Universe.Lookup(node.Name); obj != nil {
 		return nodeid(-1), fmt.Errorf("universe object ", node)
 	}
 
-
 	// I wrote this in a subconcious spree of, "I have a gut feeling that this will do it"
 	obj := pkginfo.ObjectOf(node)
-	return getIdOfObj(obj)
-	
-	// obj = pkginfo.Implicits[node]
-	// if obj != nil {
-	// 	return pointerToNodeid(obj), nil
-	// }
 
+	objId := string(obj.Pos()) + obj.Id()
+	// fmt.Println(obj.Name(), obj.Pos(), objId)
+
+	if obj != nil {
+		if id, ok := objsIdentified[objId]; ok {
+			return id, nil
+		} else {
+			id := pointerToId(obj)
+			objsIdentified[objId] = id
+			return id, nil
+		}
+	}
+
+	return nodeid(-1), fmt.Errorf("unexpected error", obj)
+
+	// return getIdOfObj(obj)
 }
+
+// func getImportPkgNode(spec *ast.ImportSpec) *node {
+// 	obj := pkginfo.Implicits[spec]
+	
+// 	importId := pointerToId(obj)
+
+// 	if importedPackageNode, ok := importedPackages[importId]; !ok {
+// 		importedPackageNode = NewNode(spec, importId, obj.Name())
+// 		return importedPackageNode
+// 	} else {
+// 		return nil
+// 	}
+// }
 
 // TODO  Names: []*ast.Ident (len = 2)
 
 var pkgIdentNode *node
 var currentFileNode *node
 
-var packageFilePath string = "/Users/liamz/parser/src/github.com/twitchyliquid64/subnet/"
-
-var optIncludeFilesAsNodes bool = true
-
 func Visit(node ast.Node) bool {
 	switch x := node.(type) {
 		case *ast.File:
 			if pkgIdentNode == nil {
 				pkgIdent := x.Name
-				pkgIdentId := pointerToNodeid(pkgIdent)
+				pkgIdentId := pointerToId(pkgIdent)
 				pkgIdentNode = NewNode(pkgIdent, pkgIdentId, x.Name.Name)
 			}
 
@@ -151,22 +157,26 @@ func Visit(node ast.Node) bool {
 			}
 
 		case *ast.ImportSpec:
-			// pkgId, err := getIdFromPointer()
-			obj := pkginfo.Implicits[x]
-			importId, err := getIdOfObj(obj)
+			importImp := pkginfo.Implicits[x]
+			// importName := importImp.Name()
+			importName, err := strconv.Unquote(x.Path.Value)
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err.Error())
-				return true
+				panic(err)
 			}
+			fmt.Println(importImp)
 
-			importedPackageNode := NewNode(x, importId, obj.Name())
-			Graph.AddEdge(importedPackageNode, pkgIdentNode)
+			if importNode, ok := importedPackages[importImp.Id()]; !ok {
+				importNode = NewNode(importImp, pointerToId(importImp), importName)
+				importedPackages[importImp.Id()] = importNode
+				Graph.AddEdge(importNode, pkgIdentNode)
+			}
+			
 			// THIS IS BAD BELOW:
 			// Graph.AddEdge(pkgIdentNode, importedPackageNode)
 			return true
 
 		case *ast.TypeSpec:
-			typeId, err := getIdFromPointer(x.Name)
+			typeId, err := getIdOfIdent(x.Name)
 			if err != nil {
 				fmt.Fprintln(os.Stderr, err.Error())
 				return true
@@ -192,7 +202,7 @@ func Visit(node ast.Node) bool {
 							// ast.Print(fset, y)
 							// fmt.Println(y, selection)
 
-							fieldTypeId, err := getIdFromPointer(y.Sel)
+							fieldTypeId, err := getIdOfIdent(y.Sel)
 							if err != nil {
 								fmt.Fprintln(os.Stderr, err.Error())
 								return true
@@ -204,7 +214,7 @@ func Visit(node ast.Node) bool {
 						case *ast.Ident:
 							// fmt.Fprintln(os.Stderr, "parsing type - missed Ident field", field)
 							// ast.Print(fset, field.Names[0])
-							identId, err := getIdFromPointer(field.Names[0])
+							identId, err := getIdOfIdent(field.Names[0])
 
 							if err != nil {
 								fmt.Fprintln(os.Stderr, err.Error())
@@ -233,7 +243,7 @@ func Visit(node ast.Node) bool {
 								return true
 							}
 
-							fieldTypeId, err := getIdFromPointer(fieldTypeIdent)
+							fieldTypeId, err := getIdOfIdent(fieldTypeIdent)
 							if err != nil {
 								fmt.Fprintln(os.Stderr, err.Error())
 								return true
@@ -252,7 +262,7 @@ func Visit(node ast.Node) bool {
 								fmt.Fprintln(os.Stderr, "parsing ChanType field - missed Value type", field)
 							}
 
-							fieldTypeId, err := getIdFromPointer(fieldType)
+							fieldTypeId, err := getIdOfIdent(fieldType)
 							if err != nil {
 								fmt.Fprintln(os.Stderr, err.Error())
 								return true
@@ -273,7 +283,7 @@ func Visit(node ast.Node) bool {
 
 		case *ast.FuncDecl:
 			// Function as parent
-			funcId, err := getIdFromPointer(x.Name)
+			funcId, err := getIdOfIdent(x.Name)
 			if err != nil {
 				// Function is not referenced outside of this file
 				// Thus does not have a .Obj
@@ -287,7 +297,7 @@ func Visit(node ast.Node) bool {
 				recv := x.Recv.List[0]
 				switch y := recv.Type.(type) {
 				case *ast.StarExpr:
-					recvId, err := getIdFromPointer(y.X.(*ast.Ident))
+					recvId, err := getIdOfIdent(y.X.(*ast.Ident))
 
 					if err != nil {
 						fmt.Fprintln(os.Stderr, err.Error())
@@ -322,7 +332,7 @@ func Visit(node ast.Node) bool {
 					case *ast.StarExpr:
 						starExprIdent := y.X.(*ast.Ident)
 
-						funcResultId, err := getIdFromPointer(starExprIdent)
+						funcResultId, err := getIdOfIdent(starExprIdent)
 						if err != nil {
 							fmt.Fprintln(os.Stderr, err.Error())
 							return true
@@ -332,7 +342,7 @@ func Visit(node ast.Node) bool {
 						break
 
 					case *ast.Ident:
-						funcResultId, err := getIdFromPointer(y)
+						funcResultId, err := getIdOfIdent(y)
 						if err != nil {
 							// Function is not referenced outside of this file
 							// Thus does not have a .Obj
