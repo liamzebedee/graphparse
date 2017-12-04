@@ -6,6 +6,7 @@ import (
 	"go/token"
 	"go/ast"
 	"fmt"
+	"path/filepath"
 
 	"golang.org/x/tools/go/loader"
 	"os"
@@ -13,7 +14,7 @@ import (
 
 var pkgpath string
 func DoMainStuff() {
-	pkgpath := "github.com/twitchyliquid64/subnet/subnet"
+	pkgpath = "github.com/twitchyliquid64/subnet/subnet"
 	// pkgpath := "github.com/liamzebedee/graphparse/graphparse"
 
 	conf := loader.Config{ParserMode: 0}
@@ -29,13 +30,18 @@ func DoMainStuff() {
 	fset = prog.Fset
 	
 	Graph = NewGraph()
-	unresolvedIdentToId = make(map[*ast.Ident]nodeid)
+	canonicalRefsToNodes = make(map[string]CanonicalNode)
 	objsIdentified = make(map[string]nodeid)
 
 	for i, f := range pkginfo.Files {
 		currentFile = f
+		currentFileName := fset.File(f.Package).Name()
+		// if currentFileName == "/Users/liamz/parser/src/github.com/twitchyliquid64/subnet/subnet/server.go" {
+		// 	ast.Print(fset, f)
+		// 	return
+		// }
 
-		fmt.Println("Processing", fset.File(f.Package).Name())
+		fmt.Println("Processing", currentFileName)
 		ast.Inspect(f, Visit)
 		if i == 12*1000 { break }
 		// ast.Print(fset, f)
@@ -48,14 +54,26 @@ var Graph *graph
 var Pkg *types.Package
 var fset *token.FileSet
 var currentFile *ast.File
-var unresolvedIdentToId map[*ast.Ident]nodeid
-var pkgIdentNode *node
+var canonicalRefsToNodes map[string]CanonicalNode
+
 
 var objsIdentified map[string]nodeid
 
 type Visitor struct {
 }
 
+type CanonicalNode struct {
+	val interface{}
+}
+
+func GetCanonicalNode(ref string, val interface{}) (CanonicalNode, nodeid) {
+	cnode, ok := canonicalRefsToNodes[ref]
+	if !ok {
+		cnode = CanonicalNode{val}
+		canonicalRefsToNodes[ref] = cnode
+	}
+	return cnode, pointerToNodeid(cnode)
+}
 
 func pointerToNodeid(ptr interface{}) nodeid {
 	if i, err := strconv.ParseInt(fmt.Sprintf("%p", &ptr), 0, 64); err != nil {
@@ -65,12 +83,11 @@ func pointerToNodeid(ptr interface{}) nodeid {
 	}
 }
 
-type CanonicalUnresolvedIdent struct {
-	ident *ast.Ident
-}
 
 func getIdOfObj(obj types.Object) (nodeid, error) {
 	objId := obj.Id()
+	fmt.Println(objId)
+
 	if obj != nil {
 		if id, ok := objsIdentified[objId]; ok {
 			return id, nil
@@ -103,6 +120,14 @@ func getIdFromPointer(node *ast.Ident) (nodeid, error) {
 }
 
 // TODO  Names: []*ast.Ident (len = 2)
+
+var pkgIdentNode *node
+var currentFileNode *node
+
+var packageFilePath string = "/Users/liamz/parser/src/github.com/twitchyliquid64/subnet/"
+
+var optIncludeFilesAsNodes bool = true
+
 func Visit(node ast.Node) bool {
 	switch x := node.(type) {
 		case *ast.File:
@@ -110,6 +135,19 @@ func Visit(node ast.Node) bool {
 				pkgIdent := x.Name
 				pkgIdentId := pointerToNodeid(pkgIdent)
 				pkgIdentNode = NewNode(pkgIdent, pkgIdentId, x.Name.Name)
+			}
+
+			if optIncludeFilesAsNodes {
+				fileName, err := filepath.Rel(packageFilePath, fset.File(x.Package).Name())
+				if err != nil {
+					fmt.Fprintln(os.Stderr, err.Error())
+					return false
+				}
+
+				fileNode, fileNodeId := GetCanonicalNode(fileName, x)
+				currentFileNode = NewNode(fileNode, fileNodeId, fileName)
+				currentFileNode.extraAttrs = "[color=\"red\"]"
+				Graph.AddEdge(pkgIdentNode, currentFileNode)
 			}
 
 		case *ast.ImportSpec:
@@ -135,8 +173,12 @@ func Visit(node ast.Node) bool {
 			}
 
 			typeNode := NewNode(x.Name, typeId, x.Name.Name)
-			typeNode.extraAttrs = "[color=\"red\"]"
-			Graph.AddEdge(pkgIdentNode, typeNode)
+
+			if optIncludeFilesAsNodes {
+				Graph.AddEdge(currentFileNode, typeNode)
+			} else {				
+				Graph.AddEdge(pkgIdentNode, typeNode)
+			}
 
 			// If struct, loop over fields
 			switch y := x.Type.(type) {
@@ -145,6 +187,11 @@ func Visit(node ast.Node) bool {
 					for _, field := range y.Fields.List {
 						switch y := field.Type.(type) {
 						case *ast.SelectorExpr:
+							// selection := pkginfo.Selections[y]
+							// TODO
+							// ast.Print(fset, y)
+							// fmt.Println(y, selection)
+
 							fieldTypeId, err := getIdFromPointer(y.Sel)
 							if err != nil {
 								fmt.Fprintln(os.Stderr, err.Error())
@@ -177,6 +224,9 @@ func Visit(node ast.Node) bool {
 							case *ast.Ident:
 								fieldTypeIdent = z
 							case *ast.SelectorExpr:
+								// selection := pkginfo.Selections[z]
+								// fmt.Println(pkginfo.Selections)
+
 								fieldTypeIdent = z.Sel
 							default:
 								fmt.Fprintln(os.Stderr, "parsing StarExpr field - missed StarExpr.X type", field)
@@ -192,7 +242,7 @@ func Visit(node ast.Node) bool {
 							fieldType := NewNode(fieldTypeIdent, fieldTypeId, fieldTypeIdent.Name)
 							Graph.AddEdge(typeNode, fieldType)
 
-						
+
 						case *ast.ChanType:
 							var fieldType *ast.Ident
 							switch z := y.Value.(type) {
@@ -247,7 +297,7 @@ func Visit(node ast.Node) bool {
 					// recvVarName is the 'c' in (c *Client)
 					// recvVarName := recv.Names[0].Name
 					recvTypeName := y.X.(*ast.Ident).Name
-					recvType := NewNode(y, recvId, recvVarName)
+					recvType := NewNode(y, recvId, recvTypeName)
 
 					Graph.AddEdge(funcNode, recvType)
 				default:
@@ -256,7 +306,12 @@ func Visit(node ast.Node) bool {
 
 				// Graph.AddEdge(pkgIdentNode, funcNode)
 			} else {
-				Graph.AddEdge(pkgIdentNode, funcNode)
+				if optIncludeFilesAsNodes {
+					Graph.AddEdge(currentFileNode, funcNode)
+				} else {				
+					Graph.AddEdge(pkgIdentNode, funcNode)
+				}
+				
 			}
 
 			// Loop over return values
