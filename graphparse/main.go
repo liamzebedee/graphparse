@@ -1,25 +1,23 @@
 package graphparse
 
 import (
-	// "io"
-	// "strings"
-	// "path/filepath"
-	// "io/ioutil"
-	// "strconv"
-	// godsUtils "github.com/emirpasic/gods/utils" 
-	// "github.com/emirpasic/gods/trees/btree"
-	// "github.com/emirpasic/gods/maps/treemap"
-	// "go/parser"
-	// "go/ast"
-	// "go/token"
-	// "fmt"
+	"flag"
+	"fmt"
 )
 
-const dir string = "/Users/liamz/parser/src/github.com/liamzebedee/graphparse/subnet/subnet/"
-
+// Stuff does everything.
 func Stuff() {
-	DoMainStuff()
+	runApi := flag.Bool("api", false, "run API server for web experiment")
+
+	flag.Parse()
+
+	GenerateCodeGraph()
+	Graph.WriteDotFile()
+
+	if *runApi {
+		fmt.Println("Running web api on port 8081...")
+		WebAPI("8081")
+	}
+	
 	// visitor.Graph.String()
 }
-
-

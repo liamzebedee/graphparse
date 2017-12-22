@@ -1,2 +1,2 @@
-export GOPATH=~/parser
-go install && $GOPATH/bin/graphparse
+# export GOPATH=~/parser
+go install && ~/go/bin/graphparse -api

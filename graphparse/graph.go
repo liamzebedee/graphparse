@@ -1,24 +1,24 @@
 package graphparse
 
 import (
-	"fmt"
-	"sort"
 	"bufio"
+	"fmt"
 	"os"
-	"github.com/dcadenas/pagerank"
+	"sort"
+	"path/filepath"
 
+	"github.com/dcadenas/pagerank"
 )
 
-
-
 type node struct {
-	value interface{}
-	id nodeid
-	label string
+	value      interface{}
+	id         nodeid
+	label      string
 	extraAttrs string
 }
 
 var clientseen bool = false
+
 func NewNode(value interface{}, id nodeid, label string) *node {
 	return &node{value, id, label, ""}
 }
@@ -44,10 +44,12 @@ func (this *graph) String() string {
 	return ""
 }
 
-func (this *graph) ToDot() {
+// Writes the graph into a .dot graph format for web viz
+func (this *graph) WriteDotFile() {
 	printToStdout := false
+	dotfilePath, _ := filepath.Abs("./www/graph.dot")
+	f, err := os.Create(dotfilePath)
 
-	f, err := os.Create("/Users/liamz/parser/src/github.com/liamzebedee/graphparse/graph.dot")
 	if err != nil {
 		panic(err)
 	}
@@ -59,8 +61,6 @@ func (this *graph) ToDot() {
 	w := bufio.NewWriter(f)
 	defer w.Flush()
 
-
-
 	// Compute edges from pointers
 	nodesLookup := make(map[nodeid]*node)
 	for _, edge := range this.edges {
@@ -70,7 +70,7 @@ func (this *graph) ToDot() {
 		nodesLookup[node2.id] = node2
 	}
 	fmt.Println(len(this.edges), "edges and", len(nodesLookup), "nodes")
-	
+
 	// Compute PageRank distribution
 	graph := pagerank.New()
 	for _, edge := range this.edges {
@@ -83,7 +83,7 @@ func (this *graph) ToDot() {
 	// Generate .dot file for graphviz
 	// ------
 	w.WriteString("digraph graphname {\n")
-	
+
 	// 1. Node definitions
 	var ranks rankPairList
 	graph.Rank(probability_of_following_a_link, tolerance, func(identifier int, rank float64) {
@@ -100,9 +100,9 @@ func (this *graph) ToDot() {
 	} else {
 		min, max = ranks[0].Rank, ranks[len(ranks)-1].Rank
 	}
-	
+
 	scaleRank := func(rank float64) float64 {
-		return (maxAllowed - minAllowed) * (rank - min) / (max - min) + minAllowed;
+		return (maxAllowed-minAllowed)*(rank-min)/(max-min) + minAllowed
 	}
 	// fmt.Println("smallest node is", scaleRank(min))
 	// fmt.Println("biggest node is", scaleRank(max))
@@ -118,12 +118,5 @@ func (this *graph) ToDot() {
 		fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge[1].id, edge[0].id)
 	}
 
-
 	w.WriteString("}\n")
 }
-
-
-
-
-
-

@@ -12,3 +12,7 @@ WIP implementation of PageRank on the Abstract Syntax Trees of Go source code.
  - convert the graph to .dot GRAPHVIZ format, with node sizes normalised according to their importance
  - visualise in browser
 
+## Try
+ - `./run.sh` to generate .dot graph file.
+ - `cd www && npm run start` to view the graph.
+ - Bonus: tool for quickly getting details on the AST representation of source code

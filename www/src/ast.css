@@ -1,0 +1,23 @@
+.container-fluid {
+    display: flex;
+}
+
+#code {
+    flex: 1;
+}
+#sidebar {
+    flex: 1;
+}
+#sidebar pre {
+}
+#sidebar .wrap {
+    position: fixed;
+    top: 0;
+    overflow: scroll;
+    overflow-y: scroll;
+    height: 100%;
+}
+
+pre {
+    max-width: 50vw;
+}

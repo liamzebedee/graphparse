@@ -1,2 +1,2 @@
 # webpack bundle.js
-open http://localhost:8080 && ../../../../bin/gost .
+open http://localhost:8080 && ../../../../bin/gost -path ./www/
