@@ -30,7 +30,7 @@ type packageFileInfo struct {
 	// Nodes map[postuple] `json:"nodes"`
 }
 
-var canonicalRefsToNodes map[string]CanonicalNode
+var canonicalRefsToNodes map[string]nodeid
 var objsIdentified map[string]nodeid
 var importedPackages map[string]*node
 
@@ -50,7 +50,7 @@ func GenerateCodeGraph() {
 	pkginfo = prog.Package(pkgpath)
 	fset = prog.Fset
 	Graph = NewGraph()
-	canonicalRefsToNodes = make(map[string]CanonicalNode)
+	canonicalRefsToNodes = make(map[string]nodeid)
 	objsIdentified = make(map[string]nodeid)
 	importedPackages = make(map[string]*node)
 
@@ -79,13 +79,11 @@ type CanonicalNode struct {
 	val interface{}
 }
 
-func GetCanonicalNode(ref string, val interface{}) (CanonicalNode, nodeid) {
-	cnode, ok := canonicalRefsToNodes[ref]
-	if !ok {
-		cnode = CanonicalNode{val}
-		canonicalRefsToNodes[ref] = cnode
+func GetCanonicalNodeId(ref string) (nodeid) {
+	if _, ok := canonicalRefsToNodes[ref]; !ok {
+		canonicalRefsToNodes[ref] = pointerToId(&CanonicalNode{})
 	}
-	return cnode, pointerToId(cnode)
+	return canonicalRefsToNodes[ref]
 }
 
 func pointerToStr(ptr interface{}) string {
@@ -132,23 +130,25 @@ func getIdOfIdent(node *ast.Ident) (nodeid, error) {
 	// return getIdOfObj(obj)
 }
 
-// func getImportPkgNode(spec *ast.ImportSpec) *node {
-// 	obj := pkginfo.Implicits[spec]
-
-// 	importId := pointerToId(obj)
-
-// 	if importedPackageNode, ok := importedPackages[importId]; !ok {
-// 		importedPackageNode = NewNode(spec, importId, obj.Name())
-// 		return importedPackageNode
-// 	} else {
-// 		return nil
-// 	}
-// }
-
-// TODO  Names: []*ast.Ident (len = 2)
-
 var pkgIdentNode *node
 var currentFileNode *node
+
+var parentNode *node
+
+
+func getIdOfNode(node ast.Node) nodeid {
+	switch x := node.(type) {
+	case *ast.ImportSpec:
+		importName, err := strconv.Unquote(x.Path.Value)
+		if err != nil {
+			panic(err)
+		}
+		id := GetCanonicalNodeId(importName)
+		return id
+	}
+	panic(1)
+}
+
 
 func Visit(node ast.Node) bool {
 	switch x := node.(type) {
@@ -166,29 +166,20 @@ func Visit(node ast.Node) bool {
 				return false
 			}
 
-			fileNode, fileNodeId := GetCanonicalNode(fileName, x)
-			currentFileNode = NewNode(fileNode, fileNodeId, fileName)
+			fileNodeId := GetCanonicalNodeId(fileName)
+			currentFileNode = NewNode(x, fileNodeId, fileName)
 			currentFileNode.extraAttrs = "[color=\"red\"]"
 			Graph.AddEdge(pkgIdentNode, currentFileNode)
 		}
 
 	case *ast.ImportSpec:
-		importImp := pkginfo.Implicits[x]
-		// importName := importImp.Name()
-		importName, err := strconv.Unquote(x.Path.Value)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(importImp)
-
-		if importNode, ok := importedPackages[importImp.Id()]; !ok {
-			importNode = NewNode(importImp, pointerToId(importImp), importName)
-			importedPackages[importImp.Id()] = importNode
-			Graph.AddEdge(importNode, pkgIdentNode)
-		}
+		importName, _ := strconv.Unquote(x.Path.Value)
+		importedPackageNode := NewNode(nil, getIdOfNode(x), importName)
+		fmt.Println(getIdOfNode(x), getIdOfNode(x))
+		// Graph.AddEdge(importNode, pkgIdentNode)
 
 		// THIS IS BAD BELOW:
-		// Graph.AddEdge(pkgIdentNode, importedPackageNode)
+		Graph.AddEdge(pkgIdentNode, importedPackageNode)
 		return true
 
 	case *ast.TypeSpec:
@@ -252,7 +243,6 @@ func Visit(node ast.Node) bool {
 						case *ast.SelectorExpr:
 							// selection := pkginfo.Selections[z]
 							// fmt.Println(pkginfo.Selections)
-
 							fieldTypeIdent = z.Sel
 						default:
 							fmt.Fprintln(os.Stderr, "parsing StarExpr field - missed StarExpr.X type", field)
@@ -292,6 +282,7 @@ func Visit(node ast.Node) bool {
 				}
 			}
 			break
+			
 		default:
 			fmt.Fprintln(os.Stderr, "parsing type - missed type", y)
 		}
@@ -307,6 +298,7 @@ func Visit(node ast.Node) bool {
 		}
 
 		funcNode := NewNode(x, funcId, x.Name.Name)
+		parentNode = funcNode
 
 		if x.Recv != nil && len(x.Recv.List) == 1 {
 			recv := x.Recv.List[0]
@@ -376,7 +368,43 @@ func Visit(node ast.Node) bool {
 		}
 
 		return true
-
+	
+	// 
+	
+	// func (s *Scope) Innermost(pos token.Pos) *Scope
+	case *ast.CallExpr:
+		// ftype, fval := pkginfo.Types[x]
+		switch y := x.Fun.(type) {
+		case *ast.SelectorExpr:
+			obj := pkginfo.ObjectOf(y.Sel)
+			pkg := obj.Pkg()
+			if pkg != nil {
+				if pkg.Name() == "subnet" {
+					id, err := getIdOfIdent(y.Sel)
+					if err != nil {
+						fmt.Fprintln(os.Stderr, err.Error())
+						return true
+					}
+		
+					callNode := NewNode(y, id, y.Sel.Name)
+					Graph.AddEdge(callNode, parentNode)
+				} else {
+					// importPkgNode := 
+					// package -> thing -> otherthing <- subnet
+				}
+			}
+			
+	
+		case *ast.Ident:
+			id, err := getIdOfIdent(y)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err.Error())
+				return true
+			}
+			fmt.Println(id)
+		default:
+			fmt.Fprintln(os.Stderr, "parsing call - missed type", y)
+		}
 	default:
 		// fmt.Fprintf(os.Stderr, "parsing - missed type %T\n", x)
 		return true

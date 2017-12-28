@@ -17,10 +17,19 @@ type node struct {
 	extraAttrs string
 }
 
-var clientseen bool = false
+var nodeLookup = make(map[nodeid]node)
 
 func NewNode(value interface{}, id nodeid, label string) *node {
-	return &node{value, id, label, ""}
+	newNode, ok := nodeLookup[id]
+
+	if !ok {
+		newNode = node{value, id, label, ""}
+		nodeLookup[id] = newNode
+	} else {
+		fmt.Println("Reusing node")
+	}
+
+	return &newNode
 }
 
 type nodeid int64
@@ -32,12 +41,13 @@ type graph struct {
 }
 
 func NewGraph() *graph {
-	return &graph{}
+	return &graph{
+	}
 }
 
-func (this *graph) AddEdge(from, to *node) {
+func (graph *graph) AddEdge(from, to *node) {
 	e := edge{from, to}
-	this.edges = append(this.edges, e)
+	graph.edges = append(graph.edges, e)
 }
 
 func (this *graph) String() string {
@@ -61,15 +71,7 @@ func (this *graph) WriteDotFile() {
 	w := bufio.NewWriter(f)
 	defer w.Flush()
 
-	// Compute edges from pointers
-	nodesLookup := make(map[nodeid]*node)
-	for _, edge := range this.edges {
-		node1 := edge[0]
-		node2 := edge[1]
-		nodesLookup[node1.id] = node1
-		nodesLookup[node2.id] = node2
-	}
-	fmt.Println(len(this.edges), "edges and", len(nodesLookup), "nodes")
+	fmt.Println(len(this.edges), "edges and", len(nodeLookup), "nodes")
 
 	// Compute PageRank distribution
 	graph := pagerank.New()
@@ -108,7 +110,7 @@ func (this *graph) WriteDotFile() {
 	// fmt.Println("biggest node is", scaleRank(max))
 
 	for _, rank := range ranks {
-		node := nodesLookup[rank.NodeId]
+		node := nodeLookup[rank.NodeId]
 		rankStretched := scaleRank(rank.Rank)
 		fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"] %v;\n", rank.NodeId, rankStretched, rankStretched, node.label, node.extraAttrs)
 	}
