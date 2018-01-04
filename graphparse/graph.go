@@ -26,7 +26,7 @@ func NewNode(value interface{}, id nodeid, label string) *node {
 		newNode = node{value, id, label, ""}
 		nodeLookup[id] = newNode
 	} else {
-		fmt.Println("Reusing node")
+		// fmt.Println("Reusing node")
 	}
 
 	return &newNode

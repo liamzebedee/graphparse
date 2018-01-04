@@ -7,4 +7,5 @@ document.addEventListener('DOMContentLoaded', function() {
   let g = d3.select("#graph");
   g.graphviz().renderDot(graphdata).totalMemory(16777216 * 2) // 32mb memory
   g.attr('width', '100%').attr('height', '100%')
+  // g.select('.node').
 });

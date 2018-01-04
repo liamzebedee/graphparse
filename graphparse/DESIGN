@@ -1,0 +1,44 @@
+DESIGN SIMPLIFICATION
+=====================
+
+DEFINE
+quickly exploring/understanding codebase relationships
+
+EMPATHISE
+want to be able to visualise main types
+
+PROTOTYPE
+
+
+TEST
+can see links, but too many
+
+ITERATE
+
+
+
+
+THE RECURSIVE ESSENCE
+=====================
+
+ast -> graph -> filtered(view) -> render
+
+weight node based on relationships into it (even if we don't display them #leavethemalone)
+
+so for example:
+
+Package
+    File?
+        Imports
+        Struct
+            Field
+            Method
+        Func
+
+we can filter to:
+
+Package
+    Structs
+Imports
+
+Also don't include the root package, otherwise it gets quite highly ranked in the pagerank (which is duh, since it's the thing that we're examining lol)

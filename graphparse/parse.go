@@ -14,7 +14,7 @@ import (
 )
 
 var packageFilePath = "/Users/liamz/go/src/github.com/twitchyliquid64/subnet/"
-var optIncludeFilesAsNodes = true
+var optIncludeFilesAsNodes = false
 
 var prog *loader.Program
 var pkginfo *loader.PackageInfo 
@@ -98,10 +98,6 @@ func pointerToId(ptr interface{}) nodeid {
 	}
 }
 
-// func getIdOfObj(obj types.Object) (nodeid, error) {
-// 	// objId := pointerToStr(obj.Parent()) + obj.Id()
-
-// }
 
 func getIdOfIdent(node *ast.Ident) (nodeid, error) {
 	// https://golang.org/src/go/types/universe.go
@@ -126,8 +122,6 @@ func getIdOfIdent(node *ast.Ident) (nodeid, error) {
 	}
 
 	return nodeid(-1), fmt.Errorf("unexpected error", obj)
-
-	// return getIdOfObj(obj)
 }
 
 var pkgIdentNode *node
@@ -175,11 +169,11 @@ func Visit(node ast.Node) bool {
 	case *ast.ImportSpec:
 		importName, _ := strconv.Unquote(x.Path.Value)
 		importedPackageNode := NewNode(nil, getIdOfNode(x), importName)
-		fmt.Println(getIdOfNode(x), getIdOfNode(x))
-		// Graph.AddEdge(importNode, pkgIdentNode)
+		Graph.AddEdge(importedPackageNode, pkgIdentNode)
+		// currentFileNode.extraAttrs = "[color=\"red\"]"
 
 		// THIS IS BAD BELOW:
-		Graph.AddEdge(pkgIdentNode, importedPackageNode)
+		// Graph.AddEdge(pkgIdentNode, importedPackageNode)
 		return true
 
 	case *ast.TypeSpec:
@@ -387,8 +381,24 @@ func Visit(node ast.Node) bool {
 					}
 		
 					callNode := NewNode(y, id, y.Sel.Name)
-					Graph.AddEdge(callNode, parentNode)
+					// Graph.AddEdge(callNode, parentNode)
+					Graph.AddEdge(parentNode, callNode)
 				} else {
+					importName := pkg.Path()
+					pkgId := GetCanonicalNodeId(importName)
+					importPkgNode := NewNode(nil, pkgId, pkg.Name())
+
+
+					id, err := getIdOfIdent(y.Sel)
+					if err != nil {
+						fmt.Fprintln(os.Stderr, err.Error())
+						return true
+					}
+		
+					callNode := NewNode(y, id, y.Sel.Name)
+
+					Graph.AddEdge(importPkgNode, callNode)
+					Graph.AddEdge(callNode, parentNode)
 					// importPkgNode := 
 					// package -> thing -> otherthing <- subnet
 				}
@@ -396,12 +406,8 @@ func Visit(node ast.Node) bool {
 			
 	
 		case *ast.Ident:
-			id, err := getIdOfIdent(y)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err.Error())
-				return true
-			}
-			fmt.Println(id)
+			// id, _ := getIdOfIdent(y)
+			// fmt.Println("unreg'd ident", y.Name, id)
 		default:
 			fmt.Fprintln(os.Stderr, "parsing call - missed type", y)
 		}
