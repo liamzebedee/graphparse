@@ -1,0 +1,234 @@
+case *ast.TypeSpec:
+		typeId, err := getIdOfIdent(x.Name)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			return true
+		}
+
+		var nodeType NodeType
+		switch x.Type.(type) {
+		case *ast.StructType:
+			nodeType = Struct
+		default:
+			nodeType = Undefined
+		}
+		typeNode := NewNode(x.Name, typeId, x.Name.Name, nodeType)
+
+		if optIncludeFilesAsNodes {
+			Graph.AddEdge(currentFileNode, typeNode)
+		} else {
+			Graph.AddEdge(pkgIdentNode, typeNode)
+		}
+
+		// If struct, loop over fields
+		switch y := x.Type.(type) {
+		case *ast.StructType:
+			if y.Fields != nil {
+				for _, field := range y.Fields.List {
+					switch y := field.Type.(type) {
+					case *ast.SelectorExpr:
+						fieldTypeId, err := getIdOfIdent(y.Sel)
+						if err != nil {
+							fmt.Fprintln(os.Stderr, err.Error())
+							return true
+						}
+
+						fieldType := NewNode(y, fieldTypeId, y.Sel.Name, Field)
+
+						Graph.AddEdge(typeNode, fieldType)
+					case *ast.Ident:
+						identId, err := getIdOfIdent(field.Names[0])
+
+						if err != nil {
+							fmt.Fprintln(os.Stderr, err.Error())
+							return true
+						}
+
+						// fieldType := NewNode(field.Names[0], identId, y.Name)
+						fieldNode := NewNode(field.Names[0], identId, field.Names[0].Name, Field)
+						Graph.AddEdge(typeNode, fieldNode)
+
+					case *ast.StarExpr:
+						var fieldTypeIdent *ast.Ident
+
+						switch z := y.X.(type) {
+						case *ast.Ident:
+							fieldTypeIdent = z
+						case *ast.SelectorExpr:
+							fieldTypeIdent = z.Sel
+						default:
+							fmt.Fprintln(os.Stderr, "parsing StarExpr field - missed StarExpr.X type", field)
+							return true
+						}
+
+						fieldTypeId, err := getIdOfIdent(fieldTypeIdent)
+						if err != nil {
+							fmt.Fprintln(os.Stderr, err.Error())
+							return true
+						}
+
+						fieldType := NewNode(fieldTypeIdent, fieldTypeId, fieldTypeIdent.Name, Field)
+						Graph.AddEdge(typeNode, fieldType)
+
+					case *ast.ChanType:
+						var fieldType *ast.Ident
+						switch z := y.Value.(type) {
+						case *ast.StarExpr:
+							fieldType = z.X.(*ast.Ident)
+						default:
+							fmt.Fprintln(os.Stderr, "parsing ChanType field - missed Value type", field)
+						}
+
+						fieldTypeId, err := getIdOfIdent(fieldType)
+						if err != nil {
+							fmt.Fprintln(os.Stderr, err.Error())
+							return true
+						}
+
+						fieldTypeNode := NewNode(fieldType, fieldTypeId, fieldType.Name, Field)
+						Graph.AddEdge(typeNode, fieldTypeNode)
+					}
+
+				}
+			}
+			break
+			
+		default:
+			fmt.Fprintln(os.Stderr, "parsing type - missed type", y)
+		}
+
+	case *ast.FuncDecl:
+		// Function as parent
+		funcId, err := getIdOfIdent(x.Name)
+		if err != nil {
+			// Function is not referenced outside of this file
+			// Thus does not have a .Obj
+			fmt.Fprintln(os.Stderr, err.Error())
+			return true
+		}
+
+		funcNode := NewNode(x, funcId, x.Name.Name, Func)
+		parentNode = funcNode
+
+		if x.Recv != nil && len(x.Recv.List) == 1 {
+			// TODO hacky
+			funcNode.variety = Method
+
+			recv := x.Recv.List[0]
+			switch y := recv.Type.(type) {
+			case *ast.StarExpr:
+				recvId, err := getIdOfIdent(y.X.(*ast.Ident))
+
+				if err != nil {
+					fmt.Fprintln(os.Stderr, err.Error())
+					return true
+				}
+
+				// recvVarName is the 'c' in (c *Client)
+				// recvVarName := recv.Names[0].Name
+				recvTypeName := y.X.(*ast.Ident).Name
+				recvType := NewNode(y, recvId, recvTypeName, Undefined)
+
+				Graph.AddEdge(funcNode, recvType)
+			default:
+				fmt.Fprintln(os.Stderr, "parsing receiver - missed type", recv)
+			}
+
+			// Graph.AddEdge(pkgIdentNode, funcNode)
+		} else {
+			if optIncludeFilesAsNodes {
+				Graph.AddEdge(currentFileNode, funcNode)
+			} else {
+				Graph.AddEdge(pkgIdentNode, funcNode)
+			}
+
+		}
+
+		// Loop over return values
+		if x.Type.Results != nil {
+			for _, funcResult := range x.Type.Results.List {
+				// each *ast.Field
+				switch y := funcResult.Type.(type) {
+				case *ast.StarExpr:
+					starExprIdent := y.X.(*ast.Ident)
+
+					funcResultId, err := getIdOfIdent(starExprIdent)
+					if err != nil {
+						fmt.Fprintln(os.Stderr, err.Error())
+						return true
+					}
+					funcResultNode := NewNode(funcResult, funcResultId, starExprIdent.Name, Undefined)
+					Graph.AddEdge(funcNode, funcResultNode)
+					break
+
+				case *ast.Ident:
+					funcResultId, err := getIdOfIdent(y)
+					if err != nil {
+						// Function is not referenced outside of this file
+						// Thus does not have a .Obj
+						fmt.Fprintln(os.Stderr, err.Error())
+						return true
+					}
+
+					funcResultNode := NewNode(funcResult, funcResultId, y.Name, Undefined)
+					Graph.AddEdge(funcNode, funcResultNode)
+					break
+
+				default:
+					fmt.Fprintln(os.Stderr, "parsing result - missed type", funcResult)
+				}
+			}
+		}
+
+		return true
+	
+	case *ast.CallExpr:
+		// ftype, fval := pkginfo.Types[x]
+		switch y := x.Fun.(type) {
+		case *ast.SelectorExpr:
+			obj := pkginfo.ObjectOf(y.Sel)
+			pkg := obj.Pkg()
+			if pkg != nil {
+				if pkg.Name() == "subnet" {
+					id, err := getIdOfIdent(y.Sel)
+					if err != nil {
+						fmt.Fprintln(os.Stderr, err.Error())
+						return true
+					}
+		
+					callNode := NewNode(y, id, y.Sel.Name, ShouldAlreadyExist)
+					Graph.AddEdge(callNode, parentNode)
+					// Graph.AddEdge(parentNode, callNode)
+					
+				} else {
+					importName := pkg.Path()
+					pkgId := GetCanonicalNodeId(importName)
+					importPkgNode := NewNode(nil, pkgId, pkg.Name(), ImportedPackage)
+
+					id, err := getIdOfIdent(y.Sel)
+					if err != nil {
+						fmt.Fprintln(os.Stderr, err.Error())
+						return true
+					}
+		
+					callNode := NewNode(y, id, y.Sel.Name, ImportedFunc)
+
+					Graph.AddEdge(importPkgNode, callNode)
+					Graph.AddEdge(parentNode, callNode)
+					// package -> callnode <- parent
+				}
+			}
+			
+	
+		case *ast.Ident:
+			id, err := getIdOfIdent(y)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err.Error())
+				return true
+			}
+			
+			callNode := NewNode(y, id, y.Name, ShouldAlreadyExist)
+			Graph.AddEdge(callNode, parentNode)
+		default:
+			fmt.Fprintln(os.Stderr, "parsing call - missed type", y)
+		}
