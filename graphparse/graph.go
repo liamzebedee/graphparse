@@ -48,15 +48,9 @@ const (
 	ShouldAlreadyExist
 )
 
-// type node struct {
-// 	value      interface{}
-// 	id         nodeid
-// 	label      string
-// 	extraAttrs string
-// 	variety NodeType
-// }
 type baseNode struct {
 	variant NodeType
+	label string
 }
 
 type Node interface {
@@ -68,7 +62,6 @@ type Node interface {
 type objNode struct {
 	obj types.Object
 	baseNode
-	// label string
 }
 
 func (n *objNode) Id() nodeid {
@@ -77,14 +70,14 @@ func (n *objNode) Id() nodeid {
 	return pointerToId(&n.obj)
 }
 func (n *objNode) Label() string {
-	return ""
+	return n.baseNode.label
 }
 func (n *objNode) Variant() NodeType {
 	return n.baseNode.variant
 }
 
 
-func LookupOrCreateNode(obj types.Object, variant NodeType) *objNode {
+func LookupOrCreateNode(obj types.Object, variant NodeType, label string) *objNode {
 	if obj == nil {
 		panic("obj must be non-nil")
 	}
@@ -95,7 +88,7 @@ func LookupOrCreateNode(obj types.Object, variant NodeType) *objNode {
 	if !ok {
 		node = &objNode{
 			obj,
-			baseNode{variant},
+			baseNode{variant, label},
 		}
 		addNodeToLookup(node)
 	}
@@ -113,18 +106,18 @@ func (n *canonicalNode) Id() nodeid {
 	return pointerToId(n)
 }
 func (n *canonicalNode) Label() string {
-	return ""
+	return n.baseNode.label
 }
 func (n *canonicalNode) Variant() NodeType {
 	return n.baseNode.variant
 }
 
-func LookupOrCreateCanonicalNode(key string, variant NodeType) *canonicalNode {
+func LookupOrCreateCanonicalNode(key string, variant NodeType, label string) *canonicalNode {
 	node, ok := canonicalNodeLookup[key]
 
 	if !ok {
 		node = &canonicalNode{
-			baseNode{variant},
+			baseNode{variant, label},
 		}
 		canonicalNodeLookup[key] = node
 		addNodeToLookup(node)
@@ -132,25 +125,6 @@ func LookupOrCreateCanonicalNode(key string, variant NodeType) *canonicalNode {
 
 	return node
 } 
-
-// func NewNode(value interface{}, id nodeid, label string, nodeType NodeType) *node {
-// 	newNode, ok := nodeLookup[id]
-
-// 	if !ok {
-// 		newNode = &node{
-// 			value, 
-// 			id, 
-// 			label, 
-// 			"",
-// 			nodeType,
-// 		}
-// 		nodeLookup[id] = newNode
-// 	} else {
-// 		// fmt.Println("Reusing node")
-// 	}
-
-// 	return newNode
-// }
 
 type nodeid int64
 

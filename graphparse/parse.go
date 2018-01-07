@@ -120,8 +120,7 @@ func Visit(node ast.Node) bool {
 	switch x := node.(type) {
 	case *ast.File:
 		if rootPackage == nil {
-			pkgIdent := x.Name.Name
-			rootPackage = LookupOrCreateCanonicalNode(pkgIdent, RootPackage)
+			rootPackage = LookupOrCreateCanonicalNode(x.Name.Name, RootPackage, x.Name.Name)
 			// LABEL x.Name.Name
 		}
 
@@ -140,8 +139,8 @@ func Visit(node ast.Node) bool {
 		// }
 
 	case *ast.ImportSpec:
-		// LABEL importName, _ := strconv.Unquote(x.Path.Value)
-		importedPackage := LookupOrCreateCanonicalNode(importToCanonicalKey(x), ImportedPackage)
+		importName, _ := strconv.Unquote(x.Path.Value)
+		importedPackage := LookupOrCreateCanonicalNode(importToCanonicalKey(x), ImportedPackage, importName)
 		Graph.AddEdge(importedPackage, rootPackage)
 		
 		// currentFileNode.extraAttrs = "[color=\"red\"]"
