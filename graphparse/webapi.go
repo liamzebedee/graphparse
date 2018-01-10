@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const fileForExperiment = "subnet/server.go"
+const fileForExperiment = "server.go"
 
 func WebAPI(port string) {
 	router := mux.NewRouter().StrictSlash(true)

@@ -11,17 +11,6 @@ import (
 // need a visual shape-based constraint/design language
 
 
-// two approaches:
-// - big global canonical lookup table of scope (bad, error-prone)
-// - small recursive progressive graph AST approach (better)
-
-
-
-// next goal: get methods on structs to be linked back to the struct type
-// really what this entails is changing the canonicalisation of the id
-
-
-
 func main() {
 	graphparse.Stuff()
 }

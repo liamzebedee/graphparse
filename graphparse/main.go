@@ -11,13 +11,11 @@ func Stuff() {
 
 	flag.Parse()
 
-	GenerateCodeGraph()
+	GenerateCodeGraph("github.com/twitchyliquid64/subnet/subnet", "")
 	Graph.WriteDotFile()
 
 	if *runApi {
 		fmt.Println("Running web api on port 8081...")
 		WebAPI("8081")
 	}
-	
-	// visitor.Graph.String()
 }
