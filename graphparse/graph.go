@@ -290,6 +290,7 @@ type jsonNodeDef struct {
 	Rank float64 `json:"rank"`
 	Label string `json:"label"`
 	Id nodeid `json:"id"`
+	Variant NodeType `json:"variant"`
 }
 type jsonNodeEdge struct {
 	From nodeid `json:"source"`
@@ -363,6 +364,7 @@ func (g *graph) ToJson() {
 				Rank: rankStretched,
 				Label: node.Label(),
 				Id: node.Id(),
+				Variant: node.Variant(),
 			}
 			jsonGraph.NodesLookup[rank.NodeId] = n
 			jsonGraph.Nodes = append(jsonGraph.Nodes, n)

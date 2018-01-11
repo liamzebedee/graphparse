@@ -22,5 +22,11 @@ text {
 
 .nodes circle {
     stroke: black;
-    stroke-width: 0px;
+    stroke-width: 1px;
+    fill: white;
+}
+
+.nodes circle:hover {
+    fill: rgb(214, 214, 214);
+    cursor: pointer;
 }
