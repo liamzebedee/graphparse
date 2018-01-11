@@ -11,9 +11,9 @@ func Stuff() {
 
 	flag.Parse()
 
-	GenerateCodeGraph("github.com/liamzebedee/graphparse/graphparse")
-	// GenerateCodeGraph("github.com/twitchyliquid64/subnet/subnet")
-	Graph.WriteDotFile()
+	// GenerateCodeGraph("github.com/liamzebedee/graphparse/graphparse")
+	GenerateCodeGraph("github.com/twitchyliquid64/subnet/subnet")
+	Graph.ToJson()
 
 	if *runApi {
 		fmt.Println("Running web api on port 8081...")

@@ -7,7 +7,8 @@ import (
 	"sort"
 	"path/filepath"
 	"go/types"
-
+	"encoding/json"
+	"bytes"
 	"github.com/dcadenas/pagerank"
 )
 
@@ -195,41 +196,140 @@ func (graph *graph) AddEdge(from, to Node) {
 	if to == nil {
 		panic("to node must be non-nil")
 	}
+	if _, ok := nodeLookup[from.Id()]; !ok {
+		panic("from node doesn't exist, cannot add edge")
+	}
+	if _, ok := nodeLookup[to.Id()]; !ok {
+		panic("to node doesn't exist, cannot add edge")
+	}
 	e := edge{from, to}
 	graph.edges = append(graph.edges, e)
 }
 
-// Writes the graph into a .dot graph format for web viz
-func (this *graph) WriteDotFile() {
-	printToStdout := false
-	dotfilePath, _ := filepath.Abs("./www/graph.dot")
-	f, err := os.Create(dotfilePath)
+
+// func (g *graph) ToDot() string {
+// 	printToStdout := false
+// 	dotfilePath, _ := filepath.Abs("./www/graph.dot")
+// 	f, err := os.Create(dotfilePath)
+
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	if printToStdout {
+// 		f = os.Stdout
+// 	} else {
+// 		defer f.Close()
+// 	}
+// 	w := bufio.NewWriter(f)
+// 	defer w.Flush()
+
+// 	fmt.Println(len(this.edges), "edges and", len(nodeLookup), "nodes")
+
+// 	// Compute PageRank distribution
+// 	graph := pagerank.New()
+// 	for _, edge := range this.edges {
+// 		graph.Link(int(edge[0].Id()), int(edge[1].Id()))
+// 	}
+
+// 	probability_of_following_a_link := 0.85
+// 	tolerance := 0.05
+
+// 	// Generate .dot file for graphviz
+// 	// ------
+// 	w.WriteString("digraph graphname {\n")
+
+// 	// 1. Node definitions
+// 	var ranks rankPairList
+// 	graph.Rank(probability_of_following_a_link, tolerance, func(identifier int, rank float64) {
+// 		ranks = append(ranks, rankPair{nodeid(identifier), rank})
+// 	})
+
+// 	// normalise ranks to something that is nice to look at
+// 	sort.Sort(ranks)
+
+// 	minSize, maxSize := 1.0, 6.0
+// 	min, max := ranks[0].Rank, ranks[len(ranks)-1].Rank
+
+// 	scaleRank := func(rank float64) float64 {
+// 		return (maxSize - minSize)  *  (rank - min)/(max - min) + minSize
+// 	}
+// 	fmt.Println("smallest node is", min, scaleRank(min))
+// 	fmt.Println("biggest node is", max, scaleRank(max))
+
+// 	for _, rank := range ranks {
+// 		node := nodeLookup[rank.NodeId]
+// 		rankStretched := scaleRank(rank.Rank)
+
+// 		switch(node.Variant()) {
+// 		// case RootPackage, Struct, Method:
+// 		default:
+// 			fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"];\n", rank.NodeId, rankStretched, rankStretched, node.Label())
+// 			// break
+// 		// default:
+// 			// fmt.Fprintf(w, "%v [label=\"%v\"];\n", rank.NodeId, node.Label())
+// 		}
+// 	}
+
+// 	// 2. Edges
+// 	for _, edge := range this.edges {
+// 		from := edge[1]
+// 		// to := edge[0]
+
+// 		switch(from.Variant()) {
+// 		// case RootPackage, ImportedPackage, Struct, Method:
+// 		default:
+// 			fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge[1].Id(), edge[0].Id())
+// 		}
+// 	}
+
+// 	w.WriteString("}\n")
+// }
+
+
+type jsonNodeDef struct {
+	Rank float64 `json:"rank"`
+	Label string `json:"label"`
+	Id nodeid `json:"id"`
+}
+type jsonNodeEdge struct {
+	From nodeid `json:"source"`
+	To nodeid   `json:"target"`
+}
+type jsonGraph struct {
+	NodesLookup map[nodeid]jsonNodeDef `json:"nodesLookup"`
+	Nodes []jsonNodeDef `json:"nodes"`
+	Edges []jsonNodeEdge 		 `json:"edges"`
+}
+func newJsonGraph() jsonGraph {
+	return jsonGraph{
+		NodesLookup: make(map[nodeid]jsonNodeDef),
+	}
+}
+
+func (g *graph) ToJson() {
+	buf := new(bytes.Buffer)
+	
+	path, _ := filepath.Abs("./www/graph.json")
+	f, err := os.Create(path)
 
 	if err != nil {
 		panic(err)
 	}
-	if printToStdout {
-		f = os.Stdout
-	} else {
-		defer f.Close()
-	}
+	defer f.Close()
 	w := bufio.NewWriter(f)
 	defer w.Flush()
 
-	fmt.Println(len(this.edges), "edges and", len(nodeLookup), "nodes")
+	fmt.Println(len(g.edges), "edges and", len(nodeLookup), "nodes")
 
 	// Compute PageRank distribution
 	graph := pagerank.New()
-	for _, edge := range this.edges {
+	for _, edge := range g.edges {
 		graph.Link(int(edge[0].Id()), int(edge[1].Id()))
 	}
 
 	probability_of_following_a_link := 0.85
 	tolerance := 0.05
 
-	// Generate .dot file for graphviz
-	// ------
-	w.WriteString("digraph graphname {\n")
 
 	// 1. Node definitions
 	var ranks rankPairList
@@ -249,31 +349,42 @@ func (this *graph) WriteDotFile() {
 	fmt.Println("smallest node is", min, scaleRank(min))
 	fmt.Println("biggest node is", max, scaleRank(max))
 
+
+	jsonGraph := newJsonGraph()
+
 	for _, rank := range ranks {
 		node := nodeLookup[rank.NodeId]
 		rankStretched := scaleRank(rank.Rank)
 
 		switch(node.Variant()) {
-		// case RootPackage, Struct, Method:
 		default:
-			fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"];\n", rank.NodeId, rankStretched, rankStretched, node.Label())
-			// break
-		// default:
-			// fmt.Fprintf(w, "%v [label=\"%v\"];\n", rank.NodeId, node.Label())
+			// fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"];\n", rank.NodeId, rankStretched, rankStretched, node.Label())
+			n := jsonNodeDef{
+				Rank: rankStretched,
+				Label: node.Label(),
+				Id: node.Id(),
+			}
+			jsonGraph.NodesLookup[rank.NodeId] = n
+			jsonGraph.Nodes = append(jsonGraph.Nodes, n)
 		}
 	}
 
 	// 2. Edges
-	for _, edge := range this.edges {
+	for _, edge := range g.edges {
 		from := edge[1]
 		// to := edge[0]
 
 		switch(from.Variant()) {
 		// case RootPackage, ImportedPackage, Struct, Method:
 		default:
-			fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge[1].Id(), edge[0].Id())
+			// fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge[1].Id(), edge[0].Id())
+			jsonGraph.Edges = append(jsonGraph.Edges, jsonNodeEdge{
+				edge[1].Id(), 
+				edge[0].Id(),
+			})
 		}
 	}
 
-	w.WriteString("}\n")
+	json.NewEncoder(buf).Encode(jsonGraph)
+	f.WriteString(buf.String())
 }

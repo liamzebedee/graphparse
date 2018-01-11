@@ -174,8 +174,6 @@ func Visit(node ast.Node) bool {
 		importName, _ := strconv.Unquote(x.Path.Value)
 		importedPackage := LookupOrCreateCanonicalNode(importToCanonicalKey(x), ImportedPackage, importName)
 		Graph.AddEdge(importedPackage, rootPackage)
-		
-		// currentFileNode.extraAttrs = "[color=\"red\"]"
 		return true
 	
 	case *ast.TypeSpec:

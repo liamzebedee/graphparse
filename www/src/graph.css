@@ -1,0 +1,26 @@
+/* body {
+    overflow: hidden;
+}
+#graph {
+    text-align: center;
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+} */
+
+text {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-anchor: middle;
+    pointer-events: none;
+  }
+
+
+.links line {
+    stroke: #999;
+    stroke-opacity: 0.6;
+}
+
+.nodes circle {
+    stroke: black;
+    stroke-width: 0px;
+}
