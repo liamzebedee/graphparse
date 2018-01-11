@@ -13,6 +13,9 @@ import (
 	"golang.org/x/tools/go/loader"
 )
 
+// GO GURU
+// https://golang.org/lib/godoc/analysis/help.html
+
 var optIncludeFilesAsNodes = false
 
 var prog *loader.Program
@@ -30,7 +33,7 @@ type packageFileInfo struct {
 }
 
 
-func GenerateCodeGraph(pkgpath string, pkgFilePath string) {
+func GenerateCodeGraph(pkgpath string) {
 	// We use loader instead of Importer here deliberately
 	// Since we identify objects by their declaring position obj.Pos()
 	// TODO alternatively we could simply use the pointer to the type
@@ -46,9 +49,7 @@ func GenerateCodeGraph(pkgpath string, pkgFilePath string) {
 	}
 
 	// TODO doesn't work with relative package imports
-	if pkgFilePath == "" {
-		pkgFilePath = build.Default.GOPATH + "/src/" + pkgpath
-	}
+	pkgFilePath := build.Default.GOPATH + "/src/" + pkgpath
 
 	pkginfo = prog.Package(pkgpath)
 	if pkginfo == nil {
@@ -60,6 +61,8 @@ func GenerateCodeGraph(pkgpath string, pkgFilePath string) {
 	thisPackage = pkginfo.Pkg.Name()
 	fmt.Println("Generating graph for package", thisPackage)
 
+	// TODO process subpackages
+	// eg github.com/twitchyliquid64/subnet/subnet/conn from subnet
 	for _, f := range pkginfo.Files {
 		currentFilePath := fset.File(f.Pos()).Name()
 		fileName, _ := filepath.Rel(pkgFilePath, currentFilePath)
@@ -181,7 +184,9 @@ func Visit(node ast.Node) bool {
 			panic(err)
 		}
 
-		typeNode := LookupOrCreateNode(obj, Struct, obj.Type().String())
+		// types.Interface
+		// obj.Type().(*types.Named).Obj().
+		typeNode := LookupOrCreateNode(obj, Struct, obj.Type().(*types.Named).Obj().Name())
 		Graph.AddEdge(rootPackage, typeNode)
 
 	case *ast.FuncDecl:
@@ -201,7 +206,10 @@ func Visit(node ast.Node) bool {
 			switch typ := recvTypeObj.Type().(type) {
 			case *types.Pointer:
 				structName = typ.Elem().(*types.Named).Obj().Name()
+			case *types.Named:
+				structName = typ.Obj().Name()
 			default:
+				fmt.Printf("%T\n", typ)
 				panic(typ)
 			}
 

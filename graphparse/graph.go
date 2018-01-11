@@ -68,12 +68,6 @@ type objlookup struct {
 }
 var objLookups = make(map[string]*objlookup)
 func (n *objNode) Id() nodeid {
-	// TODO this Id may not work uniquely yet
-	
-	// The obj,Id is not unique. Two structs can have the same Run method if it is not exported.
-	// The obj.Name() is unique, sort of 
-	// objId := n.obj.String()
-
 	switch n.variant {
 	case Struct:
 		switch typ := n.obj.Type().(type) {
@@ -83,6 +77,8 @@ func (n *objNode) Id() nodeid {
 		case *types.Pointer:
 			id := nodeid(typ.Elem().(*types.Named).Obj().Pos())
 			return id
+		default:
+			panic("cant find type of struct Object")
 		}
 	default:
 		objId := n.obj.String()
@@ -94,35 +90,12 @@ func (n *objNode) Id() nodeid {
 		return pointerToId(x)
 	}
 
-	// switch typ := n.obj.Type().(type) {
-	// case *types.Named:
-	// 	fmt.Println(typ.Obj().Pos(), n.obj.Id())
-	// case *types.Signature:
-	// case *types.Pointer:
-	// 	fmt.Println(typ.Elem())
-	// default:
-	// 	fmt.Printf("%T\n", typ)
-	// }
-
-	
-
-	// objId := n.obj.Type()
-	// return pointerToId(objId)
-
-	// return pointerToId(n.obj.Pos())
-
-
-	
 	// if objId == "Run" {
 	// 	fmt.Println(n.obj.String())
 	// }
 	// objId := string(n.obj.Pos()) + n.obj.Id()
 	
-	
-	
-	// return pointerToId(n.obj)
-
-	return nodeid(n.obj.Pos())
+	panic("cant get id")
 }
 func (n *objNode) Label() string {
 	return n.baseNode.label
@@ -205,6 +178,14 @@ type graph struct {
 func NewGraph() *graph {
 	return &graph{
 	}
+}
+
+
+type pointerGraph struct {
+
+}
+func (g *graph) toPointerGraph() *pointerGraph {
+	return nil
 }
 
 func (graph *graph) AddEdge(from, to Node) {

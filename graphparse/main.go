@@ -11,7 +11,8 @@ func Stuff() {
 
 	flag.Parse()
 
-	GenerateCodeGraph("github.com/twitchyliquid64/subnet/subnet", "")
+	GenerateCodeGraph("github.com/liamzebedee/graphparse/graphparse")
+	// GenerateCodeGraph("github.com/twitchyliquid64/subnet/subnet")
 	Graph.WriteDotFile()
 
 	if *runApi {
