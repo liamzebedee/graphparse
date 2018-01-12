@@ -1,12 +1,24 @@
-/* body {
-    overflow: hidden;
+body {
+    font-family: "Helvetica Neue", sans-serif;
 }
-#graph {
-    text-align: center;
-    display: flex;
-    width: 100vw;
-    height: 100vh;
-} */
+
+.ctn {
+}
+
+.ctn #react-mount {
+    min-width: 200px;
+    min-height: 400px;
+
+    position: fixed;
+    background: white;
+    color: #333;
+    box-shadow: rgba(230,230,230,0.7) 1px 1px;
+    top: 0;
+    right: 0;
+    padding: 1em;
+    margin: 1em;
+    border: 1px solid rgba(230,230,230,0.7);
+}
 
 text {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -14,16 +26,21 @@ text {
     pointer-events: none;
   }
 
-
-.links line {
+/* 
+.links path {
     stroke: #999;
     stroke-opacity: 0.6;
-}
+} */
+
+path.link {
+    fill: none;
+    stroke: #666;
+    stroke-width: 1.5px;
+  }
 
 .nodes circle {
     stroke: black;
     stroke-width: 1px;
-    fill: white;
 }
 
 .nodes circle:hover {

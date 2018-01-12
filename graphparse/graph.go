@@ -47,6 +47,17 @@ const (
 	ImportedFunc
 	FuncCall
 )
+var nodeTypes = []string{
+	"Struct",
+	"Method",
+	"Func",
+	"Field",
+	"RootPackage",
+	"File",
+	"ImportedPackage",
+	"ImportedFunc",
+	"FuncCall",
+}
 
 type baseNode struct {
 	variant NodeType
@@ -300,10 +311,12 @@ type jsonGraph struct {
 	NodesLookup map[nodeid]jsonNodeDef `json:"nodesLookup"`
 	Nodes []jsonNodeDef `json:"nodes"`
 	Edges []jsonNodeEdge 		 `json:"edges"`
+	NodeTypes []string `json:"nodeTypes"`
 }
 func newJsonGraph() jsonGraph {
 	return jsonGraph{
 		NodesLookup: make(map[nodeid]jsonNodeDef),
+		NodeTypes: nodeTypes,
 	}
 }
 

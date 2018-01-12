@@ -15,6 +15,9 @@ import (
 
 // GO GURU
 // https://golang.org/lib/godoc/analysis/help.html
+// https://github.com/golang/tools/blob/master/go/callgraph/cha/cha.go#L38:46
+// https://github.com/dominikh/implements/blob/master/main.go#L103:16
+// https://github.com/golang/tools/blob/master/cmd/guru/implements.go#L47:16
 
 var optIncludeFilesAsNodes = false
 

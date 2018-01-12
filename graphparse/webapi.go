@@ -19,6 +19,7 @@ func WebAPI(port string) {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/src", corsEnabledHeaders(showSrc))
 	router.HandleFunc("/src/from/{start}/to/{end}", corsEnabledHeaders(getPos))
+	// router.HandleFunc("/graph/nodes/{id}", corsEnabledHeaders(getNodeInfo))
 
 	log.Fatal(http.ListenAndServe(":" + port, router))
 }
@@ -56,3 +57,13 @@ func getPos(w http.ResponseWriter, r *http.Request) {
 	}
 	json.NewEncoder(w).Encode(res)
 }
+
+// type nodeInfo struct {
+	
+// }
+
+// func getNodeInfo(w http.ResponseWriter, r *http.Request) {
+// 	vars := mux.Vars(r)
+// 	nodeId := nodeid(strconv.ParseInt(vars["id"], 0, 32))
+// 	node := nodeLookup[nodeId]
+// }
