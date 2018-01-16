@@ -266,9 +266,7 @@ func (g *graph) computeNodeRanks() map[nodeid]float64 {
 }
 
 
-func (g *graph) computeAggregateNodeRanks() map[nodeid]float64 {
-	ranks := g.computeNodeRanks()
-
+func (g *graph) computeAggregateNodeRanks(ranks map[nodeid]float64) map[nodeid]float64 {
 	getNodesToRemove := func(ranks map[nodeid]float64, shouldRemove func(n Node) bool) []nodeid {
 		ids := []nodeid{}
 		for id, rank := range ranks {
@@ -321,18 +319,14 @@ func (g *graph) computeAggregateNodeRanks() map[nodeid]float64 {
 
 
 func (g *graph) ToDot() {
-	printToStdout := false
 	dotfilePath, _ := filepath.Abs("./www/graph.dot")
 	f, err := os.Create(dotfilePath)
-
 	if err != nil {
 		panic(err)
 	}
-	if printToStdout {
-		f = os.Stdout
-	} else {
-		defer f.Close()
-	}
+	defer f.Close()
+
+	
 	w := bufio.NewWriter(f)
 	defer w.Flush()
 
@@ -340,26 +334,16 @@ func (g *graph) ToDot() {
 	// ------
 	w.WriteString("digraph graphname {\n")
 	
-	for id, rank := range g.computeAggregateNodeRanks() {
-		node := nodeLookup[id]
-		
-		switch(node.Variant()) {
-		// case RootPackage, Struct, Method:
-		default:
-			fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"];\n", id, rank, rank, node.Label())
-			// break
-		// default:
-			// fmt.Fprintf(w, "%v [label=\"%v\"];\n", rank.NodeId, node.Label())
-		}
-	}
+	ranks := g.computeNodeRanks()
+	aggRanks := g.computeAggregateNodeRanks(ranks)
+	
+	g.mapRanks(aggRanks, func(node Node, rank float64) {
+		fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"];\n", node.Id(), rank, rank, node.Label())
+	})
 
-	// 2. Edges
-	for _, edge := range g.edges {
-		switch(edge.from.Variant()) {
-		case Struct:
-			fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge.to.Id(), edge.from.Id())
-		}
-	}
+	g.mapEdges(aggRanks, func(edge edge) {
+		fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge.to.Id(), edge.from.Id())
+	})
 
 	w.WriteString("}\n")
 }
@@ -385,51 +369,77 @@ func newJsonGraph() jsonGraph {
 	return jsonGraph{
 		NodesLookup: make(map[nodeid]jsonNodeDef),
 		NodeTypes: nodeTypes,
+		Edges: []jsonNodeEdge{},
+		Nodes: []jsonNodeDef{},
+	}
+}
+
+type ranksMap = map[nodeid]float64
+
+func (g *graph) thing() {
+	// get file
+	// defer
+	// create graph serial structure
+	// make ranks, aggRanks
+	// output node defs
+	// output edges
+	// write
+}
+
+// Maps ranks with node lookup
+func (g *graph) mapRanks(ranks ranksMap, fn func(n Node, rank float64)) {
+	for id, rank := range ranks {
+		fn(nodeLookup[id], rank)
+	}
+}
+
+// Maps all edges, ignoring those that aren't in ranks.
+func (g *graph) mapEdges(ranks ranksMap, fn func(e edge)) {
+	for _, edge := range g.edges {
+		// Ignore edges that aren't in ranks
+		if _, ok := ranks[edge.from.Id()]; !ok {
+			continue
+		}
+		if _, ok := ranks[edge.to.Id()]; !ok {
+			continue
+		}
+
+		fn(edge)
 	}
 }
 
 func (g *graph) ToJson() {
-	buf := new(bytes.Buffer)
-	
 	path, _ := filepath.Abs("./www/graph.json")
 	f, err := os.Create(path)
-
+	buf := new(bytes.Buffer)
+	w := bufio.NewWriter(f)
 	if err != nil {
 		panic(err)
 	}
 	defer f.Close()
-	w := bufio.NewWriter(f)
 	defer w.Flush()
 
-
 	jsonGraph := newJsonGraph()
+	ranks := g.computeNodeRanks()
+	aggRanks := g.computeAggregateNodeRanks(ranks)
 
-	for id, rank := range g.computeAggregateNodeRanks() {
-		node := nodeLookup[id]
-
-		switch(node.Variant()) {
-		default:
-			n := jsonNodeDef{
-				Id: id,
-				Rank: rank,
-				Label: node.Label(),
-				Variant: node.Variant(),
-			}
-			jsonGraph.NodesLookup[id] = n
-			jsonGraph.Nodes = append(jsonGraph.Nodes, n)
+	g.mapRanks(aggRanks, func(node Node, rank float64) {
+		n := jsonNodeDef{
+			Id: node.Id(),
+			Rank: rank,
+			Label: node.Label(),
+			Variant: node.Variant(),
 		}
-	}
+		jsonGraph.NodesLookup[node.Id()] = n
+		jsonGraph.Nodes = append(jsonGraph.Nodes, n)
+	})
 
-	// 2. Edges
-	jsonGraph.Edges = []jsonNodeEdge{}
-	for _, edge := range g.edges {
-		if edge.from.Variant() == Struct && edge.to.Variant() == Struct {
-			jsonGraph.Edges = append(jsonGraph.Edges, jsonNodeEdge{
-				edge.to.Id(), 
-				edge.from.Id(),
-			})
-		}
-	}
+	g.mapEdges(aggRanks, func(edge edge) {
+		jsonGraph.Edges = append(jsonGraph.Edges, jsonNodeEdge{
+			edge.to.Id(), 
+			edge.from.Id(),
+		})
+	})
 
 	json.NewEncoder(buf).Encode(jsonGraph)
 	f.WriteString(buf.String())

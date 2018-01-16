@@ -203,11 +203,11 @@ function renderGraphD3(nodes, edges) {
                                 
   var link_force =  d3.forceLink(graphdata.edges)
                       .id(function(d) { return d.id; })
-                      .strength(1)
-                      .distance(10)
+                      // .strength(1)
+                      // .distance(10)
   
   var charge_force = d3.forceManyBody()
-                       .strength(-200)
+                      //  .strength(-200)
 
   simulation
       .nodes(graphdata.nodes)
@@ -215,11 +215,11 @@ function renderGraphD3(nodes, edges) {
       .force('charge', charge_force)
       .force('center', d3.forceCenter(width / 2, height / 2))
       .force('collision', d3.forceCollide().radius(function(d) {
-        return 15 + radius(d)
+        return 1 + radius(d)
       }))
    ;
 
-  // simulation.stop();
+  simulation.stop();
 
   d3.timeout(function() {  
     // See https://github.com/d3/d3-force/blob/master/README.md#simulation_tick
