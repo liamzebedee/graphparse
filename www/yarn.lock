@@ -1567,7 +1567,7 @@ d3-color@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/d3-color/-/d3-color-1.0.1.tgz#73cc91f4ee3f12e00ca06b1596a7c83cf104723a"
 
-d3-dispatch@1, d3-dispatch@1.0.3:
+d3-dispatch@1, d3-dispatch@1.0.3, d3-dispatch@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/d3-dispatch/-/d3-dispatch-1.0.3.tgz#46e1491eaa9b58c358fce5be4e8bed626e7871f8"
 
@@ -1629,7 +1629,7 @@ d3-force@1.1.0, d3-force@^1.1.0:
     d3-quadtree "1"
     d3-timer "1"
 
-d3-format@1:
+d3-format@1, d3-format@^1.2.0:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/d3-format/-/d3-format-1.2.2.tgz#1a39c479c8a57fe5051b2e67a3bee27061a74e7a"
 
@@ -1653,6 +1653,19 @@ d3-geo@1.9.1:
   dependencies:
     d3-array "1"
 
+d3-graphviz@^1.3.3:
+  version "1.3.3"
+  resolved "https://registry.yarnpkg.com/d3-graphviz/-/d3-graphviz-1.3.3.tgz#fc24275594fd067ed9ab1acf25086cfa45e5a6ab"
+  dependencies:
+    d3-dispatch "^1.0.3"
+    d3-format "^1.2.0"
+    d3-interpolate "^1.1.5"
+    d3-selection "^1.1.0"
+    d3-timer "^1.0.6"
+    d3-transition "^1.1.0"
+    d3-zoom "^1.5.0"
+    viz.js "^1.8.0"
+
 d3-hierarchy@1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/d3-hierarchy/-/d3-hierarchy-1.0.2.tgz#c8faa11dc49bcc93914c6aa35a46bdee4e01ee72"
@@ -1661,7 +1674,7 @@ d3-hierarchy@1.1.5:
   version "1.1.5"
   resolved "https://registry.yarnpkg.com/d3-hierarchy/-/d3-hierarchy-1.1.5.tgz#a1c845c42f84a206bcf1c01c01098ea4ddaa7a26"
 
-d3-interpolate@1, d3-interpolate@1.1.6:
+d3-interpolate@1, d3-interpolate@1.1.6, d3-interpolate@^1.1.5:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/d3-interpolate/-/d3-interpolate-1.1.6.tgz#2cf395ae2381804df08aa1bf766b7f97b5f68fb6"
   dependencies:
@@ -1795,7 +1808,7 @@ d3-time@1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/d3-time/-/d3-time-1.0.2.tgz#25da641a7061af8f68ad08ca173101717b7430fc"
 
-d3-timer@1, d3-timer@1.0.7:
+d3-timer@1, d3-timer@1.0.7, d3-timer@^1.0.6:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/d3-timer/-/d3-timer-1.0.7.tgz#df9650ca587f6c96607ff4e60cc38229e8dd8531"
 
@@ -1803,7 +1816,7 @@ d3-timer@1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/d3-timer/-/d3-timer-1.0.2.tgz#6ebf6bbeb6add41fc505284a97cc7611a30029f3"
 
-d3-transition@1, d3-transition@1.1.1:
+d3-transition@1, d3-transition@1.1.1, d3-transition@^1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/d3-transition/-/d3-transition-1.1.1.tgz#d8ef89c3b848735b060e54a39b32aaebaa421039"
   dependencies:
@@ -1843,7 +1856,7 @@ d3-zoom@1.0.3:
     d3-selection "1"
     d3-transition "1"
 
-d3-zoom@1.7.1:
+d3-zoom@1.7.1, d3-zoom@^1.5.0:
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/d3-zoom/-/d3-zoom-1.7.1.tgz#02f43b3c3e2db54f364582d7e4a236ccc5506b63"
   dependencies:
@@ -4855,6 +4868,10 @@ verror@1.10.0:
     assert-plus "^1.0.0"
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
+
+viz.js@^1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/viz.js/-/viz.js-1.8.0.tgz#e0cb5ad241368e35b1a6e960691eba454c24951f"
 
 vm-browserify@0.0.4:
   version "0.0.4"

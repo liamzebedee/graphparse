@@ -1,2 +1,4 @@
- - 
  - oh that's why there's only 8 files - it ignores GOOS-unspecific files
+ - make([]T, 16) makes an array with 16 nil entries
+ - you can do []T{} which is better
+ - also the for loop condition haha

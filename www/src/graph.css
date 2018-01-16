@@ -1,8 +1,12 @@
 body {
     font-family: "Helvetica Neue", sans-serif;
+    margin: 0;
+    zoom: 1;
 }
 
 .ctn {
+    width: 100vw;
+    height: 100vh;
 }
 
 .ctn #react-mount {
@@ -28,6 +32,11 @@ body {
     width: 100%;
 }
 
+#graph {
+    width: 100vw;
+    height: 100vh;
+}
+
 text {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     text-anchor: middle;
@@ -40,9 +49,17 @@ path.link {
     stroke-width: 1.5px;
   }
 
+  .nodes {
+    will-change: transform;
+  }
+  
 .nodes circle {
     stroke: black;
     stroke-width: 1px;
+}
+
+.nodes circle.selected {
+    stroke-width: 3px;
 }
 
 .nodes circle:hover {

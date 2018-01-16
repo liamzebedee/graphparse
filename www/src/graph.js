@@ -1,5 +1,16 @@
-import * as d3 from 'd3'
+import * as d3old from 'd3'
+// import 'd3-graphviz';
+// import 'viz.js';
+// import 'script-loader!./vendor/d3.v4.min.js';
+// import 'script-loader!./vendor/viz-lite.js';
+import  'script-loader!./vendor/d3.v4.min.js';
+import 'script-loader!./vendor/viz-lite.js';
+import 'script-loader!./vendor/d3-graphviz.min.js';
+
+
+
 import graphdata from '../graph.json';
+import graphDot from 'raw-loader!../graph.dot';
 import './graph.css';
 
 
@@ -31,7 +42,7 @@ class GraphStore {
   }
 
   @computed.struct get selectedNodes() {
-    return Array.from(this.selectedNodeIds).map(id => { console.log(id); return graphdata.nodesLookup[id] })
+    return Array.from(this.selectedNodeIds).map(id => { return graphdata.nodesLookup[id] })
   }
 
   mouseoverNode(id) {
@@ -146,17 +157,29 @@ const SelectionInfo = (props) => {
 
 var nodeColor = d3.scaleOrdinal(d3.schemeCategory20);
 
-document.addEventListener('DOMContentLoaded', function() {
-  ReactDOM.render(
-    <InfoView store={graphStore}/>,
-    document.getElementById('react-mount')
-  );
+function renderGraph(nodes, edges) {
+  renderGraphD3()
+  // renderGraphVizJs()
+}
 
 
+function renderGraphVizJs(nodes, edges) {
+  d3
+    .select("#graph")
+    .append('svg')
+    .attr('width', '100%').attr('height', '100%')
+    .graphviz()
+    .renderDot(graphDot)
+    .totalMemory(16777216 * 2)
+    
+}
+
+function renderGraphD3(nodes, edges) {
+  let graph = d3.select("#graph")
   var svg = d3.select("#graph").append('svg')
+  .attr('width', '100%').attr('height', '100%')
   var width = 900;
   var height = 700;
-  svg.attr('width', '100%').attr('height', '100%')
 
   svg.append("defs").selectAll("marker")
     .data(["end"])
@@ -195,9 +218,19 @@ document.addEventListener('DOMContentLoaded', function() {
         return 15 + radius(d)
       }))
    ;
+
+  // simulation.stop();
+
+  d3.timeout(function() {  
+    // See https://github.com/d3/d3-force/blob/master/README.md#simulation_tick
+    for (var i = 0, n = Math.ceil(Math.log(simulation.alphaMin()) / Math.log(1 - simulation.alphaDecay())); i < n; ++i) {
+      simulation.tick();
+      tickActions()
+    }
+  });
           
   //add tick instructions: 
-  simulation.on("tick", tickActions );
+  // simulation.on("tick", tickActions );
   
   //add encompassing group for the zoom 
   var g = svg.append("g")
@@ -240,27 +273,37 @@ function radius(d) {
 }
 
   let circle = node.append("circle")
-              .attr("r", function(d) {
-                return radius(d)
-              })
-              .attr("fill", function(d) { return nodeColor(d.variant); })
+              .attr("r", radius)
+              .attr("fill", (d) => nodeColor(d.variant))
   
   mobx.autorun(() => {
     if(graphStore.highlightedNodes == null) {
-      node.attr('opacity', 1)
-      link.attr('opacity', 1)
+      node
+        .attr('opacity', 1)
+      
+      circle
+        .classed('selected', false)
+      
+      link
+        .attr('opacity', 1)
+      
     } else {
       node
-      .attr('opacity', 0.2)
-      .filter(function(d) {
-        return graphStore.getNodeHighlight(d.id) != null;
-      })
-      .attr('opacity', function(d) {
-        return 1 - graphStore.getNodeHighlight(d.id).score;
-      });
+        .attr('opacity', 0.2)
+        .filter(function(d) {
+          return graphStore.getNodeHighlight(d.id) != null;
+        })
+        .attr('opacity', function(d) {
+          return 1 - graphStore.getNodeHighlight(d.id).score;
+        });
+      
+      circle
+        .classed('selected', function(d) {
+          return _.has(graphStore.selectedNodeIds, d.id)
+        })
 
       link
-      .attr('opacity', 0)
+        .attr('opacity', 0)
     }
   })
 
@@ -272,30 +315,35 @@ function radius(d) {
               })
               .attr("dy", ".35em")
 
-  //add drag capabilities  
-  var drag_handler = d3.drag()
-    .on("start", drag_start)
-    .on("drag", drag_drag)
-    .on("end", drag_end);	
-    
-  drag_handler(circle);
   
   
-  //add zoom capabilities 
   var zoom_handler = d3.zoom()
-      .on("zoom", zoom_actions);
+    // .scaleExtent([1, Infinity])
+    // .translateExtent([[0, 0], [width, height]])
+    // .extent([[0, 0], [width, height]])
+    .on("zoom", () => {
+      let transform = d3.event.transform;
+      
+      // g.attr("transform", d3.event.transform)
+      g.style("transform", () => `translate3d(${transform.x}px, ${transform.y}px, 0px) scale(${transform.k})`)
+    });
   
-  zoom_handler(svg);     
+  zoom_handler(svg);   
+
+
+  var drag_handler = d3.drag()
+  .on("start", drag_start)
+  .on("drag", drag_drag)
+  .on("end", drag_end);	
   
-  //Drag functions 
-  //d is the node 
+  drag_handler(node);
+
   function drag_start(d) {
-   if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
       d.fx = d.x;
       d.fy = d.y;
   }
-  
-  //make sure you can't drag the circle outside the box
+
   function drag_drag(d) {
     d.fx = d3.event.x;
     d.fy = d3.event.y;
@@ -306,12 +354,7 @@ function radius(d) {
     d.fx = null;
     d.fy = null;
   }
-  
-  //Zoom functions 
-  function zoom_actions(){
-      g.attr("transform", d3.event.transform)
-  }
-  
+
 
   function tickActions() {
     link.attr("d", function(d) {
@@ -323,7 +366,6 @@ function radius(d) {
       let pathLength = Math.sqrt((diffX * diffX) + (diffY * diffY));
 
       // x and y distances from center to outside edge of target node
-
       let offsetX = (diffX * radius(d.target)) / pathLength;
       let offsetY = (diffY * radius(d.target)) / pathLength;
 
@@ -332,6 +374,7 @@ function radius(d) {
   
     // update circle positions each tick of the simulation 
     node
+      // .attr("style", function (d) { return `transform: translate3d(${d.x}px, ${d.y}px, 0px)` })
       .attr('transform', (d) => `translate(${d.x} ${d.y})`)
           
     // update link positions 
@@ -341,7 +384,14 @@ function radius(d) {
       .attr("x2", function(d) { return d.target.x; })
       .attr("y2", function(d) { return d.target.y; });
   } 
+}
 
 
+document.addEventListener('DOMContentLoaded', function() {
+  ReactDOM.render(
+    <InfoView store={graphStore}/>,
+    document.getElementById('react-mount')
+  );
 
+  renderGraph()
 });

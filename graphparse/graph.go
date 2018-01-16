@@ -181,7 +181,10 @@ func LookupOrCreateCanonicalNode(key string, variant NodeType, label string) *ca
 
 type nodeid int64
 
-type edge []Node
+type edge struct {
+	from Node
+	to Node
+}
 
 type graph struct {
 	edges []edge
@@ -193,14 +196,14 @@ func NewGraph() *graph {
 }
 
 
-type pointerGraph struct {
 
-}
-func (g *graph) toPointerGraph() *pointerGraph {
-	return nil
-}
+// type pointerGraph struct {
+// }
+// func (g *graph) toPointerGraph() *pointerGraph {
 
-func (graph *graph) AddEdge(from, to Node) {
+// }
+
+func (g *graph) AddEdge(from, to Node) {
 	if from == nil {
 		panic("from node must be non-nil")
 	}
@@ -214,87 +217,152 @@ func (graph *graph) AddEdge(from, to Node) {
 		panic("to node doesn't exist, cannot add edge")
 	}
 	e := edge{from, to}
-	graph.edges = append(graph.edges, e)
+	g.edges = append(g.edges, e)
 }
 
 
-// func (g *graph) ToDot() string {
-// 	printToStdout := false
-// 	dotfilePath, _ := filepath.Abs("./www/graph.dot")
-// 	f, err := os.Create(dotfilePath)
+func (g *graph) computeNodeRanks() map[nodeid]float64 {
+	fmt.Println(len(g.edges), "edges and", len(nodeLookup), "nodes")
 
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	if printToStdout {
-// 		f = os.Stdout
-// 	} else {
-// 		defer f.Close()
-// 	}
-// 	w := bufio.NewWriter(f)
-// 	defer w.Flush()
+	// Compute PageRank distribution
+	graph := pagerank.New()
+	for _, edge := range g.edges {
+		if edge.from.Variant() == RootPackage {	
+			graph.Link(int(edge.from.Id()), int(edge.to.Id()))
+			// continue
+		} else {
+			graph.Link(int(edge.from.Id()), int(edge.to.Id()))
+		}
+	}
 
-// 	fmt.Println(len(this.edges), "edges and", len(nodeLookup), "nodes")
+	probability_of_following_a_link := 0.9
+	tolerance := 0.05
 
-// 	// Compute PageRank distribution
-// 	graph := pagerank.New()
-// 	for _, edge := range this.edges {
-// 		graph.Link(int(edge[0].Id()), int(edge[1].Id()))
-// 	}
+	var ranks rankPairList
+	graph.Rank(probability_of_following_a_link, tolerance, func(identifier int, rank float64) {
+		ranks = append(ranks, rankPair{nodeid(identifier), rank})
+	})
 
-// 	probability_of_following_a_link := 0.85
-// 	tolerance := 0.05
+	// normalise ranks to something that is nice to look at
+	sort.Sort(ranks)
 
-// 	// Generate .dot file for graphviz
-// 	// ------
-// 	w.WriteString("digraph graphname {\n")
+	minSize, maxSize := 1.0, 6.0
+	min, max := ranks[0].Rank, ranks[len(ranks)-1].Rank
 
-// 	// 1. Node definitions
-// 	var ranks rankPairList
-// 	graph.Rank(probability_of_following_a_link, tolerance, func(identifier int, rank float64) {
-// 		ranks = append(ranks, rankPair{nodeid(identifier), rank})
-// 	})
+	scaleRank := func(rank float64) float64 {
+		return (maxSize - minSize)  *  (rank - min)/(max - min) + minSize
+	}
+	fmt.Println("smallest node is", min, scaleRank(min))
+	fmt.Println("biggest node is", max, scaleRank(max))
 
-// 	// normalise ranks to something that is nice to look at
-// 	sort.Sort(ranks)
+	rankMap := make(map[nodeid]float64)
 
-// 	minSize, maxSize := 1.0, 6.0
-// 	min, max := ranks[0].Rank, ranks[len(ranks)-1].Rank
+	for _, rank := range ranks {
+		rankScaled := scaleRank(rank.Rank)
+		rankMap[rank.NodeId] = rankScaled
+	}
 
-// 	scaleRank := func(rank float64) float64 {
-// 		return (maxSize - minSize)  *  (rank - min)/(max - min) + minSize
-// 	}
-// 	fmt.Println("smallest node is", min, scaleRank(min))
-// 	fmt.Println("biggest node is", max, scaleRank(max))
+	return rankMap
+}
 
-// 	for _, rank := range ranks {
-// 		node := nodeLookup[rank.NodeId]
-// 		rankStretched := scaleRank(rank.Rank)
 
-// 		switch(node.Variant()) {
-// 		// case RootPackage, Struct, Method:
-// 		default:
-// 			fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"];\n", rank.NodeId, rankStretched, rankStretched, node.Label())
-// 			// break
-// 		// default:
-// 			// fmt.Fprintf(w, "%v [label=\"%v\"];\n", rank.NodeId, node.Label())
-// 		}
-// 	}
+func (g *graph) computeAggregateNodeRanks() map[nodeid]float64 {
+	ranks := g.computeNodeRanks()
 
-// 	// 2. Edges
-// 	for _, edge := range this.edges {
-// 		from := edge[1]
-// 		// to := edge[0]
+	getNodesToRemove := func(ranks map[nodeid]float64, shouldRemove func(n Node) bool) []nodeid {
+		ids := []nodeid{}
+		for id, rank := range ranks {
+			if rank > 0 && shouldRemove(nodeLookup[id]) {
+				ids = append(ids, id)
+			}
+		}
+		return ids
+	}
 
-// 		switch(from.Variant()) {
-// 		// case RootPackage, ImportedPackage, Struct, Method:
-// 		default:
-// 			fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge[1].Id(), edge[0].Id())
-// 		}
-// 	}
+	outEdges := make(map[nodeid][]Node)
+	for _, edge := range g.edges {
+		if l, ok := outEdges[edge.from.Id()]; !ok {
+			outEdges[edge.from.Id()] = []Node{edge.to}
+		} else {
+			outEdges[edge.from.Id()] = append(l, edge.to)
+		}
+	}
 
-// 	w.WriteString("}\n")
-// }
+	removeCond := func(n Node) bool {
+		return n.Variant() != Struct 
+	}
+
+	iters := 0
+
+	for nodes := getNodesToRemove(ranks, removeCond); len(nodes) > 0; nodes = getNodesToRemove(ranks, removeCond) {
+		fmt.Println("aggregating nodes, iteration", iters)
+		for _, id := range nodes {
+			outs := outEdges[id]
+
+			rankDist := ranks[id] / float64(len(outs))
+			for _, out := range outs {
+				ranks[out.Id()] += rankDist
+			}
+			// Technically equivalent to deletion, 
+			// since PageRank will never issue a rank of 0.
+			ranks[id] = 0
+		}
+		iters++
+	}
+
+	for id, r := range ranks {
+		if r == 0 {
+			delete(ranks, id)
+		}
+	}
+
+	return ranks
+}
+
+
+func (g *graph) ToDot() {
+	printToStdout := false
+	dotfilePath, _ := filepath.Abs("./www/graph.dot")
+	f, err := os.Create(dotfilePath)
+
+	if err != nil {
+		panic(err)
+	}
+	if printToStdout {
+		f = os.Stdout
+	} else {
+		defer f.Close()
+	}
+	w := bufio.NewWriter(f)
+	defer w.Flush()
+
+	// Generate .dot file for graphviz
+	// ------
+	w.WriteString("digraph graphname {\n")
+	
+	for id, rank := range g.computeAggregateNodeRanks() {
+		node := nodeLookup[id]
+		
+		switch(node.Variant()) {
+		// case RootPackage, Struct, Method:
+		default:
+			fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"];\n", id, rank, rank, node.Label())
+			// break
+		// default:
+			// fmt.Fprintf(w, "%v [label=\"%v\"];\n", rank.NodeId, node.Label())
+		}
+	}
+
+	// 2. Edges
+	for _, edge := range g.edges {
+		switch(edge.from.Variant()) {
+		case Struct:
+			fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge.to.Id(), edge.from.Id())
+		}
+	}
+
+	w.WriteString("}\n")
+}
 
 
 type jsonNodeDef struct {
@@ -310,7 +378,7 @@ type jsonNodeEdge struct {
 type jsonGraph struct {
 	NodesLookup map[nodeid]jsonNodeDef `json:"nodesLookup"`
 	Nodes []jsonNodeDef `json:"nodes"`
-	Edges []jsonNodeEdge 		 `json:"edges"`
+	Edges []jsonNodeEdge `json:"edges"`
 	NodeTypes []string `json:"nodeTypes"`
 }
 func newJsonGraph() jsonGraph {
@@ -333,69 +401,32 @@ func (g *graph) ToJson() {
 	w := bufio.NewWriter(f)
 	defer w.Flush()
 
-	fmt.Println(len(g.edges), "edges and", len(nodeLookup), "nodes")
-
-	// Compute PageRank distribution
-	graph := pagerank.New()
-	for _, edge := range g.edges {
-		graph.Link(int(edge[0].Id()), int(edge[1].Id()))
-	}
-
-	probability_of_following_a_link := 0.85
-	tolerance := 0.05
-
-
-	// 1. Node definitions
-	var ranks rankPairList
-	graph.Rank(probability_of_following_a_link, tolerance, func(identifier int, rank float64) {
-		ranks = append(ranks, rankPair{nodeid(identifier), rank})
-	})
-
-	// normalise ranks to something that is nice to look at
-	sort.Sort(ranks)
-
-	minSize, maxSize := 1.0, 6.0
-	min, max := ranks[0].Rank, ranks[len(ranks)-1].Rank
-
-	scaleRank := func(rank float64) float64 {
-		return (maxSize - minSize)  *  (rank - min)/(max - min) + minSize
-	}
-	fmt.Println("smallest node is", min, scaleRank(min))
-	fmt.Println("biggest node is", max, scaleRank(max))
-
 
 	jsonGraph := newJsonGraph()
 
-	for _, rank := range ranks {
-		node := nodeLookup[rank.NodeId]
-		rankStretched := scaleRank(rank.Rank)
+	for id, rank := range g.computeAggregateNodeRanks() {
+		node := nodeLookup[id]
 
 		switch(node.Variant()) {
 		default:
-			// fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"];\n", rank.NodeId, rankStretched, rankStretched, node.Label())
 			n := jsonNodeDef{
-				Rank: rankStretched,
+				Id: id,
+				Rank: rank,
 				Label: node.Label(),
-				Id: node.Id(),
 				Variant: node.Variant(),
 			}
-			jsonGraph.NodesLookup[rank.NodeId] = n
+			jsonGraph.NodesLookup[id] = n
 			jsonGraph.Nodes = append(jsonGraph.Nodes, n)
 		}
 	}
 
 	// 2. Edges
+	jsonGraph.Edges = []jsonNodeEdge{}
 	for _, edge := range g.edges {
-		from := edge[1]
-		// to := edge[0]
-
-		switch(from.Variant()) {
-		// case RootPackage, ImportedPackage, Struct, Method:
-		default:
-			// fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge[1].Id(), edge[0].Id())
+		if edge.from.Variant() == Struct && edge.to.Variant() == Struct {
 			jsonGraph.Edges = append(jsonGraph.Edges, jsonNodeEdge{
-				edge[1].Id(), 
-				edge[0].Id(),
+				edge.to.Id(), 
+				edge.from.Id(),
 			})
 		}
 	}

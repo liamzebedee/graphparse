@@ -233,7 +233,8 @@ func Visit(node ast.Node) bool {
 		obj = exprToObj(x.Fun)
 
 		if obj == nil {
-			panic(x.Fun)
+			return true
+			// panic(x.Fun)
 		}
 		
 		if obj.Pkg() != nil && obj.Pkg().Name() == thisPackage {
