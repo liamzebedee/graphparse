@@ -83,9 +83,12 @@ class ASTView extends React.Component {
         return <div className='container-fluid'>
             <div id='code'>
                 <pre ref={(ref) => this.codePre = ref}>
-                    {this.state.src.code || <div className="alert alert-warning" role="alert">
+                    {this.state.src.code === undefined ? <div className="alert alert-warning" role="alert">
                     Can't load code. Is graphparse running with the API server flag? <pre>graphparse -api</pre>
-                    </div>}
+                    </div> : null }
+                    {this.state.src.code == "" ? <div className="alert alert-warning" role="alert">
+                    Server responded with no code. Check package / file import path.
+                    </div> : null }
                 </pre>
             </div>
             <div id='sidebar'>

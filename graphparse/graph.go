@@ -10,30 +10,21 @@ import (
 	"encoding/json"
 	"bytes"
 	"github.com/dcadenas/pagerank"
+	"strings"
 )
 
 
 var nodeLookup = make(map[nodeid]Node)
+var rootNode Node
 
 func addNodeToLookup(n Node) {
 	nodeLookup[n.Id()] = n
+	if rootNode == nil && n.Variant() == RootPackage {
+		rootNode = n
+	}
 }
 
-// how to prune intermediates?
-// a -> b -> c
-// prune b
-// a -> c
-
-// e -> 
-// a -> b -> c
-//		  -> d -> a
-// a -> c
-
-// then
-
-// e -> a
-// a -> c
-// a -> d
+type ranksMap = map[nodeid]float64
 
 type NodeType int
 const (
@@ -68,6 +59,7 @@ type Node interface {
 	Id() nodeid
 	Label() string
 	Variant() NodeType
+	String() string
 }
 
 type objNode struct {
@@ -79,6 +71,9 @@ type objlookup struct {
 	id string
 }
 var objLookups = make(map[string]*objlookup)
+
+// The Id of an object node is defined canonically 
+// as the token.Pos of where the type is declared
 func (n *objNode) Id() nodeid {
 	switch n.variant {
 	case Struct:
@@ -101,13 +96,8 @@ func (n *objNode) Id() nodeid {
 		}
 		return pointerToId(x)
 	}
-
-	// if objId == "Run" {
-	// 	fmt.Println(n.obj.String())
-	// }
-	// objId := string(n.obj.Pos()) + n.obj.Id()
 	
-	panic("cant get id")
+	panic("can't get id")
 }
 func (n *objNode) Label() string {
 	return n.baseNode.label
@@ -115,6 +105,11 @@ func (n *objNode) Label() string {
 func (n *objNode) Variant() NodeType {
 	return n.baseNode.variant
 }
+func (n *objNode) String() string {
+	return fmt.Sprintf("%s <%s>", n.Label(), nodeTypes[n.Variant()])
+}
+
+
 
 
 func LookupOrCreateNode(obj types.Object, variant NodeType, label string) *objNode {
@@ -136,19 +131,6 @@ func LookupOrCreateNode(obj types.Object, variant NodeType, label string) *objNo
 	return node.(*objNode)
 }
 
-func LookupNode(obj types.Object) *objNode {
-	if obj == nil {
-		panic("obj must be non-nil")
-	}
-	id := pointerToId(obj)
-
-	node, ok := nodeLookup[id]
-	if !ok {
-		panic("node not found")
-	}
-	return node.(*objNode)
-}
-
 var canonicalNodeLookup = make(map[string]*canonicalNode)
 
 type canonicalNode struct {
@@ -163,6 +145,9 @@ func (n *canonicalNode) Label() string {
 }
 func (n *canonicalNode) Variant() NodeType {
 	return n.baseNode.variant
+}
+func (n *canonicalNode) String() string {
+	return fmt.Sprintf("%s <%s>", n.Label(), nodeTypes[n.Variant()])
 }
 
 func LookupOrCreateCanonicalNode(key string, variant NodeType, label string) *canonicalNode {
@@ -186,6 +171,10 @@ type edge struct {
 	to Node
 }
 
+func (e edge) String() string {
+	return fmt.Sprintf("%s -> %s", e.from.String(), e.to.String())
+}
+
 type graph struct {
 	edges []edge
 }
@@ -197,11 +186,127 @@ func NewGraph() *graph {
 
 
 
-// type pointerGraph struct {
-// }
-// func (g *graph) toPointerGraph() *pointerGraph {
 
-// }
+
+// Returns indices of edges that match cond
+func filterEdges(edges []edge, cond func(edge) bool) []int {
+	l := []int{}
+	for i, e := range edges {
+		if cond(e) {
+			l = append(l, i)
+		}
+	}
+	return l
+}
+
+func (g *graph) contractEdges(shouldContract func(Node) bool) ([]edge, map[nodeid]float64) {
+	edges := newArrayList()
+	for _, v := range g.edges {
+		fmt.Println(v.String())
+		edges.append(v)
+	}
+
+	aggRanks := make(ranksMap)
+	for id, _ := range nodeLookup {
+		aggRanks[id] = 0.
+	}
+
+	getUniqueNodes := func(edges *arraylist) []Node {
+		unique := make(map[nodeid]Node)
+		nodes := []Node{}
+		for _, e := range edges.Map() {
+			a := e.(edge).from
+			b := e.(edge).to
+			unique[a.Id()] = a
+			unique[b.Id()] = b
+		}
+		for _, n := range unique {
+			nodes = append(nodes, n)
+		}
+		return nodes
+	}
+
+	getNodesToContract := func(edges *arraylist) []Node {
+		nodesToContract := []Node{}
+		for _, n := range getUniqueNodes(edges) {
+			if shouldContract(n) {
+				nodesToContract = append(nodesToContract, n)
+			}
+		}
+		return nodesToContract
+	}
+
+	// get all edges of this node
+	filterEdges := func(edges *arraylist, cond func(e edge) bool) []int {
+		l := []int{}
+		for i, e := range edges.Map() {
+			if cond(e.(edge)) {
+				l = append(l, i)
+			}
+		}
+		return l
+	}
+
+
+	nodesToContract := getNodesToContract(edges)
+	fmt.Println( "contracting", len(nodesToContract), "nodes")
+
+	for _, n := range nodesToContract {
+		// fmt.Println(n.String())
+
+		// for this node N
+		// [A,B,C] -> N -> [E,F,G]
+		//   ins             outs
+
+		// do this
+		// [A] -> [E,F,G]
+		// [B] -> [E,F,G]
+		// [C] -> [E,F,G]
+
+		inEdgeIdxs := filterEdges(edges, func(e edge) bool {
+			return e.to.Id() == n.Id()
+		})
+		outEdgeIdxs := filterEdges(edges, func(e edge) bool {
+			return e.from.Id() == n.Id()
+		})
+
+		
+
+		for _, in := range inEdgeIdxs {
+			if len(outEdgeIdxs) > 0 {
+				inEdge := edges.get(in).(edge)
+
+				for _, out := range outEdgeIdxs {
+					outEdge := edges.get(out).(edge)
+
+					edges.append(edge{
+						from: inEdge.from,
+						to: outEdge.to,
+					})
+				}
+			}
+
+			edges.delete(in)
+		}
+
+		if len(outEdgeIdxs) > 0 {
+			for _, out := range outEdgeIdxs {
+				edges.delete(out)
+			}
+		}
+
+	}
+
+	edgesArr := []edge{}
+	for _, v := range edges.Map() {
+		edgesArr = append(edgesArr, v.(edge))
+	}
+
+	fmt.Println("Reduced from", len(g.edges), "to", len(edgesArr), "edges")
+
+	return edgesArr, aggRanks
+}
+
 
 func (g *graph) AddEdge(from, to Node) {
 	if from == nil {
@@ -221,18 +326,13 @@ func (g *graph) AddEdge(from, to Node) {
 }
 
 
-func (g *graph) computeNodeRanks() map[nodeid]float64 {
-	fmt.Println(len(g.edges), "edges and", len(nodeLookup), "nodes")
+func (g *graph) computeNodeRanks(edges []edge) ranksMap {
+	fmt.Println(len(edges), "edges and", len(nodeLookup), "nodes")
 
 	// Compute PageRank distribution
 	graph := pagerank.New()
-	for _, edge := range g.edges {
-		if edge.from.Variant() == RootPackage {	
-			graph.Link(int(edge.from.Id()), int(edge.to.Id()))
-			// continue
-		} else {
-			graph.Link(int(edge.from.Id()), int(edge.to.Id()))
-		}
+	for _, edge := range edges {
+		graph.Link(int(edge.from.Id()), int(edge.to.Id()))
 	}
 
 	probability_of_following_a_link := 0.9
@@ -247,6 +347,9 @@ func (g *graph) computeNodeRanks() map[nodeid]float64 {
 	sort.Sort(ranks)
 
 	minSize, maxSize := 1.0, 6.0
+	if len(ranks) == 0 {
+		panic("no ranks")
+	}
 	min, max := ranks[0].Rank, ranks[len(ranks)-1].Rank
 
 	scaleRank := func(rank float64) float64 {
@@ -255,7 +358,7 @@ func (g *graph) computeNodeRanks() map[nodeid]float64 {
 	fmt.Println("smallest node is", min, scaleRank(min))
 	fmt.Println("biggest node is", max, scaleRank(max))
 
-	rankMap := make(map[nodeid]float64)
+	rankMap := make(ranksMap)
 
 	for _, rank := range ranks {
 		rankScaled := scaleRank(rank.Rank)
@@ -264,6 +367,7 @@ func (g *graph) computeNodeRanks() map[nodeid]float64 {
 
 	return rankMap
 }
+
 
 
 func (g *graph) computeAggregateNodeRanks(ranks map[nodeid]float64) map[nodeid]float64 {
@@ -317,75 +421,6 @@ func (g *graph) computeAggregateNodeRanks(ranks map[nodeid]float64) map[nodeid]f
 	return ranks
 }
 
-
-func (g *graph) ToDot() {
-	dotfilePath, _ := filepath.Abs("./www/graph.dot")
-	f, err := os.Create(dotfilePath)
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-
-	
-	w := bufio.NewWriter(f)
-	defer w.Flush()
-
-	// Generate .dot file for graphviz
-	// ------
-	w.WriteString("digraph graphname {\n")
-	
-	ranks := g.computeNodeRanks()
-	aggRanks := g.computeAggregateNodeRanks(ranks)
-	
-	g.mapRanks(aggRanks, func(node Node, rank float64) {
-		fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"];\n", node.Id(), rank, rank, node.Label())
-	})
-
-	g.mapEdges(aggRanks, func(edge edge) {
-		fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge.to.Id(), edge.from.Id())
-	})
-
-	w.WriteString("}\n")
-}
-
-
-type jsonNodeDef struct {
-	Rank float64 `json:"rank"`
-	Label string `json:"label"`
-	Id nodeid `json:"id"`
-	Variant NodeType `json:"variant"`
-}
-type jsonNodeEdge struct {
-	From nodeid `json:"source"`
-	To nodeid   `json:"target"`
-}
-type jsonGraph struct {
-	NodesLookup map[nodeid]jsonNodeDef `json:"nodesLookup"`
-	Nodes []jsonNodeDef `json:"nodes"`
-	Edges []jsonNodeEdge `json:"edges"`
-	NodeTypes []string `json:"nodeTypes"`
-}
-func newJsonGraph() jsonGraph {
-	return jsonGraph{
-		NodesLookup: make(map[nodeid]jsonNodeDef),
-		NodeTypes: nodeTypes,
-		Edges: []jsonNodeEdge{},
-		Nodes: []jsonNodeDef{},
-	}
-}
-
-type ranksMap = map[nodeid]float64
-
-func (g *graph) thing() {
-	// get file
-	// defer
-	// create graph serial structure
-	// make ranks, aggRanks
-	// output node defs
-	// output edges
-	// write
-}
-
 // Maps ranks with node lookup
 func (g *graph) mapRanks(ranks ranksMap, fn func(n Node, rank float64)) {
 	for id, rank := range ranks {
@@ -408,6 +443,78 @@ func (g *graph) mapEdges(ranks ranksMap, fn func(e edge)) {
 	}
 }
 
+func (g *graph) mapEdges2(edges []edge, ranks ranksMap, fn func(e edge)) {
+	for _, edge := range edges {
+		fn(edge)
+	}
+}
+
+func (g *graph) ToDot() {
+	dotfilePath, _ := filepath.Abs("./www/graph.dot")
+	f, err := os.Create(dotfilePath)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	
+	w := bufio.NewWriter(f)
+	defer w.Flush()
+
+	
+	edges, _ := g.contractEdges(func(n Node) bool {
+		switch(n.Variant()) {
+		case Struct, RootPackage:
+			return false
+		default:
+			return true
+		}
+	})
+	ranks := g.computeNodeRanks(edges)
+	// ranks = g.computeAggregateNodeRanks(ranks)
+	
+	w.WriteString("digraph graphname {\n")
+	
+	g.mapRanks(ranks, func(node Node, rank float64) {
+		fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"];\n", node.Id(), rank, rank, node.Label())
+	})
+
+	g.mapEdges2(edges, ranks, func(edge edge) {
+		fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge.from.Id(), edge.to.Id())
+	})
+
+	w.WriteString("}")
+}
+
+
+type jsonNodeDef struct {
+	Rank float64 `json:"rank"`
+	Label string `json:"label"`
+	Id nodeid `json:"id"`
+	Variant NodeType `json:"variant"`
+	Pos string
+}
+type jsonNodeEdge struct {
+	From nodeid `json:"source"`
+	To nodeid   `json:"target"`
+}
+type jsonGraph struct {
+	NodesLookup map[nodeid]jsonNodeDef `json:"nodesLookup"`
+	Nodes []jsonNodeDef `json:"nodes"`
+	Edges []jsonNodeEdge `json:"edges"`
+	NodeTypes []string `json:"nodeTypes"`
+}
+func newJsonGraph() jsonGraph {
+	return jsonGraph{
+		NodesLookup: make(map[nodeid]jsonNodeDef),
+		NodeTypes: nodeTypes,
+		Edges: []jsonNodeEdge{},
+		Nodes: []jsonNodeDef{},
+	}
+}
+
+
+
 func (g *graph) ToJson() {
 	path, _ := filepath.Abs("./www/graph.json")
 	f, err := os.Create(path)
@@ -420,10 +527,20 @@ func (g *graph) ToJson() {
 	defer w.Flush()
 
 	jsonGraph := newJsonGraph()
-	ranks := g.computeNodeRanks()
-	aggRanks := g.computeAggregateNodeRanks(ranks)
+	edges, _ := g.contractEdges(func(n Node) bool {
+		switch(n.Variant()) {
+		case Struct, RootPackage:
+			return false
+		default:
+			if n.Variant() == Func && (strings.HasPrefix(n.Label(), "New") || strings.HasPrefix(n.Label(), "new")) {
+				return false
+			}
+			return true
+		}
+	})
+	ranks := g.computeNodeRanks(edges)
 
-	g.mapRanks(aggRanks, func(node Node, rank float64) {
+	g.mapRanks(ranks, func(node Node, rank float64) {
 		n := jsonNodeDef{
 			Id: node.Id(),
 			Rank: rank,
@@ -434,10 +551,10 @@ func (g *graph) ToJson() {
 		jsonGraph.Nodes = append(jsonGraph.Nodes, n)
 	})
 
-	g.mapEdges(aggRanks, func(edge edge) {
+	g.mapEdges(ranks, func(edge edge) {
 		jsonGraph.Edges = append(jsonGraph.Edges, jsonNodeEdge{
-			edge.to.Id(), 
-			edge.from.Id(),
+			edge.from.Id(), 
+			edge.to.Id(),
 		})
 	})
 

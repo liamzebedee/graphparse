@@ -37,7 +37,6 @@ func showSrc(w http.ResponseWriter, r *http.Request) {
 }
 
 type posInfo struct {
-	// Nodes []ast.Node `json:"output"`
 	Output string `json:"output"`
 }
 

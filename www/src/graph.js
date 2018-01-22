@@ -203,11 +203,11 @@ function renderGraphD3(nodes, edges) {
                                 
   var link_force =  d3.forceLink(graphdata.edges)
                       .id(function(d) { return d.id; })
-                      // .strength(1)
-                      // .distance(10)
+                      .strength(1)
+                      .distance(10)
   
   var charge_force = d3.forceManyBody()
-                      //  .strength(-200)
+                       .strength(-200)
 
   simulation
       .nodes(graphdata.nodes)

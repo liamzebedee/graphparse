@@ -33,3 +33,43 @@ func pointerToId(ptr interface{}) nodeid {
 		return nodeid(i)
 	}
 }
+
+
+type arraylist struct {
+	counter int
+	backing map[int]interface{}
+}
+
+func newArrayList() *arraylist {
+	return &arraylist{
+		counter: 0,
+		backing: make(map[int]interface{}),
+	}
+}
+
+func (l *arraylist) append(v interface{}) {
+	l.backing[l.counter] = v
+	l.counter++
+	// fmt.Println("app", l.counter)
+}
+
+func (l *arraylist) delete(i int) {
+	// fmt.Println("del", i)
+	delete(l.backing, i)
+}
+
+// func (l arraylist) toArray() (arr []interface{}) {
+// 	arr = []interface{}{}
+// 	for _, v := range l.backing {
+// 		arr = append(arr, v)
+// 	}
+// 	return arr
+// }
+
+func (l *arraylist) Map() map[int]interface{} {
+	return l.backing
+}
+
+func (l *arraylist) get(i int) interface{} {
+	return l.backing[i]
+}

@@ -219,8 +219,11 @@ func Visit(node ast.Node) bool {
 			}
 			
 			// varName := recvTypeObj.Name()
-			recvTypeNode := LookupOrCreateNode(recvTypeObj, Struct, structName)
-			Graph.AddEdge(funcNode, recvTypeNode)
+
+			// Type of the receiver
+			// ie the type that this method operates on
+			typeNode := LookupOrCreateNode(recvTypeObj, Struct, structName)
+			Graph.AddEdge(funcNode, typeNode)
 		} else {
 			Graph.AddEdge(rootPackage, funcNode)
 		}
@@ -241,57 +244,6 @@ func Visit(node ast.Node) bool {
 			funcCall := LookupOrCreateNode(obj, FuncCall, obj.Name())
 			Graph.AddEdge(parentFunc, funcCall)
 		}
-
-		
-		// switch y := x.Fun.(type) {
-		// case *ast.SelectorExpr:
-		// 	obj := pkginfo.ObjectOf(y.Sel)
-		// 	pkg := obj.Pkg()
-
-		// 	if pkg != nil {
-		// 		if pkg.Name() == "subnet" {
-		// 			id, err := getIdOfIdent(y.Sel)
-		// 			if err != nil {
-		// 				fmt.Fprintln(os.Stderr, err.Error())
-		// 				return true
-		// 			}
-		
-		// 			callNode := NewNode(y, id, y.Sel.Name, ShouldAlreadyExist)
-		// 			Graph.AddEdge(callNode, parentNode)
-		// 			// Graph.AddEdge(parentNode, callNode)
-					
-		// 		} else {
-		// 			importName := pkg.Path()
-		// 			pkgId := GetCanonicalNodeId(importName)
-		// 			importPkgNode := NewNode(nil, pkgId, pkg.Name(), ImportedPackage)
-
-		// 			id, err := getIdOfIdent(y.Sel)
-		// 			if err != nil {
-		// 				fmt.Fprintln(os.Stderr, err.Error())
-		// 				return true
-		// 			}
-		
-		// 			callNode := NewNode(y, id, y.Sel.Name, ImportedFunc)
-
-		// 			Graph.AddEdge(importPkgNode, callNode)
-		// 			Graph.AddEdge(parentNode, callNode)
-		// 			// package -> callnode <- parent
-		// 		}
-		// 	}
-			
-		
-		// 	case *ast.Ident:
-		// 		id, err := getIdOfIdent(y)
-		// 		if err != nil {
-		// 			fmt.Fprintln(os.Stderr, err.Error())
-		// 			return true
-		// 		}
-				
-		// 		callNode := NewNode(y, id, y.Name, ShouldAlreadyExist)
-		// 		Graph.AddEdge(callNode, parentNode)
-		// 	default:
-		// 		fmt.Fprintln(os.Stderr, "parsing call - missed type", y)
-		// 	}
 	
 	default:
 		// fmt.Fprintf(os.Stderr, "parsing - missed type %T\n", x)
