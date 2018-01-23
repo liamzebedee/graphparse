@@ -122,15 +122,23 @@ class InfoView extends React.Component {
     this.props.store.searchAndHighlightNodes(ev.target.value)
   }
 
+  toggleThread() {
+
+  }
+
   render() {
     const store = this.props.store;
 
     let selectedNodes = store.selectedNodes;
 
-    return <div>
+    return <div className="ui-pane">
       <input type="text" placeholder="&#x1F50E; Find structs, funcs, methods..." className='search' onChange={this.searchNodes}/>
       <SelectedNodes selectedNodes={selectedNodes}/>
-      <LoadingWrap data={store.selectionInfo}><SelectionInfo sel={store.selectionInfo}/></LoadingWrap>
+      <button onClick={this.toggleThread}>Show thread</button>
+
+      <LoadingWrap data={store.selectionInfo}>
+        <SelectionInfo sel={store.selectionInfo}/>
+      </LoadingWrap>
     </div>
   }
 }
@@ -143,7 +151,12 @@ const SelectedNodes = (props) => {
 
 const SelectedNode = (props) => {
   return <div>
-    <div style={{ backgroundColor: nodeColor(props.node.variant) }}>{props.node.label}</div>
+    <div style={{ 
+      backgroundColor: nodeColor(props.node.variant),
+      padding: '0.25em',
+      color: 'black',
+      fontWeight: 800
+    }}>{props.node.label}</div>
   </div>
 }
 
@@ -158,7 +171,7 @@ const SelectionInfo = (props) => {
 var nodeColor = d3.scaleOrdinal(d3.schemeCategory20);
 
 function renderGraph(nodes, edges) {
-  renderGraphD3()
+  renderGraphD3(nodes, edges)
   // renderGraphVizJs()
 }
 
@@ -171,7 +184,6 @@ function renderGraphVizJs(nodes, edges) {
     .graphviz()
     .renderDot(graphDot)
     .totalMemory(16777216 * 2)
-    
 }
 
 function renderGraphD3(nodes, edges) {
@@ -201,7 +213,7 @@ function renderGraphD3(nodes, edges) {
 
   var simulation = d3.forceSimulation()
                                 
-  var link_force =  d3.forceLink(graphdata.edges)
+  var link_force =  d3.forceLink(edges)
                       .id(function(d) { return d.id; })
                       .strength(1)
                       .distance(10)
@@ -210,7 +222,7 @@ function renderGraphD3(nodes, edges) {
                        .strength(-200)
 
   simulation
-      .nodes(graphdata.nodes)
+      .nodes(nodes)
       .force("links", link_force)
       .force('charge', charge_force)
       .force('center', d3.forceCenter(width / 2, height / 2))
@@ -240,7 +252,7 @@ function renderGraphD3(nodes, edges) {
   var link = g.append("g")
               .attr("class", "links")
               .selectAll("path")
-              .data(graphdata.edges)
+              .data(edges)
               .enter()
               .append("path")
               .attr("class", "link")
@@ -251,7 +263,7 @@ function renderGraphD3(nodes, edges) {
   var node = g.append("g")
           .attr("class", "nodes") 
           .selectAll("g")
-          .data(graphdata.nodes)
+          .data(nodes)
           .enter()
           .append('g')
           .on("mouseover", function(d){
@@ -271,6 +283,22 @@ function radius(d) {
   const cradius = 18; 
   return cradius * d.rank;
 }
+
+
+// Color ContrastColor(Color color)
+// {
+//     int d = 0;
+
+//     // Counting the perceptive luminance - human eye favors green color... 
+//     double a = 1 - ( 0.299 * color.R + 0.587 * color.G + 0.114 * color.B)/255;
+
+//     if (a < 0.5)
+//        d = 0; // bright colors - black font
+//     else
+//        d = 255; // dark colors - white font
+
+//     return  Color.FromArgb(d, d, d);
+// }
 
   let circle = node.append("circle")
               .attr("r", radius)
@@ -393,5 +421,5 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('react-mount')
   );
 
-  renderGraph()
+  renderGraph(graphdata.nodes, graphdata.edges)
 });

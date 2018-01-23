@@ -14,13 +14,9 @@ body {
     min-height: 400px;
 
     position: fixed;
-    background: white;
-    color: #333;
-    box-shadow: rgba(230,230,230,0.7) 1px 1px;
     top: 0;
     right: 0;
     margin: 1em;
-    border: 1px solid rgba(230,230,230,0.7);
 }
 
 #react-mount .search {
@@ -65,4 +61,11 @@ path.link {
 .nodes circle:hover {
     fill: rgb(214, 214, 214);
     cursor: pointer;
+}
+
+.ui-pane {
+    background: white;
+    color: #333;
+    box-shadow: rgba(230,230,230,0.7) 1px 1px;
+    border: 1px solid rgba(230,230,230,0.7);
 }

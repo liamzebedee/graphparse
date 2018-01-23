@@ -186,7 +186,9 @@ func NewGraph() *graph {
 
 
 
+func pathEnclosingNodes(a, b Node) []edge {
 
+}
 
 // Returns indices of edges that match cond
 func filterEdges(edges []edge, cond func(edge) bool) []int {
@@ -199,16 +201,11 @@ func filterEdges(edges []edge, cond func(edge) bool) []int {
 	return l
 }
 
-func (g *graph) contractEdges(shouldContract func(Node) bool) ([]edge, map[nodeid]float64) {
+func (g *graph) contractEdges(shouldContract func(Node) bool) []edge {
 	edges := newArrayList()
 	for _, v := range g.edges {
 		fmt.Println(v.String())
 		edges.append(v)
-	}
-
-	aggRanks := make(ranksMap)
-	for id, _ := range nodeLookup {
-		aggRanks[id] = 0.
 	}
 
 	getUniqueNodes := func(edges *arraylist) []Node {
@@ -269,7 +266,6 @@ func (g *graph) contractEdges(shouldContract func(Node) bool) ([]edge, map[nodei
 		outEdgeIdxs := filterEdges(edges, func(e edge) bool {
 			return e.from.Id() == n.Id()
 		})
-
 		
 
 		for _, in := range inEdgeIdxs {
@@ -304,7 +300,7 @@ func (g *graph) contractEdges(shouldContract func(Node) bool) ([]edge, map[nodei
 
 	fmt.Println("Reduced from", len(g.edges), "to", len(edgesArr), "edges")
 
-	return edgesArr, aggRanks
+	return edgesArr
 }
 
 
@@ -369,58 +365,6 @@ func (g *graph) computeNodeRanks(edges []edge) ranksMap {
 }
 
 
-
-func (g *graph) computeAggregateNodeRanks(ranks map[nodeid]float64) map[nodeid]float64 {
-	getNodesToRemove := func(ranks map[nodeid]float64, shouldRemove func(n Node) bool) []nodeid {
-		ids := []nodeid{}
-		for id, rank := range ranks {
-			if rank > 0 && shouldRemove(nodeLookup[id]) {
-				ids = append(ids, id)
-			}
-		}
-		return ids
-	}
-
-	outEdges := make(map[nodeid][]Node)
-	for _, edge := range g.edges {
-		if l, ok := outEdges[edge.from.Id()]; !ok {
-			outEdges[edge.from.Id()] = []Node{edge.to}
-		} else {
-			outEdges[edge.from.Id()] = append(l, edge.to)
-		}
-	}
-
-	removeCond := func(n Node) bool {
-		return n.Variant() != Struct 
-	}
-
-	iters := 0
-
-	for nodes := getNodesToRemove(ranks, removeCond); len(nodes) > 0; nodes = getNodesToRemove(ranks, removeCond) {
-		fmt.Println("aggregating nodes, iteration", iters)
-		for _, id := range nodes {
-			outs := outEdges[id]
-
-			rankDist := ranks[id] / float64(len(outs))
-			for _, out := range outs {
-				ranks[out.Id()] += rankDist
-			}
-			// Technically equivalent to deletion, 
-			// since PageRank will never issue a rank of 0.
-			ranks[id] = 0
-		}
-		iters++
-	}
-
-	for id, r := range ranks {
-		if r == 0 {
-			delete(ranks, id)
-		}
-	}
-
-	return ranks
-}
-
 // Maps ranks with node lookup
 func (g *graph) mapRanks(ranks ranksMap, fn func(n Node, rank float64)) {
 	for id, rank := range ranks {
@@ -462,7 +406,7 @@ func (g *graph) ToDot() {
 	defer w.Flush()
 
 	
-	edges, _ := g.contractEdges(func(n Node) bool {
+	edges := g.contractEdges(func(n Node) bool {
 		switch(n.Variant()) {
 		case Struct, RootPackage:
 			return false
@@ -471,7 +415,6 @@ func (g *graph) ToDot() {
 		}
 	})
 	ranks := g.computeNodeRanks(edges)
-	// ranks = g.computeAggregateNodeRanks(ranks)
 	
 	w.WriteString("digraph graphname {\n")
 	
@@ -527,7 +470,7 @@ func (g *graph) ToJson() {
 	defer w.Flush()
 
 	jsonGraph := newJsonGraph()
-	edges, _ := g.contractEdges(func(n Node) bool {
+	edges := g.contractEdges(func(n Node) bool {
 		switch(n.Variant()) {
 		case Struct, RootPackage:
 			return false
