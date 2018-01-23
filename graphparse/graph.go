@@ -86,6 +86,9 @@ func (n *objNode) Id() nodeid {
 		case *types.Pointer:
 			id := nodeid(typ.Elem().(*types.Named).Obj().Pos())
 			return id
+		case *types.Map:
+			id := nodeid(n.obj.Pos())
+			return id
 		default:
 			panic("cant find type of struct Object")
 		}

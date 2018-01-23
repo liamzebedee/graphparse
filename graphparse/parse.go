@@ -187,7 +187,14 @@ func Visit(node ast.Node) bool {
 
 		// types.Interface
 		// obj.Type().(*types.Named).Obj().
-		typeNode := LookupOrCreateNode(obj, Struct, obj.Type().(*types.Named).Obj().Name())
+		var typeNode *objNode
+		switch typ := obj.Type().(type) {
+		case *types.Named:
+			typeNode = LookupOrCreateNode(obj, Struct, typ.Obj().Name())
+		case *types.Map:
+			typeNode = LookupOrCreateNode(obj, Struct, obj.Name())
+		}
+		
 		Graph.AddEdge(rootPackage, typeNode)
 
 	case *ast.FuncDecl:
