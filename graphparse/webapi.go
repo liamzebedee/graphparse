@@ -19,7 +19,7 @@ func WebAPI(port string) {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/src", corsEnabledHeaders(showSrc))
 	router.HandleFunc("/src/from/{start}/to/{end}", corsEnabledHeaders(getPos))
-	// router.HandleFunc("/graph/nodes/{id}", corsEnabledHeaders(getNodeInfo))
+	router.HandleFunc("/graph/thread/{from}/{to}", corsEnabledHeaders(getCodeThread))
 
 	log.Fatal(http.ListenAndServe(":" + port, router))
 }
@@ -42,8 +42,8 @@ type posInfo struct {
 
 func getPos(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	posStart, _ := strconv.ParseInt(vars["start"], 0, 32)
-	posEnd, _ := strconv.ParseInt(vars["end"], 0, 32)
+	posStart, _ := strconv.ParseInt(vars["start"], 0, 64)
+	posEnd, _ := strconv.ParseInt(vars["end"], 0, 64)
 	fmt.Println("Showing code from", vars["start"], "to", vars["end"])
 
 	_, nodes, _ := prog.PathEnclosingInterval(token.Pos(posStart), token.Pos(posEnd))
@@ -57,12 +57,27 @@ func getPos(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
-// type nodeInfo struct {
-	
-// }
+type codeThreadRes struct {
+	Edges []edge `json:"edges"`
+}
 
-// func getNodeInfo(w http.ResponseWriter, r *http.Request) {
-// 	vars := mux.Vars(r)
-// 	nodeId := nodeid(strconv.ParseInt(vars["id"], 0, 32))
-// 	node := nodeLookup[nodeId]
-// }
+func getCodeThread(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	fromId, _ := strconv.ParseInt(vars["from"], 0, 64)
+	toId, _ := strconv.ParseInt(vars["to"], 0, 64)
+
+	from, ok := nodeLookup[nodeid(fromId)]
+	if !ok {
+		panic("from node not found")
+	}
+	to, ok := nodeLookup[nodeid(toId)]
+	if !ok {
+		panic("to node not found")
+	}
+
+	edges := pathEnclosingNodes(Graph, from, to)
+	res := codeThreadRes{
+		Edges: edges,
+	}
+	json.NewEncoder(w).Encode(res)
+}

@@ -2,3 +2,7 @@
  - make([]T, 16) makes an array with 16 nil entries
  - you can do []T{} which is better
  - also the for loop condition haha
+
+ - you cannot pass store.something as a prop call to an event handler. Because store likely is null when you give it? and the reference may not be passed through/bound to this? 
+
+ - return Variant() == Struct || Variant == RootPackage needs to be bracketed. Much clearer to write it with a switch case.

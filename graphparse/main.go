@@ -1,24 +1,21 @@
 package graphparse
 
 import (
-	"flag"
+	// "flag"
 	"fmt"
 )
 
 // Stuff does everything.
 func Stuff() {
-	runApi := flag.Bool("api", false, "run API server for web experiment")
-
-	flag.Parse()
+	// runApi := flag.Bool("api", false, "run API server for web experiment")
+	// flag.Parse()
 
 	// GenerateCodeGraph("github.com/liamzebedee/graphparse/graphparse")
 	// GenerateCodeGraph("github.com/twitchyliquid64/subnet/subnet")
 	GenerateCodeGraph("github.com/btcsuite/btcd/blockchain")
 	Graph.ToJson()
-	Graph.ToDot()
+	// Graph.ToDot()
 
-	if *runApi {
-		fmt.Println("Running web api on port 8081...")
-		WebAPI("8081")
-	}
+	fmt.Println("Running web api on port 8081...")
+	WebAPI("8081")
 }

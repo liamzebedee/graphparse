@@ -11,6 +11,7 @@ import (
 	"bytes"
 	"github.com/dcadenas/pagerank"
 	"strings"
+	"gonum.org/v1/gonum/graph/path"
 )
 
 
@@ -57,6 +58,7 @@ type baseNode struct {
 
 type Node interface {
 	Id() nodeid
+	ID() int64
 	Label() string
 	Variant() NodeType
 	String() string
@@ -186,8 +188,26 @@ func NewGraph() *graph {
 
 
 
-func pathEnclosingNodes(a, b Node) []edge {
+func pathEnclosingNodes(g *graph,  a, b Node) ([]edge) {
+	pathsTree := path.DijkstraAllPaths(g)
+	paths, _ := pathsTree.AllBetween(a, b)
 
+	edges := []edge{}
+
+	for _, path := range paths {
+		for i, n := range path {
+			if i == 0 || i == len(path) {
+				continue
+			}
+			e := edge{
+				from: path[i - 1].(Node),
+				to: n.(Node),
+			}
+			edges = append(edges, e)
+		}
+	}
+	
+	return edges
 }
 
 // Returns indices of edges that match cond
@@ -204,7 +224,6 @@ func filterEdges(edges []edge, cond func(edge) bool) []int {
 func (g *graph) contractEdges(shouldContract func(Node) bool) []edge {
 	edges := newArrayList()
 	for _, v := range g.edges {
-		fmt.Println(v.String())
 		edges.append(v)
 	}
 
@@ -298,7 +317,7 @@ func (g *graph) contractEdges(shouldContract func(Node) bool) []edge {
 		edgesArr = append(edgesArr, v.(edge))
 	}
 
-	fmt.Println("Reduced from", len(g.edges), "to", len(edgesArr), "edges")
+	fmt.Println("Contracted", len(g.edges), "to", len(edgesArr), "edges")
 
 	return edgesArr
 }
@@ -323,7 +342,7 @@ func (g *graph) AddEdge(from, to Node) {
 
 
 func (g *graph) computeNodeRanks(edges []edge) ranksMap {
-	fmt.Println(len(edges), "edges and", len(nodeLookup), "nodes")
+	fmt.Println("computing ranks for", len(nodeLookup), "nodes (", len(edges), ")")
 
 	// Compute PageRank distribution
 	graph := pagerank.New()
@@ -372,22 +391,22 @@ func (g *graph) mapRanks(ranks ranksMap, fn func(n Node, rank float64)) {
 	}
 }
 
-// Maps all edges, ignoring those that aren't in ranks.
-func (g *graph) mapEdges(ranks ranksMap, fn func(e edge)) {
-	for _, edge := range g.edges {
-		// Ignore edges that aren't in ranks
-		if _, ok := ranks[edge.from.Id()]; !ok {
-			continue
-		}
-		if _, ok := ranks[edge.to.Id()]; !ok {
-			continue
-		}
+// // Maps all edges, ignoring those that aren't in ranks.
+// func (g *graph) mapEdges(ranks ranksMap, fn func(e edge)) {
+// 	for _, edge := range g.edges {
+// 		// Ignore edges that aren't in ranks
+// 		if _, ok := ranks[edge.from.Id()]; !ok {
+// 			continue
+// 		}
+// 		if _, ok := ranks[edge.to.Id()]; !ok {
+// 			continue
+// 		}
 
-		fn(edge)
-	}
-}
+// 		fn(edge)
+// 	}
+// }
 
-func (g *graph) mapEdges2(edges []edge, ranks ranksMap, fn func(e edge)) {
+func (g *graph) mapEdges(edges []edge, fn func(e edge)) {
 	for _, edge := range edges {
 		fn(edge)
 	}
@@ -422,7 +441,7 @@ func (g *graph) ToDot() {
 		fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"];\n", node.Id(), rank, rank, node.Label())
 	})
 
-	g.mapEdges2(edges, ranks, func(edge edge) {
+	g.mapEdges(edges, func(edge edge) {
 		fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge.from.Id(), edge.to.Id())
 	})
 
@@ -494,7 +513,7 @@ func (g *graph) ToJson() {
 		jsonGraph.Nodes = append(jsonGraph.Nodes, n)
 	})
 
-	g.mapEdges(ranks, func(edge edge) {
+	g.mapEdges(edges, func(edge edge) {
 		jsonGraph.Edges = append(jsonGraph.Edges, jsonNodeEdge{
 			edge.from.Id(), 
 			edge.to.Id(),

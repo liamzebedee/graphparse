@@ -42,7 +42,7 @@ class GraphStore {
   }
 
   @computed.struct get selectedNodes() {
-    return Array.from(this.selectedNodeIds).map(id => { return graphdata.nodesLookup[id] })
+    return this.selectedNodeIds.map(id => { return graphdata.nodesLookup[id] })
   }
 
   mouseoverNode(id) {
@@ -57,10 +57,6 @@ class GraphStore {
     if(!_.contains(this.selectedNodeIds, id))
       this.selectedNodeIds.push(id)
   }
-  // toggleSelection(id) {
-    // if(this.selectionId) this.selectionId = null;
-    // else this.selectionId = id;
-  // }
 
   clearSelection(id) {
     this.selectionId = null;
@@ -107,6 +103,17 @@ class GraphStore {
   getNodeHighlight(id) {
     return this.highlightedNodes.filter(el => el.item.id == id)[0];
   }
+
+  getCodeThread() {
+    let from = this.selectedNodeIds[0]
+    let to = this.selectedNodeIds[1]
+
+    fetch(`http://localhost:8081/graph/thread/${from}/${to}`)
+    .then(response => response.json())
+    .then(data => {
+      renderGraph(graphdata.nodes, data.edges)        
+    })
+  } 
 }
 
 const graphStore = new GraphStore()
@@ -122,8 +129,8 @@ class InfoView extends React.Component {
     this.props.store.searchAndHighlightNodes(ev.target.value)
   }
 
-  toggleThread() {
-
+  toggleThread = () => {
+    this.props.store.getCodeThread()
   }
 
   render() {
@@ -134,7 +141,7 @@ class InfoView extends React.Component {
     return <div className="ui-pane">
       <input type="text" placeholder="&#x1F50E; Find structs, funcs, methods..." className='search' onChange={this.searchNodes}/>
       <SelectedNodes selectedNodes={selectedNodes}/>
-      <button onClick={this.toggleThread}>Show thread</button>
+      <button onClick={this.toggleThread}>Show thread</button> 
 
       <LoadingWrap data={store.selectionInfo}>
         <SelectionInfo sel={store.selectionInfo}/>
