@@ -35,22 +35,7 @@ type packageFileInfo struct {
 	Pos token.Pos `json:"pos"`
 }
 
-
-func GenerateCodeGraph(pkgpath string) {
-	// We use loader instead of Importer here deliberately
-	// Since we identify objects by their declaring position obj.Pos()
-	// TODO alternatively we could simply use the pointer to the type
-	// but this would involve parsing the underlying type (in the case of pointers)
-	// Could be a potential avenue.
-	conf := loader.Config{ParserMode: 0}
-	conf.Import(pkgpath)
-
-	var err error
-	prog, err = conf.Load()
-	if err != nil {
-		panic(err)
-	}
-
+func GenerateCodeGraphFromProg(prog *loader.Program, pkgpath string) {
 	// TODO doesn't work with relative package imports
 	pkgFilePath := build.Default.GOPATH + "/src/" + pkgpath
 
@@ -84,6 +69,24 @@ func GenerateCodeGraph(pkgpath string) {
 		ast.Inspect(f, Visit)
 		// ast.Print(fset, f)
 	}
+}
+
+func GenerateCodeGraph(pkgpath string) {
+	// We use loader instead of Importer here deliberately
+	// Since we identify objects by their declaring position obj.Pos()
+	// TODO alternatively we could simply use the pointer to the type
+	// but this would involve parsing the underlying type (in the case of pointers)
+	// Could be a potential avenue.
+	conf := loader.Config{ParserMode: 0}
+	conf.Import(pkgpath)
+
+	var err error
+	prog, err = conf.Load()
+	if err != nil {
+		panic(err)
+	}
+
+	GenerateCodeGraphFromProg(prog, pkgpath)
 }
 
 
@@ -199,6 +202,7 @@ func Visit(node ast.Node) bool {
 
 	case *ast.FuncDecl:
 		obj, err := getObjFromIdent(x.Name)
+		
 
 		if err != nil {
 			panic(err)
@@ -206,6 +210,7 @@ func Visit(node ast.Node) bool {
 
 		funcNode := LookupOrCreateNode(obj, Func, x.Name.Name)
 
+		// 1. Link receiver
 		if x.Recv != nil && len(x.Recv.List) > 0 {
 			recvTypeObj := obj.(*types.Func).Type().(*types.Signature).Recv()
 
@@ -230,10 +235,37 @@ func Visit(node ast.Node) bool {
 			// Type of the receiver
 			// ie the type that this method operates on
 			typeNode := LookupOrCreateNode(recvTypeObj, Struct, structName)
-			Graph.AddEdge(funcNode, typeNode)
+			// Graph.AddEdge(funcNode, typeNode)
+			Graph.AddEdge(typeNode, funcNode)
 		} else {
 			Graph.AddEdge(rootPackage, funcNode)
 		}
+
+		// Link params
+		// if params := x.Type.Params.List; len(params) > 0 {
+		// 	for _, y := range params {
+		// 		obj := exprToObj(y.Type)
+		// 		paramTypeNode := LookupOrCreateNode(obj, Struct, obj.Name())
+		// 		Graph.AddEdge(paramTypeNode, funcNode)
+		// 	}
+		// }
+		// sig := obj.Type().(*types.Signature)
+		sig := obj.(*types.Func).Type().(*types.Signature)
+		
+		for i := 0; i < sig.Params().Len(); i++ {
+			paramObj := sig.Params().At(i)
+			typ := paramObj.Type()
+			
+			if _, ok := typ.(*types.Basic); ok {
+				continue
+			}
+			fmt.Println(typ)
+			paramTypeNode := LookupOrCreateNode(paramObj, Struct, typ.String())
+			Graph.AddEdge(paramTypeNode, funcNode)
+			// fmt.Println(typ.String())
+		}
+
+		
 		
 		parentFunc = funcNode
 	

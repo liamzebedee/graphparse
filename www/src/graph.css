@@ -9,7 +9,7 @@ body {
     height: 100vh;
 }
 
-.ctn #react-mount {
+.info-view {
     min-width: 300px;
     min-height: 400px;
 
@@ -19,7 +19,7 @@ body {
     margin: 1em;
 }
 
-#react-mount .search {
+.info-view .search {
     background: white;
     border: none;
     border-bottom: 1px solid rgba(230,230,230,0.7);
@@ -27,11 +27,11 @@ body {
     font-size: 16px;
     width: 100%;
 }
-
+/* 
 #graph {
     width: 100vw;
     height: 100vh;
-}
+} */
 
 text {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -68,4 +68,6 @@ path.link {
     color: #333;
     box-shadow: rgba(230,230,230,0.7) 1px 1px;
     border: 1px solid rgba(230,230,230,0.7);
+    width: 350px;
+    user-select: none;
 }

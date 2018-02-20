@@ -1,17 +1,19 @@
 package graphparse
 
 import (
+	"io"
 	"bufio"
 	"fmt"
 	"os"
 	"sort"
 	"path/filepath"
-	"go/types"
 	"encoding/json"
 	"bytes"
 	"github.com/dcadenas/pagerank"
 	"strings"
 	"gonum.org/v1/gonum/graph/path"
+	"gonum.org/v1/gonum/graph/simple"
+	"go/types"
 )
 
 
@@ -27,149 +29,7 @@ func addNodeToLookup(n Node) {
 
 type ranksMap = map[nodeid]float64
 
-type NodeType int
-const (
-	Struct NodeType = iota
-	Method
-	Func
-	Field
-	RootPackage
-	File
-	ImportedPackage
-	ImportedFunc
-	FuncCall
-)
-var nodeTypes = []string{
-	"Struct",
-	"Method",
-	"Func",
-	"Field",
-	"RootPackage",
-	"File",
-	"ImportedPackage",
-	"ImportedFunc",
-	"FuncCall",
-}
 
-type baseNode struct {
-	variant NodeType
-	label string
-}
-
-type Node interface {
-	Id() nodeid
-	ID() int64
-	Label() string
-	Variant() NodeType
-	String() string
-}
-
-type objNode struct {
-	obj types.Object
-	baseNode
-}
-
-type objlookup struct {
-	id string
-}
-var objLookups = make(map[string]*objlookup)
-
-// The Id of an object node is defined canonically 
-// as the token.Pos of where the type is declared
-func (n *objNode) Id() nodeid {
-	switch n.variant {
-	case Struct:
-		switch typ := n.obj.Type().(type) {
-		case *types.Named:
-			id := nodeid(typ.Obj().Pos())
-			return id
-		case *types.Pointer:
-			id := nodeid(typ.Elem().(*types.Named).Obj().Pos())
-			return id
-		case *types.Map:
-			id := nodeid(n.obj.Pos())
-			return id
-		default:
-			panic("cant find type of struct Object")
-		}
-	default:
-		objId := n.obj.String()
-		x, ok := objLookups[objId]
-		if !ok {
-			x = &objlookup{objId}
-			objLookups[objId] = x
-		}
-		return pointerToId(x)
-	}
-	
-	panic("can't get id")
-}
-func (n *objNode) Label() string {
-	return n.baseNode.label
-}
-func (n *objNode) Variant() NodeType {
-	return n.baseNode.variant
-}
-func (n *objNode) String() string {
-	return fmt.Sprintf("%s <%s>", n.Label(), nodeTypes[n.Variant()])
-}
-
-
-
-
-func LookupOrCreateNode(obj types.Object, variant NodeType, label string) *objNode {
-	if obj == nil {
-		panic("obj must be non-nil")
-	}
-	id := pointerToId(obj)
-
-	node, ok := nodeLookup[id]
-
-	if !ok {
-		node = &objNode{
-			obj,
-			baseNode{variant, label},
-		}
-		addNodeToLookup(node)
-	}
-
-	return node.(*objNode)
-}
-
-var canonicalNodeLookup = make(map[string]*canonicalNode)
-
-type canonicalNode struct {
-	baseNode
-}
-
-func (n *canonicalNode) Id() nodeid {
-	return pointerToId(n)
-}
-func (n *canonicalNode) Label() string {
-	return n.baseNode.label
-}
-func (n *canonicalNode) Variant() NodeType {
-	return n.baseNode.variant
-}
-func (n *canonicalNode) String() string {
-	return fmt.Sprintf("%s <%s>", n.Label(), nodeTypes[n.Variant()])
-}
-
-func LookupOrCreateCanonicalNode(key string, variant NodeType, label string) *canonicalNode {
-	node, ok := canonicalNodeLookup[key]
-
-	if !ok {
-		node = &canonicalNode{
-			baseNode{variant, label},
-		}
-		canonicalNodeLookup[key] = node
-		addNodeToLookup(node)
-	}
-
-	return node
-} 
-
-type nodeid int64
 
 type edge struct {
 	from Node
@@ -189,10 +49,30 @@ func NewGraph() *graph {
 	}
 }
 
+func lookupObjectNode(obj types.Object) (*objNode) {
+	for _, n := range nodeLookup {
+		if objNode, ok := n.(*objNode); ok {
+			if objNode.obj == obj {
+				return objNode
+			}
+		}
+	}
 
+	return nil
+}
 
 func pathEnclosingNodes(g *graph,  a, b Node) ([]edge) {
-	pathsTree := path.DijkstraAllPaths(g)
+	// g2 := simple.NewDirectedGraph()
+	g2 := simple.NewUndirectedGraph()
+	for _, n := range nodeLookup {
+		g2.AddNode(n)
+	}
+	for _, e := range g.edges {
+		g2.SetEdge(e)
+	}
+
+
+	pathsTree := path.DijkstraAllPaths(g2)
 	paths, _ := pathsTree.AllBetween(a, b)
 
 	edges := []edge{}
@@ -265,7 +145,6 @@ func (g *graph) contractEdges(shouldContract func(Node) bool) []edge {
 		}
 		return l
 	}
-
 
 	nodesToContract := getNodesToContract(edges)
 	fmt.Println( "contracting", len(nodesToContract), "nodes")
@@ -345,6 +224,9 @@ func (g *graph) AddEdge(from, to Node) {
 
 
 func (g *graph) computeNodeRanks(edges []edge) ranksMap {
+	if len(edges) == 0 {
+		panic("no edges given, can't compute ranks")
+	}
 	fmt.Println("computing ranks for", len(nodeLookup), "nodes (", len(edges), ")")
 
 	// Compute PageRank distribution
@@ -394,20 +276,6 @@ func (g *graph) mapRanks(ranks ranksMap, fn func(n Node, rank float64)) {
 	}
 }
 
-// // Maps all edges, ignoring those that aren't in ranks.
-// func (g *graph) mapEdges(ranks ranksMap, fn func(e edge)) {
-// 	for _, edge := range g.edges {
-// 		// Ignore edges that aren't in ranks
-// 		if _, ok := ranks[edge.from.Id()]; !ok {
-// 			continue
-// 		}
-// 		if _, ok := ranks[edge.to.Id()]; !ok {
-// 			continue
-// 		}
-
-// 		fn(edge)
-// 	}
-// }
 
 func (g *graph) mapEdges(edges []edge, fn func(e edge)) {
 	for _, edge := range edges {
@@ -415,7 +283,7 @@ func (g *graph) mapEdges(edges []edge, fn func(e edge)) {
 	}
 }
 
-func (g *graph) ToDot() {
+func (g *graph) WriteDotToFile() {
 	dotfilePath, _ := filepath.Abs("./www/graph.dot")
 	f, err := os.Create(dotfilePath)
 	if err != nil {
@@ -423,22 +291,25 @@ func (g *graph) ToDot() {
 	}
 	defer f.Close()
 
-	
-	w := bufio.NewWriter(f)
-	defer w.Flush()
+	g.ToDot(f)
+}
 
+func (g *graph) ToDot(w io.Writer) {
+	buf := bufio.NewWriter(w)
+	defer buf.Flush()
 	
-	edges := g.contractEdges(func(n Node) bool {
-		switch(n.Variant()) {
-		case Struct, RootPackage:
-			return false
-		default:
-			return true
-		}
-	})
+	// edges := g.contractEdges(func(n Node) bool {
+	// 	switch(n.Variant()) {
+	// 	case Struct, RootPackage:
+	// 		return false
+	// 	default:
+	// 		return true
+	// 	}
+	// })
+	edges := g.edges
 	ranks := g.computeNodeRanks(edges)
 	
-	w.WriteString("digraph graphname {\n")
+	fmt.Fprintf(w, "digraph graphname {\n")
 	
 	g.mapRanks(ranks, func(node Node, rank float64) {
 		fmt.Fprintf(w, "%v [width=%v] [height=%v] [label=\"%v\"];\n", node.Id(), rank, rank, node.Label())
@@ -448,7 +319,7 @@ func (g *graph) ToDot() {
 		fmt.Fprintf(w, "\"%v\" -> \"%v\";\n", edge.from.Id(), edge.to.Id())
 	})
 
-	w.WriteString("}")
+	fmt.Fprintf(w, "}\n")
 }
 
 
@@ -478,31 +349,9 @@ func newJsonGraph() jsonGraph {
 	}
 }
 
-
-
-func (g *graph) ToJson() {
-	path, _ := filepath.Abs("./www/graph.json")
-	f, err := os.Create(path)
-	buf := new(bytes.Buffer)
-	w := bufio.NewWriter(f)
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-	defer w.Flush()
-
+func (g *graph) _toJson(edges []edge) jsonGraph {
 	jsonGraph := newJsonGraph()
-	edges := g.contractEdges(func(n Node) bool {
-		switch(n.Variant()) {
-		case Struct, RootPackage:
-			return false
-		default:
-			if n.Variant() == Func && (strings.HasPrefix(n.Label(), "New") || strings.HasPrefix(n.Label(), "new")) {
-				return false
-			}
-			return true
-		}
-	})
+	
 	ranks := g.computeNodeRanks(edges)
 
 	g.mapRanks(ranks, func(node Node, rank float64) {
@@ -522,6 +371,40 @@ func (g *graph) ToJson() {
 			edge.to.Id(),
 		})
 	})
+
+	return jsonGraph
+}
+
+func (g *graph) toJson() jsonGraph {
+	edges := g.contractEdges(func(n Node) bool {
+		// return false
+		
+		switch(n.Variant()) {
+		case Struct, RootPackage:
+			return false
+		default:
+			if n.Variant() == Func && (strings.HasPrefix(n.Label(), "New") || strings.HasPrefix(n.Label(), "new")) {
+				return false
+			}
+			return true
+		}
+	})
+	return g._toJson(edges)
+}
+
+func (g *graph) WriteJson() {
+	path, _ := filepath.Abs("./www/graph.json")
+	f, err := os.Create(path)
+	buf := new(bytes.Buffer)
+	w := bufio.NewWriter(f)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	defer w.Flush()
+
+	
+	jsonGraph := g.toJson()
 
 	json.NewEncoder(buf).Encode(jsonGraph)
 	f.WriteString(buf.String())

@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"fmt"
 	"bytes"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -20,6 +21,8 @@ func WebAPI(port string) {
 	router.HandleFunc("/src", corsEnabledHeaders(showSrc))
 	router.HandleFunc("/src/from/{start}/to/{end}", corsEnabledHeaders(getPos))
 	router.HandleFunc("/graph/thread/{from}/{to}", corsEnabledHeaders(getCodeThread))
+	router.HandleFunc("/graph", corsEnabledHeaders(getGraph))
+	router.Path("/graph/filtered").Queries("q", "{q}").HandlerFunc(corsEnabledHeaders(getGraphFiltered))
 
 	log.Fatal(http.ListenAndServe(":" + port, router))
 }
@@ -79,5 +82,39 @@ func getCodeThread(w http.ResponseWriter, r *http.Request) {
 	res := codeThreadRes{
 		Edges: edges,
 	}
+	json.NewEncoder(w).Encode(res)
+}
+
+
+func getGraph(w http.ResponseWriter, r *http.Request) {
+	res := Graph.toJson()
+	json.NewEncoder(w).Encode(res)
+}
+
+type getGraphFilteredReq struct {
+	NodeTypesHidden []NodeType `json:"nodeTypesHidden"`
+}
+
+func getGraphFiltered(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	var req getGraphFilteredReq
+	if err := json.NewDecoder(strings.NewReader(vars["q"])).Decode(&req); err != nil {
+		panic(err)
+	}
+
+	// TODO
+	nodeTypeHidden := make(map[NodeType]bool)
+	for _, nodeType := range req.NodeTypesHidden {
+		nodeTypeHidden[nodeType] = true
+	}
+	
+	edges := Graph.contractEdges(func(n Node) bool {
+		if nodeTypeHidden[n.Variant()] {
+			return true
+		}
+		return false
+	})
+
+	res := Graph._toJson(edges)
 	json.NewEncoder(w).Encode(res)
 }

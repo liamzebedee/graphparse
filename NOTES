@@ -80,3 +80,7 @@ Observation: netSendRoutine doesn't have Obj yet it is used twice in client.go. 
 Design Thinking and iteration
 
 Premature optimisation is a way of being confused about the best way to the solution because while you know the concept, the solution is based in exploring the problem space
+
+
+
+https://apis.guru/graphql-voyager/
