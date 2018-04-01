@@ -14,12 +14,47 @@ document.addEventListener('DOMContentLoaded', function() {
     );
 });
 
+function parseASTOutput(output) {
+    let root = [];
+    const indent = '  ';
+
+    // get head of first line
+    let lines = output.split('\n')
+    let lineNumIndent = lines[0].split('0')[0].length;
+    lines = lines.map(line => line.slice(lineNumIndent + indent)).join('\n')
+
+    function parseBlock(blockStr) {
+        let currentIndent = 1;
+        let children = [];
+
+        blockStr.split('\n').map((line, i) => {
+            let indents = line.split('.  ');
+            if(indents.length === 1) {
+                return
+            }
+            if(indents.length + 1 === currentIndent) {
+                if(!indents[indents.length] == '}')
+                    children.push(i)
+            }
+        })
+
+        return children
+    }
+
+    console.log(parseBlock(lines))
+}
+
+// <TreeView children={}/>
+
+// children.map(<Treeview children={}/>)
+
 class ASTView extends React.Component {
     constructor() {
         super()
         this.state = {
             src: {
-                code:""
+                code:"",
+                pos: -1,
             },
             output: "",
         }
@@ -27,12 +62,26 @@ class ASTView extends React.Component {
     }
 
     componentWillMount() {
+        // function getCorrectPosForFile(code, origPos) {
+        //     
+        //     return origPos - code.indexOf("package")
+        // }
+
+        function trimCodeToStartPos(code, origPos) {
+            // ast.File.Pos() is the position of "package" keyword
+            return code.split('').splice(code.indexOf("package")).join('')
+        }
+
         // Fetch initial source file.
         fetch('http://localhost:8081/src', {})
         .then(response => response.json())
         .then(data => {
             this.setState({
-                src: data
+                src: {
+                    code: trimCodeToStartPos(data.code, data.pos),
+                    pos: data.pos,
+                    // pos: getCorrectPosForFile(data.code, data.pos)
+                },
             })
         })
 
@@ -48,8 +97,8 @@ class ASTView extends React.Component {
     }
 
     onCodeSelection(start, end) {
-        start = this.state.src.pos + start
-        end = this.state.src.pos + end
+        start = this.state.src.pos + start;
+        end = this.state.src.pos + end;
         
         fetch(`http://localhost:8081/src/from/${start}/to/${end}`)
         .then(response => response.json())
@@ -89,6 +138,7 @@ class ASTView extends React.Component {
                     {this.state.src.code == "" ? <div className="alert alert-warning" role="alert">
                     Server responded with no code. Check package / file import path.
                     </div> : null }
+                    {this.state.src.code}
                 </pre>
             </div>
             <div id='sidebar'>
@@ -109,3 +159,4 @@ class ASTView extends React.Component {
         </div>;
     }
 }
+

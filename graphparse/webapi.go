@@ -1,6 +1,7 @@
 package graphparse
 
 import (
+	"bufio"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -14,15 +15,15 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const fileForExperiment = "server.go"
 
 func WebAPI(port string) {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/src", corsEnabledHeaders(showSrc))
-	router.HandleFunc("/src/from/{start}/to/{end}", corsEnabledHeaders(getPos))
+	router.HandleFunc("/src/from/{start}/to/{end}", corsEnabledHeaders(getASTForRange))
 	router.HandleFunc("/graph/thread/{from}/{to}", corsEnabledHeaders(getCodeThread))
+	router.HandleFunc("/graph/last-generated", corsEnabledHeaders(getLastChange))
+	router.Path      ("/graph/filtered").Queries("q", "{q}").HandlerFunc(corsEnabledHeaders(getGraphFiltered))
 	router.HandleFunc("/graph", corsEnabledHeaders(getGraph))
-	router.Path("/graph/filtered").Queries("q", "{q}").HandlerFunc(corsEnabledHeaders(getGraphFiltered))
 
 	log.Fatal(http.ListenAndServe(":" + port, router))
 }
@@ -34,16 +35,34 @@ func corsEnabledHeaders(fn http.HandlerFunc) http.HandlerFunc {
     }
 }
 
+func getLastChange(w http.ResponseWriter, r *http.Request) {
+	buf := bufio.NewWriter(w)
+	buf.WriteString(Graph.generatedAt)
+	buf.Flush()
+	// bufio.NewWriter(w).WriteString(Graph.generatedAt)
+}
+
+type packageFileInfo struct {
+	// file *ast.File
+	Code string `json:"code"`
+	Pos token.Pos `json:"pos"`
+}
+
 func showSrc(w http.ResponseWriter, r *http.Request) {
-	src := fileLookup[fileForExperiment]
-	json.NewEncoder(w).Encode(src)
+	for f, src := range fileLookup {
+		if f == "chain.go" {
+			// exampleSrcFile = f
+			json.NewEncoder(w).Encode(src)
+			break
+		}
+	}
 }
 
 type posInfo struct {
 	Output string `json:"output"`
 }
 
-func getPos(w http.ResponseWriter, r *http.Request) {
+func getASTForRange(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	posStart, _ := strconv.ParseInt(vars["start"], 0, 64)
 	posEnd, _ := strconv.ParseInt(vars["end"], 0, 64)
@@ -52,6 +71,7 @@ func getPos(w http.ResponseWriter, r *http.Request) {
 	_, nodes, _ := prog.PathEnclosingInterval(token.Pos(posStart), token.Pos(posEnd))
 
 	buf := new(bytes.Buffer)
+	
 	ast.Fprint(buf, fset, nodes[:1], ast.NotNilFilter)
 	
 	res := posInfo{

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"go/build"
+	"go/parser"
 
 	"golang.org/x/tools/go/loader"
 )
@@ -29,15 +30,13 @@ var thisPackage string
 
 var fileLookup = make(map[string]packageFileInfo)
 
-type packageFileInfo struct {
-	// file *ast.File
-	Code string `json:"code"`
-	Pos token.Pos `json:"pos"`
-}
-
-func GenerateCodeGraphFromProg(prog *loader.Program, pkgpath string) {
+func GenerateCodeGraphFromProg(prog *loader.Program, pkgpath, pkgFilePath string) {
 	// TODO doesn't work with relative package imports
-	pkgFilePath := build.Default.GOPATH + "/src/" + pkgpath
+	if pkgFilePath == "" {
+		pkgFilePath = build.Default.GOPATH + "/src/" + pkgpath
+	}
+
+	fmt.Println(pkgFilePath)
 
 	pkginfo = prog.Package(pkgpath)
 	if pkginfo == nil {
@@ -69,6 +68,8 @@ func GenerateCodeGraphFromProg(prog *loader.Program, pkgpath string) {
 		ast.Inspect(f, Visit)
 		// ast.Print(fset, f)
 	}
+
+	Graph.markGenerated()
 }
 
 func GenerateCodeGraph(pkgpath string) {
@@ -77,7 +78,7 @@ func GenerateCodeGraph(pkgpath string) {
 	// TODO alternatively we could simply use the pointer to the type
 	// but this would involve parsing the underlying type (in the case of pointers)
 	// Could be a potential avenue.
-	conf := loader.Config{ParserMode: 0}
+	conf := loader.Config{ParserMode: parser.ParseComments}
 	conf.Import(pkgpath)
 
 	var err error
@@ -86,7 +87,7 @@ func GenerateCodeGraph(pkgpath string) {
 		panic(err)
 	}
 
-	GenerateCodeGraphFromProg(prog, pkgpath)
+	GenerateCodeGraphFromProg(prog, pkgpath, "")
 }
 
 
@@ -94,21 +95,20 @@ func GenerateCodeGraph(pkgpath string) {
 
 func getObjFromIdent(ident *ast.Ident) (types.Object, error) {
 	// I wrote this in a subconcious spree of, "I have a gut feeling that this will do it"
-	// obj := pkginfo.ObjectOf(ident)
+	obj := pkginfo.ObjectOf(ident)
 
 	// we want to have a canonical obj so we can make an id out of it
 	// in this case, we use the def obj
 	// obj := pkginfo.Defs[ident]
-	obj := pkginfo.ObjectOf(ident)
 	
-	if obj == nil {
-		return nil, fmt.Errorf("obj not found for ident", ident)
-	}
+	// if obj == nil {
+	// 	return nil, fmt.Errorf("obj not found for ident", ident)
+	// }
 
 	// Universe scope
-	if obj.Pkg() == nil {
-		return nil, fmt.Errorf("universe object ", obj.Type(), ident)
-	}
+	// if obj.Pkg() == nil {
+	// 	return nil, fmt.Errorf("universe object ", obj.Type(), ident)
+	// }
 
 	if obj != nil {
 		return obj, nil
@@ -117,6 +117,22 @@ func getObjFromIdent(ident *ast.Ident) (types.Object, error) {
 	return nil, fmt.Errorf("unexpected error", obj)
 }
 
+func exprToObj(expr ast.Expr) (error, types.Object) {
+	switch y := expr.(type) {
+	case *ast.SelectorExpr:
+		if sel := pkginfo.Selections[y]; sel != nil {
+			return nil, sel.Obj()
+		}
+
+		// Probably fully-qualified
+		return nil, pkginfo.ObjectOf(y.Sel)
+	case *ast.Ident:
+		obj, err := getObjFromIdent(y)
+		return err, obj
+	}
+
+	return fmt.Errorf("couldnt get obj for expr", expr), nil
+}
 
 var rootPackage Node
 var currentFile Node
@@ -132,27 +148,6 @@ func importToCanonicalKey(importSpec *ast.ImportSpec) string {
 	}
 }
 
-
-func exprToObj(expr ast.Expr) types.Object {
-	var obj types.Object
-	switch y := expr.(type) {
-	// case *ast.StarExpr:
-		// starExp := y.X
-	case *ast.SelectorExpr:
-		if sel := pkginfo.Selections[y]; sel != nil {
-			obj = sel.Obj()
-		} else {
-			// Probably fully-qualified
-			obj = pkginfo.ObjectOf(y.Sel)
-			// obj = pkginfo.Defs[y.Sel]
-		}
-	case *ast.Ident:
-		obj = pkginfo.ObjectOf(y)
-	default:
-		fmt.Println(expr)
-	}
-	return obj
-}
 
 
 func Visit(node ast.Node) bool {
@@ -188,27 +183,25 @@ func Visit(node ast.Node) bool {
 			panic(err)
 		}
 
-		// types.Interface
-		// obj.Type().(*types.Named).Obj().
-		var typeNode *objNode
-		switch typ := obj.Type().(type) {
-		case *types.Named:
-			typeNode = LookupOrCreateNode(obj, Struct, typ.Obj().Name())
-		case *types.Map:
-			typeNode = LookupOrCreateNode(obj, Struct, obj.Name())
+		if !typeIsNamed(obj.Type()) {
+			return true
 		}
-		
+
+		typeNode := LookupOrCreateNode(obj, Struct, obj.Name())
 		Graph.AddEdge(rootPackage, typeNode)
 
 	case *ast.FuncDecl:
 		obj, err := getObjFromIdent(x.Name)
-		
-
 		if err != nil {
 			panic(err)
 		}
 
+		if !typeIsNamed(obj.Type()) {
+			return true
+		}
+
 		funcNode := LookupOrCreateNode(obj, Func, x.Name.Name)
+		parentFunc = funcNode
 
 		// 1. Link receiver
 		if x.Recv != nil && len(x.Recv.List) > 0 {
@@ -242,42 +235,49 @@ func Visit(node ast.Node) bool {
 		}
 
 		// Link params
-		// if params := x.Type.Params.List; len(params) > 0 {
-		// 	for _, y := range params {
-		// 		obj := exprToObj(y.Type)
-		// 		paramTypeNode := LookupOrCreateNode(obj, Struct, obj.Name())
-		// 		Graph.AddEdge(paramTypeNode, funcNode)
-		// 	}
-		// }
-		// sig := obj.Type().(*types.Signature)
-		sig := obj.(*types.Func).Type().(*types.Signature)
-		
-		for i := 0; i < sig.Params().Len(); i++ {
-			paramObj := sig.Params().At(i)
-			typ := paramObj.Type()
-			
-			if _, ok := typ.(*types.Basic); ok {
-				continue
+		if params := x.Type.Params.List; len(params) > 0 {
+			for _, y := range params {
+				obj, err := getObjFromIdent(y.Names[len(y.Names) - 1])
+				if err != nil {
+					panic(err)
+				}
+
+				// Ignore unnamed params
+				if !typeIsNamed(obj.Type()) {
+					continue
+				}
+
+				paramTypeNode := LookupOrCreateNode(obj, Struct, obj.Name())
+				Graph.AddEdge(paramTypeNode, funcNode)
 			}
-			fmt.Println(typ)
-			paramTypeNode := LookupOrCreateNode(paramObj, Struct, typ.String())
-			Graph.AddEdge(paramTypeNode, funcNode)
-			// fmt.Println(typ.String())
 		}
-
-		
-		
-		parentFunc = funcNode
 	
-	case *ast.CallExpr:
-		var obj types.Object
-		
-		obj = exprToObj(x.Fun)
+	case *ast.CallExpr:		
+		typ := pkginfo.TypeOf(x)
+		// if !typeIsNamed(typ) {
+		// 	fmt.Println("ignoring call for unnamed type", typ)
+		// }
+		obj := typeToObj(typ)
+		// fmt.Println(obj)
+		// return false
 
-		if obj == nil {
+		// err, obj := exprToObj(x.Fun)
+
+		// if err != nil {
+		// 	fmt.Println("error parsing callexpr", x, err)
+		// 	return true
+		// }
+
+		// if objIsBuiltin(obj) {
+		// 	return true
+		// }
+
+		return true
+
+		if !typeIsNamed(obj.Type()) {
 			return true
-			// panic(x.Fun)
 		}
+
 		
 		if obj.Pkg() != nil && obj.Pkg().Name() == thisPackage {
 			funcCall := LookupOrCreateNode(obj, FuncCall, obj.Name())
@@ -290,3 +290,8 @@ func Visit(node ast.Node) bool {
 	}
 	return true
 }
+
+// func objIsBuiltin(obj types.Object) bool {
+// 	fmt.Println(obj.Pkg())
+// 	return true
+// }

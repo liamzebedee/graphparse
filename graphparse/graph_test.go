@@ -1,9 +1,9 @@
 package graphparse
 
 import (
-	"fmt"
+	// "fmt"
 	// "github.com/liamzebedee/graphparse/graphparse"
-	"testing"
+	// "testing"
 	"golang.org/x/tools/go/loader"
 	"os"
 	"go/ast"
@@ -29,34 +29,34 @@ func parseFile(conf loader.Config, path string) *ast.File {
 }
 
 
-const pkgPath = "github.com/liamzebedee/graphparse/test/testpkg"
-
-func TestShortestPath(t *testing.T) {
-	// create graph
-	var conf loader.Config
-
-	// Create an ad hoc package with path "foo" from
-	// the specified already-parsed files.
-	// All ASTs must have the same 'package' declaration.
-	// conf.CreateFromFiles("foo", parseFile(conf, "./testpkg/main.go"))
-	conf.Import(pkgPath)
-
- 	prog, err := conf.Load()
-
-	if err != nil {
-		panic(err)
-	}
+// const pkgPath = "github.com/liamzebedee/graphparse/test/testpkg"
+const pkgPath = "github.com/liamzebedee/graphparse/graphparse"
 
 
-	GenerateCodeGraphFromProg(prog, pkgPath)
+// func TestShortestPath(t *testing.T) {
+// 	// create graph
+// 	var conf loader.Config
 
-	nodeA := lookupObjectNode(prog.Package(pkgPath).Pkg.Scope().Lookup("Person"))
-	nodeB := lookupObjectNode(prog.Package(pkgPath).Pkg.Scope().Lookup("NewChurch"))
+// 	// Create an ad hoc package with path "foo" from
+// 	// the specified already-parsed files.
+// 	// All ASTs must have the same 'package' declaration.
+// 	// conf.CreateFromFiles("foo", parseFile(conf, "./testpkg/main.go"))
+// 	conf.Import(pkgPath)
+
+//  	prog, err := conf.Load()
+
+// 	if err != nil {
+// 		panic(err)
+// 	}
+
+// 	GenerateCodeGraphFromProg(prog, pkgPath)
+
+// 	nodeA := lookupObjectNode(prog.Package(pkgPath).Pkg.Scope().Lookup("graph"))
+// 	nodeB := lookupObjectNode(prog.Package(pkgPath).Pkg.Scope().Lookup("pathEnclosingNodes"))		
 	
-	
-	fmt.Println(pathEnclosingNodes(Graph, nodeA, nodeB))
+// 	fmt.Println(pathEnclosingNodes(Graph, nodeA, nodeB))
 
-	Graph.ToDot(os.Stdout)
+// 	Graph.ToDot(os.Stdout)
 	
-	// create two nodes
-}
+// 	// create two nodes
+// }

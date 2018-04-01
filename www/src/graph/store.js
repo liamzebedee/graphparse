@@ -7,6 +7,7 @@ import graphdataFromFile from '../../graph.json';
 var graphdata = graphdataFromFile;
 
 import { renderGraph } from '../graph';
+import { listenForReload } from '../dev_util';
 
 export default class GraphStore {
     @observable hoverId = null;
@@ -25,6 +26,12 @@ export default class GraphStore {
   
     @computed.struct get selectedNodes() {
       return this.selectedNodeIds.map(id => { return graphdata.nodesLookup[id] })
+    }
+
+    constructor() {
+      listenForReload(() => {
+        alert(1)
+      })
     }
   
     loadGraph() {

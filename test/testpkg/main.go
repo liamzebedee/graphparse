@@ -1,29 +1,17 @@
 package testpkg
 
-type Church struct {
-	balance int
-	believers []Person
-	pope Person
+type Server struct {
+	addr string
+	port int
 }
 
-func NewChurch(balance int) Church {
-	return Church{}
-}
-
-func (church *Church) AddBeliever(p Person) {
-	church.believers = append(church.believers, p)
-}
-
-func (church *Church) AnnounceDayOfOurLord() {
-	church.balance = 10000
-}
-
-type Person struct {
-	name string
-}
-
-func NewPerson(name string) Person {
-	return Person{
-		name: name,
+func NewServer(addr string, port int) *Server {
+	return &Server{
+		addr,
+		port,
 	}
+}
+
+func (s *Server) Listen() {
+	
 }

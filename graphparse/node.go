@@ -3,6 +3,7 @@ package graphparse
 import (
 	"go/types"
 	"fmt"
+	// "errors"
 )
 
 type NodeType int
@@ -52,34 +53,102 @@ type objlookup struct {
 }
 var objLookups = make(map[string]*objlookup)
 
+/*
+
+	func (t *Basic) Underlying() Type     { return t }
+	func (t *Array) Underlying() Type     { return t }
+	func (t *Slice) Underlying() Type     { return t }
+	func (t *Struct) Underlying() Type    { return t }
+	func (t *Pointer) Underlying() Type   { return t }
+	func (t *Tuple) Underlying() Type     { return t }
+	func (t *Signature) Underlying() Type { return t }
+	func (t *Interface) Underlying() Type { return t }
+	func (t *Map) Underlying() Type       { return t }
+	func (t *Chan) Underlying() Type      { return t }
+	func (t *Named) Underlying() Type     { return t.underlying }
+
+*/
+
+func typeIsNamed(typ types.Type) bool {
+	switch typ := typ.(type) {
+	// End recursive case.
+	case *types.Basic:
+		return false
+	case *types.Named:
+		return true
+	
+	// Recursive cases
+	case *types.Array:
+	case *types.Slice:
+	case *types.Chan:
+	case *types.Pointer:
+		return typeIsNamed(typ.Elem())
+	
+	// Error cases
+	case *types.Struct:
+	case *types.Tuple:
+	case *types.Signature:
+		return false
+		// fmt.Println(typ)
+		// panic("this type doesn't have underlying type, we shouldn't encounter it")
+	}
+	return false
+}
+
+		// types.Interface
+		// obj.Type().(*types.Named).Obj().
+
+func typeToObj(typ types.Type) (types.Object) {
+	switch typ := typ.(type) {
+	// End recursive case.
+	case *types.Basic:
+		// panic("basic type has no obj")
+		return nil
+	case *types.Named:
+		return typ.Obj()
+	
+	// Recursive cases
+	case *types.Array:
+	case *types.Slice:
+	case *types.Chan:
+	case *types.Pointer:
+		return typeToObj(typ.Elem())
+	
+	// Error cases
+	case *types.Struct:
+	case *types.Tuple:
+	case *types.Signature:
+		panic("types have no obj")
+		// fmt.Println(typ)
+		// panic("this type doesn't have underlying type, we shouldn't encounter it")
+	}
+	return nil
+}
+
 // The Id of an object node is defined canonically 
 // as the token.Pos of where the type is declared
 func (n *objNode) Id() nodeid {
-	switch n.variant {
-	case Struct:
-		switch typ := n.obj.Type().(type) {
-		case *types.Named:
-			id := nodeid(typ.Obj().Pos())
-			return id
-		case *types.Pointer:
-			id := nodeid(typ.Elem().(*types.Named).Obj().Pos())
-			return id
-		// TODO implement rest of type aliases
-		case *types.Map:
-			id := nodeid(n.obj.Pos())
-			return id
-		default:
-			panic("cant find type of struct Object")
-		}
-	default:
-		objId := n.obj.String()
-		x, ok := objLookups[objId]
-		if !ok {
-			x = &objlookup{objId}
-			objLookups[objId] = x
-		}
-		return pointerToId(x)
-	}
+	return nodeid(n.obj.Pos())
+	// switch n.variant {
+	// case Struct:
+	// 	obj := typeToObj(n.obj.Type())
+
+	// 	if obj == nil {
+	// 		fmt.Println(n.obj.Type())
+	// 		fmt.Println(n.obj)
+	// 		panic("cant find obj for type")
+	// 	}
+
+	// 	return nodeid(obj.Pos())
+	// default:
+	// 	objId := n.obj.String()
+	// 	x, ok := objLookups[objId]
+	// 	if !ok {
+	// 		x = &objlookup{objId}
+	// 		objLookups[objId] = x
+	// 	}
+	// 	return pointerToId(x)
+	// }
 	
 	panic("can't get id")
 }

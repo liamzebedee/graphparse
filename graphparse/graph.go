@@ -14,6 +14,7 @@ import (
 	"gonum.org/v1/gonum/graph/path"
 	"gonum.org/v1/gonum/graph/simple"
 	"go/types"
+	"time"
 )
 
 
@@ -42,6 +43,7 @@ func (e edge) String() string {
 
 type graph struct {
 	edges []edge
+	generatedAt string
 }
 
 func NewGraph() *graph {
@@ -220,6 +222,28 @@ func (g *graph) AddEdge(from, to Node) {
 	}
 	e := edge{from, to}
 	g.edges = append(g.edges, e)
+}
+
+func (g *graph) markGenerated() {
+	g.generatedAt = time.Now().String()
+}
+
+func (g *graph) parents(n Node) (l []Node) {
+	for _, edge := range g.edges {
+		if edge.to == n {
+			l = append(l, edge.to)
+		}
+	}
+	return l
+}
+
+func (g *graph) children(n Node) (l []Node) {
+	for _, edge := range g.edges {
+		if edge.from == n {
+			l = append(l, edge.from)
+		}
+	}
+	return l
 }
 
 

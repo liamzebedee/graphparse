@@ -55,7 +55,7 @@ class InfoView extends React.Component {
   reloadGraph = () => {
     this.props.store.loadGraph()
   }
-
+ 
   toggleNodeTypeFilter = (nodeTypeIdx) => {
     this.props.store.toggleNodeTypeFilter(nodeTypeIdx)
   }

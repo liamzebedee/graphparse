@@ -1,0 +1,193 @@
+     0  []ast.Node (len = 1) {
+     1  .  0: *ast.File {
+     2  .  .  Package: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:5:1
+     3  .  .  Name: *ast.Ident {
+     4  .  .  .  NamePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:5:9
+     5  .  .  .  Name: "blockchain"
+     6  .  .  }
+     7  .  .  Decls: []ast.Decl (len = 41) {
+     8  .  .  .  0: *ast.GenDecl {
+     9  .  .  .  .  TokPos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:7:1
+    10  .  .  .  .  Tok: import
+    11  .  .  .  .  Lparen: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:7:8
+    12  .  .  .  .  Specs: []ast.Spec (len = 10) {
+    13  .  .  .  .  .  0: *ast.ImportSpec {
+    14  .  .  .  .  .  .  Path: *ast.BasicLit {
+    15  .  .  .  .  .  .  .  ValuePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:8:2
+    16  .  .  .  .  .  .  .  Kind: STRING
+    17  .  .  .  .  .  .  .  Value: "\"container/list\""
+    18  .  .  .  .  .  .  }
+    19  .  .  .  .  .  .  EndPos: -
+    20  .  .  .  .  .  }
+    21  .  .  .  .  .  1: *ast.ImportSpec {
+    22  .  .  .  .  .  .  Path: *ast.BasicLit {
+    23  .  .  .  .  .  .  .  ValuePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:9:2
+    24  .  .  .  .  .  .  .  Kind: STRING
+    25  .  .  .  .  .  .  .  Value: "\"fmt\""
+    26  .  .  .  .  .  .  }
+    27  .  .  .  .  .  .  EndPos: -
+    28  .  .  .  .  .  }
+    29  .  .  .  .  .  2: *ast.ImportSpec {
+    30  .  .  .  .  .  .  Path: *ast.BasicLit {
+    31  .  .  .  .  .  .  .  ValuePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:10:2
+    32  .  .  .  .  .  .  .  Kind: STRING
+    33  .  .  .  .  .  .  .  Value: "\"sync\""
+    34  .  .  .  .  .  .  }
+    35  .  .  .  .  .  .  EndPos: -
+    36  .  .  .  .  .  }
+    37  .  .  .  .  .  3: *ast.ImportSpec {
+    38  .  .  .  .  .  .  Path: *ast.BasicLit {
+    39  .  .  .  .  .  .  .  ValuePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:11:2
+    40  .  .  .  .  .  .  .  Kind: STRING
+    41  .  .  .  .  .  .  .  Value: "\"time\""
+    42  .  .  .  .  .  .  }
+    43  .  .  .  .  .  .  EndPos: -
+    44  .  .  .  .  .  }
+    45  .  .  .  .  .  4: *ast.ImportSpec {
+    46  .  .  .  .  .  .  Path: *ast.BasicLit {
+    47  .  .  .  .  .  .  .  ValuePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:13:2
+    48  .  .  .  .  .  .  .  Kind: STRING
+    49  .  .  .  .  .  .  .  Value: "\"github.com/btcsuite/btcd/chaincfg\""
+    50  .  .  .  .  .  .  }
+    51  .  .  .  .  .  .  EndPos: -
+    52  .  .  .  .  .  }
+    53  .  .  .  .  .  5: *ast.ImportSpec {
+    54  .  .  .  .  .  .  Path: *ast.BasicLit {
+    55  .  .  .  .  .  .  .  ValuePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:14:2
+    56  .  .  .  .  .  .  .  Kind: STRING
+    57  .  .  .  .  .  .  .  Value: "\"github.com/btcsuite/btcd/chaincfg/chainhash\""
+    58  .  .  .  .  .  .  }
+    59  .  .  .  .  .  .  EndPos: -
+    60  .  .  .  .  .  }
+    61  .  .  .  .  .  6: *ast.ImportSpec {
+    62  .  .  .  .  .  .  Path: *ast.BasicLit {
+    63  .  .  .  .  .  .  .  ValuePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:15:2
+    64  .  .  .  .  .  .  .  Kind: STRING
+    65  .  .  .  .  .  .  .  Value: "\"github.com/btcsuite/btcd/database\""
+    66  .  .  .  .  .  .  }
+    67  .  .  .  .  .  .  EndPos: -
+    68  .  .  .  .  .  }
+    69  .  .  .  .  .  7: *ast.ImportSpec {
+    70  .  .  .  .  .  .  Path: *ast.BasicLit {
+    71  .  .  .  .  .  .  .  ValuePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:16:2
+    72  .  .  .  .  .  .  .  Kind: STRING
+    73  .  .  .  .  .  .  .  Value: "\"github.com/btcsuite/btcd/txscript\""
+    74  .  .  .  .  .  .  }
+    75  .  .  .  .  .  .  EndPos: -
+    76  .  .  .  .  .  }
+    77  .  .  .  .  .  8: *ast.ImportSpec {
+    78  .  .  .  .  .  .  Path: *ast.BasicLit {
+    79  .  .  .  .  .  .  .  ValuePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:17:2
+    80  .  .  .  .  .  .  .  Kind: STRING
+    81  .  .  .  .  .  .  .  Value: "\"github.com/btcsuite/btcd/wire\""
+    82  .  .  .  .  .  .  }
+    83  .  .  .  .  .  .  EndPos: -
+    84  .  .  .  .  .  }
+    85  .  .  .  .  .  9: *ast.ImportSpec {
+    86  .  .  .  .  .  .  Path: *ast.BasicLit {
+    87  .  .  .  .  .  .  .  ValuePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:18:2
+    88  .  .  .  .  .  .  .  Kind: STRING
+    89  .  .  .  .  .  .  .  Value: "\"github.com/btcsuite/btcutil\""
+    90  .  .  .  .  .  .  }
+    91  .  .  .  .  .  .  EndPos: -
+    92  .  .  .  .  .  }
+    93  .  .  .  .  }
+    94  .  .  .  .  Rparen: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:19:1
+    95  .  .  .  }
+    96  .  .  .  1: *ast.GenDecl {
+    97  .  .  .  .  TokPos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:21:1
+    98  .  .  .  .  Tok: const
+    99  .  .  .  .  Lparen: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:21:7
+   100  .  .  .  .  Specs: []ast.Spec (len = 1) {
+   101  .  .  .  .  .  0: *ast.ValueSpec {
+   102  .  .  .  .  .  .  Names: []*ast.Ident (len = 1) {
+   103  .  .  .  .  .  .  .  0: *ast.Ident {
+   104  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:24:2
+   105  .  .  .  .  .  .  .  .  Name: "maxOrphanBlocks"
+   106  .  .  .  .  .  .  .  .  Obj: *ast.Object {
+   107  .  .  .  .  .  .  .  .  .  Kind: const
+   108  .  .  .  .  .  .  .  .  .  Name: "maxOrphanBlocks"
+   109  .  .  .  .  .  .  .  .  .  Decl: *(obj @ 101)
+   110  .  .  .  .  .  .  .  .  .  Data: 0
+   111  .  .  .  .  .  .  .  .  }
+   112  .  .  .  .  .  .  .  }
+   113  .  .  .  .  .  .  }
+   114  .  .  .  .  .  .  Values: []ast.Expr (len = 1) {
+   115  .  .  .  .  .  .  .  0: *ast.BasicLit {
+   116  .  .  .  .  .  .  .  .  ValuePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:24:20
+   117  .  .  .  .  .  .  .  .  Kind: INT
+   118  .  .  .  .  .  .  .  .  Value: "100"
+   119  .  .  .  .  .  .  .  }
+   120  .  .  .  .  .  .  }
+   121  .  .  .  .  .  }
+   122  .  .  .  .  }
+   123  .  .  .  .  Rparen: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:25:1
+   124  .  .  .  }
+   125  .  .  .  2: *ast.GenDecl {
+   126  .  .  .  .  TokPos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:41:1
+   127  .  .  .  .  Tok: type
+   128  .  .  .  .  Lparen: -
+   129  .  .  .  .  Specs: []ast.Spec (len = 1) {
+   130  .  .  .  .  .  0: *ast.TypeSpec {
+   131  .  .  .  .  .  .  Name: *ast.Ident {
+   132  .  .  .  .  .  .  .  NamePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:41:6
+   133  .  .  .  .  .  .  .  Name: "BlockLocator"
+   134  .  .  .  .  .  .  .  Obj: *ast.Object {
+   135  .  .  .  .  .  .  .  .  Kind: type
+   136  .  .  .  .  .  .  .  .  Name: "BlockLocator"
+   137  .  .  .  .  .  .  .  .  Decl: *(obj @ 130)
+   138  .  .  .  .  .  .  .  }
+   139  .  .  .  .  .  .  }
+   140  .  .  .  .  .  .  Assign: -
+   141  .  .  .  .  .  .  Type: *ast.ArrayType {
+   142  .  .  .  .  .  .  .  Lbrack: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:41:19
+   143  .  .  .  .  .  .  .  Elt: *ast.StarExpr {
+   144  .  .  .  .  .  .  .  .  Star: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:41:21
+   145  .  .  .  .  .  .  .  .  X: *ast.SelectorExpr {
+   146  .  .  .  .  .  .  .  .  .  X: *ast.Ident {
+   147  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:41:22
+   148  .  .  .  .  .  .  .  .  .  .  Name: "chainhash"
+   149  .  .  .  .  .  .  .  .  .  }
+   150  .  .  .  .  .  .  .  .  .  Sel: *ast.Ident {
+   151  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:41:32
+   152  .  .  .  .  .  .  .  .  .  .  Name: "Hash"
+   153  .  .  .  .  .  .  .  .  .  }
+   154  .  .  .  .  .  .  .  .  }
+   155  .  .  .  .  .  .  .  }
+   156  .  .  .  .  .  .  }
+   157  .  .  .  .  .  }
+   158  .  .  .  .  }
+   159  .  .  .  .  Rparen: -
+   160  .  .  .  }
+   161  .  .  .  3: *ast.GenDecl {
+   162  .  .  .  .  TokPos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:46:1
+   163  .  .  .  .  Tok: type
+   164  .  .  .  .  Lparen: -
+   165  .  .  .  .  Specs: []ast.Spec (len = 1) {
+   166  .  .  .  .  .  0: *ast.TypeSpec {
+   167  .  .  .  .  .  .  Name: *ast.Ident {
+   168  .  .  .  .  .  .  .  NamePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:46:6
+   169  .  .  .  .  .  .  .  Name: "orphanBlock"
+   170  .  .  .  .  .  .  .  Obj: *ast.Object {
+   171  .  .  .  .  .  .  .  .  Kind: type
+   172  .  .  .  .  .  .  .  .  Name: "orphanBlock"
+   173  .  .  .  .  .  .  .  .  Decl: *(obj @ 166)
+   174  .  .  .  .  .  .  .  }
+   175  .  .  .  .  .  .  }
+   176  .  .  .  .  .  .  Assign: -
+   177  .  .  .  .  .  .  Type: *ast.StructType {
+   178  .  .  .  .  .  .  .  Struct: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:46:18
+   179  .  .  .  .  .  .  .  Fields: *ast.FieldList {
+   180  .  .  .  .  .  .  .  .  Opening: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:46:25
+   181  .  .  .  .  .  .  .  .  List: []*ast.Field (len = 2) {
+   182  .  .  .  .  .  .  .  .  .  0: *ast.Field {
+   183  .  .  .  .  .  .  .  .  .  .  Names: []*ast.Ident (len = 1) {
+   184  .  .  .  .  .  .  .  .  .  .  .  0: *ast.Ident {
+   185  .  .  .  .  .  .  .  .  .  .  .  .  NamePos: /Users/liamz/go/src/github.com/btcsuite/btcd/blockchain/chain.go:47:2
+   186  .  .  .  .  .  .  .  .  .  .  .  .  Name: "block"
+   187  .  .  .  .  .  .  .  .  .  .  .  .  Obj: *ast.Object {
+   188  .  .  .  .  .  .  .  .  .  .  .  .  .  Kind: var
+   189  .  .  .  .  .  .  .  .  .  .  .  .  .  Name: "block"
+   190  .  .  .  .  .  .  .  .  .  .  .  .  .  Decl: *(obj @ 182)
+   191  .  .  .  .  .  .  .  .  .  .  .  .  }
+   192  .  .  .  .  .  .  .  .…
