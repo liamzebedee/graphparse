@@ -22,3 +22,20 @@ Abstract engine from parse tree
 
 Pain point
     How to simply identify a node throughout traversing the AST?
+
+Could use universal AST -
+    HYPERFOCUS
+    Very different techincal requirements.
+    Solve a problem, don't build a platform
+
+
+
+
+Goal:
+    build a good name graph for subnet.
+        ^^first hyperfocussed pain point
+
+
+
+Integration or unit tests?
+Integration I guess.

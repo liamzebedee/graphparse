@@ -74,11 +74,12 @@ func (g *graph) Edge(u, v graphGn.Node) graphGn.Edge {
 		   e.to.ID()   == v.ID() {
 			return e
 		}
+
 		// We ignore directness?
-		if e.from.ID() == v.ID() && 
-		   e.to.ID()   == u.ID() {
-			return e
-		}
+		// if e.from.ID() == v.ID() && 
+		//    e.to.ID()   == u.ID() {
+		// 	return e
+		// }
 	}
 	return nil
 }

@@ -1,17 +1,20 @@
 package testpkg
 
-type Server struct {
-	addr string
-	port int
-}
+import (
+	"log"
+	"os"
+)
 
-func NewServer(addr string, port int) *Server {
-	return &Server{
-		addr,
-		port,
+type mockTypeAlias = int64
+
+var logger = log.New(os.Stdout, "", 0)
+
+func main() {
+	c, err := NewServer("localhost", 12345)
+	// logger.Println("starting up...")
+
+	if err != nil {
+		panic(err)
 	}
-}
-
-func (s *Server) Listen() {
-	
+	go c.Listen()
 }

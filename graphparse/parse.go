@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"go/build"
 	"go/parser"
+	// "os"
 
 	"golang.org/x/tools/go/loader"
 )
@@ -21,6 +22,7 @@ import (
 // https://github.com/golang/tools/blob/master/cmd/guru/implements.go#L47:16
 
 var optIncludeFilesAsNodes = false
+
 
 var prog *loader.Program
 var pkginfo *loader.PackageInfo 
@@ -117,21 +119,31 @@ func getObjFromIdent(ident *ast.Ident) (types.Object, error) {
 	return nil, fmt.Errorf("unexpected error", obj)
 }
 
-func exprToObj(expr ast.Expr) (error, types.Object) {
-	switch y := expr.(type) {
+func exprToObj(expr ast.Expr) (types.Object, error) {
+	switch x := expr.(type) {
 	case *ast.SelectorExpr:
-		if sel := pkginfo.Selections[y]; sel != nil {
-			return nil, sel.Obj()
+		if sel := pkginfo.Selections[x]; sel != nil {
+			return sel.Obj(), nil
 		}
-
 		// Probably fully-qualified
-		return nil, pkginfo.ObjectOf(y.Sel)
+		return pkginfo.ObjectOf(x.Sel), nil
+	
 	case *ast.Ident:
-		obj, err := getObjFromIdent(y)
-		return err, obj
+		obj, err := getObjFromIdent(x)
+		return obj, err
+	
+	default:
+		ParserLog.Printf("missed type %T\n", x)
 	}
 
-	return fmt.Errorf("couldnt get obj for expr", expr), nil
+	return nil, fmt.Errorf("couldn't get object for expression:", expr)
+}
+
+func objIsWorthy(obj types.Object) bool {
+	if obj.Pkg() == nil {
+		return false
+	}
+	return true
 }
 
 var rootPackage Node
@@ -148,150 +160,210 @@ func importToCanonicalKey(importSpec *ast.ImportSpec) string {
 	}
 }
 
+type parseEngine struct {
+}
 
 
-func Visit(node ast.Node) bool {
-	switch x := node.(type) {
-	case *ast.File:
-		if rootPackage == nil {
-			rootPackage = LookupOrCreateCanonicalNode(x.Name.Name, RootPackage, x.Name.Name)
-		}
+func (eng *parseEngine) parseRootPackage(f *ast.File) {
+	if rootPackage == nil {
+		rootPackage = LookupOrCreateCanonicalNode(f.Name.Name, RootPackage, f.Name.Name)
+	}
+}
 
-		// TODO REFACTOR
-		// if optIncludeFilesAsNodes {
-		// 	fileName, err := filepath.Rel(packageFilePath, fset.File(x.Package).Name())
-		// 	if err != nil {
-		// 		fmt.Fprintln(os.Stderr, err.Error())
-		// 		return false
-		// 	}
+func (eng *parseEngine) parseFile(f *ast.File) {
+	// TODO REFACTOR
+	// if optIncludeFilesAsNodes {
+	// 	fileName, err := filepath.Rel(packageFilePath, fset.File(x.Package).Name())
+	// 	if err != nil {
+	// 		fmt.Fprintln(os.Stderr, err.Error())
+	// 		return false
+	// 	}
 
-		// 	fileNodeId := GetCanonicalNodeId(fileName)
-		// 	currentFileNode = NewNode(x, fileNodeId, fileName, File)
-		// 	// currentFileNode.extraAttrs = "[color=\"red\"]"
-		// 	Graph.AddEdge(pkgIdentNode, currentFileNode)
-		// }
+	// 	fileNodeId := GetCanonicalNodeId(fileName)
+	// 	currentFileNode = NewNode(x, fileNodeId, fileName, File)
+	// 	// currentFileNode.extraAttrs = "[color=\"red\"]"
+	// 	Graph.AddEdge(pkgIdentNode, currentFileNode)
+	// }
+}
 
-	case *ast.ImportSpec:
-		importName, _ := strconv.Unquote(x.Path.Value)
-		importedPackage := LookupOrCreateCanonicalNode(importToCanonicalKey(x), ImportedPackage, importName)
-		Graph.AddEdge(importedPackage, rootPackage)
-		return true
-	
-	case *ast.TypeSpec:
-		obj, err := getObjFromIdent(x.Name)
+func (eng *parseEngine) parseTypeSpec(typeSpec *ast.TypeSpec) {
+	switch x := typeSpec.Type.(type) {
+	case *ast.StructType:
+		obj, err := getObjFromIdent(typeSpec.Name)
 		if err != nil {
 			panic(err)
-		}
-
-		if !typeIsNamed(obj.Type()) {
-			return true
 		}
 
 		typeNode := LookupOrCreateNode(obj, Struct, obj.Name())
 		Graph.AddEdge(rootPackage, typeNode)
-
-	case *ast.FuncDecl:
-		obj, err := getObjFromIdent(x.Name)
+	
+	case *ast.Ident:
+		obj, err := getObjFromIdent(typeSpec.Name)
 		if err != nil {
 			panic(err)
 		}
 
-		if !typeIsNamed(obj.Type()) {
-			return true
-		}
+		typeNode := LookupOrCreateNode(obj, Struct, obj.Name())
+		Graph.AddEdge(rootPackage, typeNode)
+	
+	default:
+		ParserLog.Printf("missed type %T\n", x)
+	}
+}
 
-		funcNode := LookupOrCreateNode(obj, Func, x.Name.Name)
-		parentFunc = funcNode
+func (eng *parseEngine) parseFuncDecl(funcDecl *ast.FuncDecl) {
+	obj, err := getObjFromIdent(funcDecl.Name)
+	if err != nil {
+		panic(err)
+	}
 
-		// 1. Link receiver
-		if x.Recv != nil && len(x.Recv.List) > 0 {
-			recvTypeObj := obj.(*types.Func).Type().(*types.Signature).Recv()
+	if !objIsWorthy(obj) {
+		return
+	}
 
-			structName := ""
+	// TODO test code below for cases where it isn't a *types.Signature
+	// then refactor using isMethod
+	isMethod := funcDecl.Recv.NumFields() == 1
+	variant := Func
+	if isMethod {
+		variant = Method
+	}
 
-			switch typ := recvTypeObj.Type().(type) {
-			case *types.Pointer:
-				structName = typ.Elem().(*types.Named).Obj().Name()
-			case *types.Named:
-				structName = typ.Obj().Name()
-			default:
-				fmt.Printf("%T\n", typ)
-				panic(typ)
-			}
+	funcNode := LookupOrCreateNode(obj, variant, funcDecl.Name.Name)
+	parentFunc = funcNode
 
-			if err != nil {
-				panic(err)
-			}
-			
-			// varName := recvTypeObj.Name()
-
-			// Type of the receiver
-			// ie the type that this method operates on
-			typeNode := LookupOrCreateNode(recvTypeObj, Struct, structName)
-			// Graph.AddEdge(funcNode, typeNode)
-			Graph.AddEdge(typeNode, funcNode)
+	switch x := obj.Type().(type) {
+	case *types.Signature:
+		if isMethod {
+			eng.parseMethod(funcNode, x.Recv())
 		} else {
 			Graph.AddEdge(rootPackage, funcNode)
 		}
 
-		// Link params
-		if params := x.Type.Params.List; len(params) > 0 {
-			for _, y := range params {
-				obj, err := getObjFromIdent(y.Names[len(y.Names) - 1])
-				if err != nil {
-					panic(err)
-				}
+		eng.parseFuncDeclResults(funcNode, x.Results())
 
-				// Ignore unnamed params
-				if !typeIsNamed(obj.Type()) {
-					continue
-				}
-
-				paramTypeNode := LookupOrCreateNode(obj, Struct, obj.Name())
-				Graph.AddEdge(paramTypeNode, funcNode)
-			}
-		}
-	
-	case *ast.CallExpr:		
-		typ := pkginfo.TypeOf(x)
-		// if !typeIsNamed(typ) {
-		// 	fmt.Println("ignoring call for unnamed type", typ)
-		// }
-		obj := typeToObj(typ)
-		// fmt.Println(obj)
-		// return false
-
-		// err, obj := exprToObj(x.Fun)
-
-		// if err != nil {
-		// 	fmt.Println("error parsing callexpr", x, err)
-		// 	return true
-		// }
-
-		// if objIsBuiltin(obj) {
-		// 	return true
-		// }
-
-		return true
-
-		if !typeIsNamed(obj.Type()) {
-			return true
-		}
-
-		
-		if obj.Pkg() != nil && obj.Pkg().Name() == thisPackage {
-			funcCall := LookupOrCreateNode(obj, FuncCall, obj.Name())
-			Graph.AddEdge(parentFunc, funcCall)
-		}
-	
 	default:
-		// fmt.Fprintf(os.Stderr, "parsing - missed type %T\n", x)
+		ParserLog.Printf("missed type %T\n", x)
+	}
+}
+
+func (eng *parseEngine) parseFuncDeclResults(funcNode Node, results *types.Tuple) {
+	for i := 0; i < results.Len(); i++ {
+		result := results.At(i)
+		
+		// parse result type
+		obj := typeToObj(result.Type())
+		if obj == nil {
+			continue
+		}
+		if !objIsWorthy(obj) {
+			continue
+		}
+
+		resultTypeNode := LookupOrCreateNode(obj, Func, obj.Name())
+		Graph.AddEdge(funcNode, resultTypeNode)
+	}
+}
+
+func (eng *parseEngine) parseMethod(funcNode Node, recv *types.Var) {
+	obj := typeToObj(recv.Type())
+	recvTypeNode := LookupOrCreateNode(obj, Struct, obj.Name())
+	Graph.AddEdge(recvTypeNode, funcNode)
+}
+
+func (eng *parseEngine) parseCallExpr(callExp *ast.CallExpr) {
+	obj, err := exprToObj(callExp.Fun)
+	if err != nil || obj == nil {
+		return
+	}
+
+	if !objIsWorthy(obj) {
+		return
+	}
+
+	if obj.Pkg().Name() != thisPackage {
+		eng.parseExternalFuncCall(callExp, obj)
+		return
+	}
+
+
+	variant := Func
+	switch x := obj.Type().(type) {
+	case *types.Signature:
+		if x.Recv() != nil {
+			variant = Method
+		}
+	default:
+		ParserLog.Printf("missed type %T\n", x)
+	}
+	
+	funcNode := LookupOrCreateNode(obj, variant, obj.Name())
+	
+	// TEST
+	if parentFunc != nil {
+		Graph.AddEdge(parentFunc, funcNode)
+	}
+}
+
+func (eng *parseEngine) parseExternalFuncCall(callExp *ast.CallExpr, obj types.Object) {
+	importPath := obj.Pkg().Path()
+	importNode := LookupOrCreateCanonicalNode(importPath, ImportedPackage, importPath)
+
+	variant := Func
+	switch x := obj.Type().(type) {
+	case *types.Signature:
+		if x.Recv() != nil {
+			variant = Method
+		}
+	default:
+		ParserLog.Printf("missed type %T\n", x)
+	}
+	funcNode := LookupOrCreateNode(obj, variant, obj.Name())
+
+	Graph.AddEdge(importNode, funcNode)
+	
+	// TEST
+	if parentFunc != nil {
+		Graph.AddEdge(parentFunc, funcNode)
+	}
+	
+	// package -> callnode <- parent
+}
+
+
+func (eng *parseEngine) parseImportSpec(importSpec *ast.ImportSpec) {
+	importPath, err := strconv.Unquote(importSpec.Path.Value)
+	if err != nil {
+		ParserLog.Fatal(err)
+	}
+	
+	LookupOrCreateCanonicalNode(importPath, ImportedPackage, importPath)	
+	// importedPackage := LookupOrCreateCanonicalNode(importPath, ImportedPackage, importPath)
+	// Graph.AddEdge(importedPackage, rootPackage)
+}
+
+
+var eng = parseEngine{}
+
+
+func Visit(node ast.Node) bool {
+	switch x := node.(type) {
+	case *ast.ImportSpec:
+		eng.parseImportSpec(x)
+	case *ast.File:
+		eng.parseRootPackage(x)
+		eng.parseFile(x)
+	case *ast.TypeSpec:
+		eng.parseTypeSpec(x)
+	case *ast.FuncDecl:
+		eng.parseFuncDecl(x)
+	case *ast.CallExpr:
+		eng.parseCallExpr(x)
+	case *ast.Ident, nil:
+		break
+	default:
+		ParserLog.Printf("missed type %T\n", x)
 		return true
 	}
 	return true
 }
-
-// func objIsBuiltin(obj types.Object) bool {
-// 	fmt.Println(obj.Pkg())
-// 	return true
-// }

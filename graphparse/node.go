@@ -125,10 +125,15 @@ func typeToObj(typ types.Type) (types.Object) {
 	return nil
 }
 
+// TODO refactor
+func objToId(obj types.Object) nodeid {
+	return nodeid(obj.Pos())
+}
+
 // The Id of an object node is defined canonically 
 // as the token.Pos of where the type is declared
 func (n *objNode) Id() nodeid {
-	return nodeid(n.obj.Pos())
+	return objToId(n.obj)
 	// switch n.variant {
 	// case Struct:
 	// 	obj := typeToObj(n.obj.Type())
@@ -169,9 +174,8 @@ func LookupOrCreateNode(obj types.Object, variant NodeType, label string) *objNo
 	if obj == nil {
 		panic("obj must be non-nil")
 	}
-	id := pointerToId(obj)
 
-	node, ok := nodeLookup[id]
+	node, ok := nodeLookup[objToId(obj)]
 
 	if !ok {
 		node = &objNode{

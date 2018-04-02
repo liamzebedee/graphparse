@@ -1,3 +1,76 @@
+
+
+	case *ast.ImportSpec:
+		importName, _ := strconv.Unquote(x.Path.Value)
+		importedPackage := LookupOrCreateCanonicalNode(importToCanonicalKey(x), ImportedPackage, importName)
+		Graph.AddEdge(importedPackage, rootPackage)
+		return true
+	
+	case *ast.FuncDecl:
+		obj, err := getObjFromIdent(x.Name)
+		if err != nil {
+			panic(err)
+		}
+
+		if !typeIsNamed(obj.Type()) {
+			return true
+		}
+
+		funcNode := LookupOrCreateNode(obj, Func, x.Name.Name)
+		parentFunc = funcNode
+
+		// 1. Link receiver
+		if x.Recv != nil && len(x.Recv.List) > 0 {
+			recvTypeObj := obj.(*types.Func).Type().(*types.Signature).Recv()
+
+			structName := ""
+
+			switch typ := recvTypeObj.Type().(type) {
+			case *types.Pointer:
+				structName = typ.Elem().(*types.Named).Obj().Name()
+			case *types.Named:
+				structName = typ.Obj().Name()
+			default:
+				fmt.Printf("%T\n", typ)
+				panic(typ)
+			}
+
+			if err != nil {
+				panic(err)
+			}
+			
+			// varName := recvTypeObj.Name()
+
+			// Type of the receiver
+			// ie the type that this method operates on
+			typeNode := LookupOrCreateNode(recvTypeObj, Struct, structName)
+			// Graph.AddEdge(funcNode, typeNode)
+			Graph.AddEdge(typeNode, funcNode)
+		} else {
+			Graph.AddEdge(rootPackage, funcNode)
+		}
+
+		// Link params
+		if params := x.Type.Params.List; len(params) > 0 {
+			for _, y := range params {
+				obj, err := getObjFromIdent(y.Names[len(y.Names) - 1])
+				if err != nil {
+					panic(err)
+				}
+
+				// Ignore unnamed params
+				if !typeIsNamed(obj.Type()) {
+					continue
+				}
+
+				paramTypeNode := LookupOrCreateNode(obj, Struct, obj.Name())
+				Graph.AddEdge(paramTypeNode, funcNode)
+			}
+		}
+	
+
+
+
 case *ast.TypeSpec:
 		typeId, err := getIdOfIdent(x.Name)
 		if err != nil {

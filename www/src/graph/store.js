@@ -29,9 +29,9 @@ export default class GraphStore {
     }
 
     constructor() {
-      listenForReload(() => {
-        alert(1)
-      })
+      // TODO
+      // listenForReload(() => {
+      // })
     }
   
     loadGraph() {

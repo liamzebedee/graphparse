@@ -191,8 +191,8 @@ document.addEventListener('DOMContentLoaded', function() {
 function renderGraphVizJs(nodes, edges) {
   svg
     .graphviz()
+    .totalMemory(16777216 * 4)
     .renderDot(graphDot)
-    .totalMemory(16777216 * 2)
 }
 
 function renderGraphD3(nodes, edges) {
