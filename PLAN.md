@@ -39,3 +39,12 @@ Goal:
 
 Integration or unit tests?
 Integration I guess.
+
+
+
+
+Pain: how to understand subnet quickly
+
+
+The real pain? 
+Being able to refactor well and see relationships

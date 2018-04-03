@@ -282,7 +282,7 @@ func (eng *parseEngine) parseCallExpr(callExp *ast.CallExpr) {
 	}
 
 	if obj.Pkg().Name() != thisPackage {
-		eng.parseExternalFuncCall(callExp, obj)
+		// eng.parseExternalFuncCall(callExp, obj)
 		return
 	}
 
@@ -320,11 +320,12 @@ func (eng *parseEngine) parseExternalFuncCall(callExp *ast.CallExpr, obj types.O
 	}
 	funcNode := LookupOrCreateNode(obj, variant, obj.Name())
 
-	Graph.AddEdge(importNode, funcNode)
+	Graph.AddEdge(importNode, funcNode)	
 	
 	// TEST
 	if parentFunc != nil {
-		Graph.AddEdge(parentFunc, funcNode)
+		// Graph.AddEdge(parentFunc, funcNode)
+		Graph.AddEdge(funcNode, parentFunc)
 	}
 	
 	// package -> callnode <- parent
@@ -338,8 +339,8 @@ func (eng *parseEngine) parseImportSpec(importSpec *ast.ImportSpec) {
 	}
 	
 	LookupOrCreateCanonicalNode(importPath, ImportedPackage, importPath)	
-	// importedPackage := LookupOrCreateCanonicalNode(importPath, ImportedPackage, importPath)
-	// Graph.AddEdge(importedPackage, rootPackage)
+	importedPackage := LookupOrCreateCanonicalNode(importPath, ImportedPackage, importPath)
+	Graph.AddEdge(importedPackage, rootPackage)
 }
 
 
@@ -349,7 +350,7 @@ var eng = parseEngine{}
 func Visit(node ast.Node) bool {
 	switch x := node.(type) {
 	case *ast.ImportSpec:
-		eng.parseImportSpec(x)
+		// eng.parseImportSpec(x)
 	case *ast.File:
 		eng.parseRootPackage(x)
 		eng.parseFile(x)

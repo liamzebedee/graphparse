@@ -10,7 +10,7 @@ import (
 	"encoding/json"
 	"bytes"
 	"github.com/dcadenas/pagerank"
-	"strings"
+	// "strings"
 	"gonum.org/v1/gonum/graph/path"
 	"gonum.org/v1/gonum/graph/simple"
 	"go/types"
@@ -359,7 +359,7 @@ type jsonNodeEdge struct {
 	To nodeid   `json:"target"`
 }
 type jsonGraph struct {
-	NodesLookup map[nodeid]jsonNodeDef `json:"nodesLookup"`
+	NodesLookup map[nodeid]jsonNodeDef `json:"nodeLookup"`
 	Nodes []jsonNodeDef `json:"nodes"`
 	Edges []jsonNodeEdge `json:"edges"`
 	NodeTypes []string `json:"nodeTypes"`
@@ -400,23 +400,23 @@ func (g *graph) _toJson(edges []edge) jsonGraph {
 }
 
 func (g *graph) toJson() jsonGraph {
-	edges := g.contractEdges(func(n Node) bool {
-		// return false
+	// edges := g.contractEdges(func(n Node) bool {
+	// 	// return false
 		
-		switch(n.Variant()) {
-		case Struct, RootPackage:
-			return false
-		default:
-			if n.Variant() == Func && (strings.HasPrefix(n.Label(), "New") || strings.HasPrefix(n.Label(), "new")) {
-				return false
-			}
-			return true
-		}
-	})
-	return g._toJson(edges)
+	// 	switch(n.Variant()) {
+	// 	case Struct, RootPackage:
+	// 		return false
+	// 	default:
+	// 		if n.Variant() == Func && (strings.HasPrefix(n.Label(), "New") || strings.HasPrefix(n.Label(), "new")) {
+	// 			return false
+	// 		}
+	// 		return true
+	// 	}
+	// })
+	return g._toJson(g.edges)
 }
 
-func (g *graph) WriteJson() {
+func (g *graph) WriteJsonToFile() {
 	path, _ := filepath.Abs("./www/graph.json")
 	f, err := os.Create(path)
 	buf := new(bytes.Buffer)
