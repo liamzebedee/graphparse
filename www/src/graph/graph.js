@@ -1,9 +1,7 @@
-
 import React from 'react';
 import 'script-loader!../vendor/d3.v4.min.js';
 
 import graphJSON from '../../graph.json';
-import graphDOT from 'raw-loader!../../graph.dot';
 
 import Viz from 'viz.js';
 import _ from 'underscore';
@@ -21,6 +19,8 @@ import {
     hexToRgb
 } from '../util'
 
+import { getStore } from './ui'
+
 
 @observer
 export default class D3Graph extends React.Component {
@@ -32,21 +32,24 @@ export default class D3Graph extends React.Component {
         this.svg = d3.select(this.svgCtn).append('svg')
                      .attr('width', '100%')
                      .attr('height', '100%')
+        this.g = this.svg.append("g").attr("class", "everything");
+        
         this.setupSvg()
     }
 
     setupSvg = () => {
         let svg = this.svg;
-        let g = svg.append("g").attr("class", "everything");
-
+        let g = this.g;
+        
         let zoom = handleZoom(svg, g)
-        let layout = loadGraphVizLayout(g)
+        let layout = generateLayout(g, this.props.graphDOT, this.props.nodeLookup)
         renderGraph(g, layout)
         focusOnPackageNode(svg, zoom, layout)
     }
 
-    componentWillReceiveProps() {
-        console.log(arguments)
+    componentWillUpdate(props) {
+        // let layout = generateLayout(this.g, props.graphDOT, props.nodeLookup)
+        rerenderGraph(this.g, props.interested)
     }
 
     render() {
@@ -90,13 +93,14 @@ let nodeColor = d3.scaleOrdinal(d3.schemeCategory20);
 
 const toSvgPointSpace = point => [ point[0], -point[1] ];
 
-function loadGraphVizLayout(g) {
+// Passes DOT to Graphviz, generates layout of nodes and edges in JSON, merges with node data to be bound to D3
+function generateLayout(g, graphDOT, nodeLookup) {
     var graphvizData = JSON.parse(Viz(graphDOT, { format: 'json' }));
     
     let nodes = graphvizData.objects.map(obj => {
         let pos = obj.pos.split(',').map(Number);
         let id = new Number(obj.name)
-        let info = graphJSON.nodeLookup[id + ""];
+        let info = nodeLookup[id + ""];
         if(!info) return;
 
         return {
@@ -106,7 +110,7 @@ function loadGraphVizLayout(g) {
             ry: obj._draw_[1].rect[3],
             id,
             ...obj,
-            ...graphJSON.nodeLookup[id]
+            ...nodeLookup[id]
         }
     })
 
@@ -158,10 +162,6 @@ function renderGraph(g, layout) {
         .attr('x', d => d._ldraw_[2].pt[0])
         .attr('y', d => -d._ldraw_[2].pt[1])
         .text(d => d.label)
-        // .attr('color', d => {
-        //     let {r,g,b} = hexToRgb(nodeColor(d.variant))
-        //     return contrastColour(r,g,b)
-        // })
 
         g
         .on("mouseover", d => {
@@ -179,6 +179,11 @@ function renderGraph(g, layout) {
     let edges = g.append("g").attr("class", "edges").selectAll('g').data(layout.edges, (d) => `${d.source.id}${d.target.id}`)
 
     function buildEdge(g) {
+        g
+        .classed('interesting', d => {
+            return d.source.id
+        })
+
         g.append('path')
         .attr('fill', 'none')
         .attr('stroke', '#000000')
@@ -194,15 +199,17 @@ function renderGraph(g, layout) {
         .attr('points', d => {
             return `${d.arrowPts.join(' ')} ${d.arrowPts[0]}`;
         })
+        
     }
     buildEdge(edges.enter().append('g'))
 }
+
+function rerenderGraph(g) {}
 
 function renderGraphviz(g) {
     var graphvizSvg = Viz(graphDOT, { format: 'svg' });
     g.html(graphvizSvg)
 }
-
 
 function focusOnPackageNode(svg, zoom, layout) {
     let node = _.find(layout.nodes, node => {
@@ -210,7 +217,7 @@ function focusOnPackageNode(svg, zoom, layout) {
     })
     // let transform = to_bounding_box(getCenter(node.cx, node.cy), node.rx, node.ry, 0)
     // g.transition().duration(200).call(zoom.transform, transform);
-    zoom.translateTo(svg, node.cx / 2, node.cy / 2)
+    // zoom.translateTo(svg, node.cx / 2, node.cy / 2)
 }
 
 function contrastColour(r,g,b) {

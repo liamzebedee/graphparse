@@ -48,3 +48,7 @@ Pain: how to understand subnet quickly
 
 The real pain? 
 Being able to refactor well and see relationships
+
+
+
+okay now I have to refactor loadGraphVizLayout

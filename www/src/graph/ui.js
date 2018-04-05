@@ -4,17 +4,33 @@ import D3Graph from './graph';
 import graphJSON from '../../graph.json';
 import { createStore } from 'satcheljs';
 import { observer } from 'mobx-react';
+import { observable } from 'mobx'
 
-export const getStore = createStore(
+import graphDOT from 'raw-loader!../../graph.dot';
+
+export let getStore = createStore(
     'graphStore',
-    graphJSON
+    observable({ 
+        graphDOT,
+        interested: [],
+        ...graphJSON
+    })
 );
+
+
+
 
 @observer
 export default class GraphUI extends React.Component {
     render() {
+        let store = getStore()
+
         return <div>
-            <D3Graph store={getStore()}/>
+            <D3Graph 
+                graphDOT={store.graphDOT}
+                nodeLookup={store.nodeLookup}
+                interested={store.interested}
+            />
         </div>
     }
 }

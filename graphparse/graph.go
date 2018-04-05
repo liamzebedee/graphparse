@@ -363,6 +363,7 @@ type jsonGraph struct {
 	Nodes []jsonNodeDef `json:"nodes"`
 	Edges []jsonNodeEdge `json:"edges"`
 	NodeTypes []string `json:"nodeTypes"`
+	AdjList map[nodeid][]nodeid `json:"adjList"`
 }
 func newJsonGraph() jsonGraph {
 	return jsonGraph{
@@ -394,6 +395,11 @@ func (g *graph) _toJson(edges []edge) jsonGraph {
 			edge.from.Id(), 
 			edge.to.Id(),
 		})
+	})
+
+	jsonGraph.AdjList = make(map[nodeid][]nodeid)
+	g.mapEdges(edges, func(e edge) {
+		jsonGraph.AdjList[e.from.Id()] = append(jsonGraph.AdjList[e.from.Id()], e.to.Id())
 	})
 
 	return jsonGraph

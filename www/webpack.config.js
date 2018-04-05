@@ -15,9 +15,13 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist'),
     filename: '[name].bundle.js',
+    
+    // devtoolModuleFilenameTemplate: '[absolute-resource-path]',
+    // devtoolFallbackModuleFilenameTemplate: '[absolute-resource-path]?[hash]'
   },
 
-  devtool: 'inline-source-map',
+  // devtool: "inline-cheap-module-source-map",
+  devtool: "inline-source-map",
   
   plugins: [
     // new CleanWebpackPlugin(['dist']),
@@ -29,7 +33,7 @@ module.exports = {
     new webpack.SourceMapDevToolPlugin({
       filename: "[file].map"
     }),
-    new webpack.EnvironmentPlugin(['NODE_ENV', 'DEBUG'])
+    new webpack.EnvironmentPlugin(['NODE_ENV'])
   ],
 
   module: {
@@ -42,7 +46,7 @@ module.exports = {
         test: /\.js$/,
         exclude: /(node_modules|vendor)/,
         use: ['babel-loader'],
-      },
+      }
     ],
   },
 };
