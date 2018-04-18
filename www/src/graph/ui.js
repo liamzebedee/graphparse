@@ -1,36 +1,58 @@
 import React from 'react';
-import D3Graph from './graph';
 
-import graphJSON from '../../graph.json';
-import { createStore } from 'satcheljs';
-import { observer } from 'mobx-react';
-import { observable } from 'mobx'
+import {
+    searchNodes,
+    selectNodeFromSearch
+} from './actions'
 
-import graphDOT from 'raw-loader!../../graph.dot';
+import { connect } from 'react-redux'
 
-export let getStore = createStore(
-    'graphStore',
-    observable({ 
-        graphDOT,
-        interested: [],
-        ...graphJSON
-    })
-);
+import './ui.css';
 
 
+// let nodeColor = d3.scaleOrdinal(d3.schemeCategory20);
+import nodeColor from './colours';
 
+const GraphControls = ({ nodeTypes, q, matches, searchNodes, selectNode }) => {
+    return <div className="info-view">
+        {nodeTypes.map((typ, i) => {
+            return <span style={{ backgroundColor: nodeColor(i), color: 'white' }}>{typ}</span> 
+        })}
 
-@observer
-export default class GraphUI extends React.Component {
-    render() {
-        let store = getStore()
+        <div>
+            <input type='text' onChange={(ev) => searchNodes(ev.target.value)} value={q}/>
 
-        return <div>
-            <D3Graph 
-                graphDOT={store.graphDOT}
-                nodeLookup={store.nodeLookup}
-                interested={store.interested}
-            />
+            <div className='results'>
+                { matches.length > 0 ? matches.map((node, i) => {
+                    return <NodeMatch key={i} onClick={() => selectNode(node.id)} {...node}/>
+                }) : 'none' }
+            </div>
         </div>
+    </div>
+}
+
+const NodeMatch = ({ onClick, label }) => {
+    return <div onClick={onClick}>{label}</div>
+}
+
+
+const mapStateToProps = state => {
+    return {
+        ...state.graph.search,
+        nodeTypes: state.graph.nodeTypes
     }
 }
+
+const mapDispatchToProps = dispatch => {
+    return {
+        searchNodes: (q) => dispatch(searchNodes(q)),
+        selectNode: (id) => dispatch(selectNodeFromSearch(id))
+    }
+}
+
+const GraphControlsView = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(GraphControls)
+ 
+export default GraphControlsView;

@@ -1,0 +1,13 @@
+body {
+    font-family: sans-serif;
+    user-select: none;
+}
+
+.node {
+
+}
+
+.node:hover {
+    opacity: 0.8;
+    cursor: pointer;
+}

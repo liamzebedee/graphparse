@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import GraphUI from './graph/ui';
+import GraphUI from './graph/';
 
 document.addEventListener('DOMContentLoaded', function() {
   ReactDOM.render(

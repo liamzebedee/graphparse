@@ -21,8 +21,6 @@ import (
 // https://github.com/dominikh/implements/blob/master/main.go#L103:16
 // https://github.com/golang/tools/blob/master/cmd/guru/implements.go#L47:16
 
-var optIncludeFilesAsNodes = false
-
 
 var prog *loader.Program
 var pkginfo *loader.PackageInfo 
@@ -32,6 +30,8 @@ var thisPackage string
 
 var fileLookup = make(map[string]packageFileInfo)
 
+var eng = parseEngine{}
+
 func GenerateCodeGraphFromProg(prog *loader.Program, pkgpath, pkgFilePath string) {
 	// TODO doesn't work with relative package imports
 	if pkgFilePath == "" {
@@ -39,6 +39,7 @@ func GenerateCodeGraphFromProg(prog *loader.Program, pkgpath, pkgFilePath string
 	}
 
 	fmt.Println(pkgFilePath)
+	eng.pkgPath = pkgFilePath
 
 	pkginfo = prog.Package(pkgpath)
 	if pkginfo == nil {
@@ -146,9 +147,6 @@ func objIsWorthy(obj types.Object) bool {
 	return true
 }
 
-var rootPackage Node
-var currentFile Node
-var parentFunc Node
 
 
 func importToCanonicalKey(importSpec *ast.ImportSpec) string {
@@ -161,32 +159,38 @@ func importToCanonicalKey(importSpec *ast.ImportSpec) string {
 }
 
 type parseEngine struct {
+	pkgPath string
+	rootPackage Node
+	currentFile Node
+	parentFunc Node
 }
+
+var optClusterFiles = true
+
 
 
 func (eng *parseEngine) parseRootPackage(f *ast.File) {
-	if rootPackage == nil {
-		rootPackage = LookupOrCreateCanonicalNode(f.Name.Name, RootPackage, f.Name.Name)
+	if eng.rootPackage == nil {
+		eng.rootPackage = LookupOrCreateCanonicalNode(f.Name.Name, RootPackage, f.Name.Name)
 	}
 }
 
 func (eng *parseEngine) parseFile(f *ast.File) {
-	// TODO REFACTOR
-	// if optIncludeFilesAsNodes {
-	// 	fileName, err := filepath.Rel(packageFilePath, fset.File(x.Package).Name())
-	// 	if err != nil {
-	// 		fmt.Fprintln(os.Stderr, err.Error())
-	// 		return false
-	// 	}
+	currentFilePath := fset.File(f.Pos()).Name()
+	fileName, _ := filepath.Rel(eng.pkgPath, currentFilePath)
 
-	// 	fileNodeId := GetCanonicalNodeId(fileName)
-	// 	currentFileNode = NewNode(x, fileNodeId, fileName, File)
-	// 	// currentFileNode.extraAttrs = "[color=\"red\"]"
-	// 	Graph.AddEdge(pkgIdentNode, currentFileNode)
-	// }
+	eng.currentFile = LookupOrCreateCanonicalNode(currentFilePath, File, fileName)
+
+	Graph.AddEdge(eng.rootPackage, eng.currentFile)
+	
 }
 
 func (eng *parseEngine) parseTypeSpec(typeSpec *ast.TypeSpec) {
+	fromNode := eng.rootPackage
+	if optClusterFiles {
+		fromNode = eng.currentFile
+	}
+	
 	switch x := typeSpec.Type.(type) {
 	case *ast.StructType:
 		obj, err := getObjFromIdent(typeSpec.Name)
@@ -195,7 +199,7 @@ func (eng *parseEngine) parseTypeSpec(typeSpec *ast.TypeSpec) {
 		}
 
 		typeNode := LookupOrCreateNode(obj, Struct, obj.Name())
-		Graph.AddEdge(rootPackage, typeNode)
+		Graph.AddEdge(fromNode, typeNode)
 	
 	case *ast.Ident:
 		obj, err := getObjFromIdent(typeSpec.Name)
@@ -204,7 +208,7 @@ func (eng *parseEngine) parseTypeSpec(typeSpec *ast.TypeSpec) {
 		}
 
 		typeNode := LookupOrCreateNode(obj, Struct, obj.Name())
-		Graph.AddEdge(rootPackage, typeNode)
+		Graph.AddEdge(fromNode, typeNode)
 	
 	default:
 		ParserLog.Printf("missed type %T\n", x)
@@ -212,6 +216,12 @@ func (eng *parseEngine) parseTypeSpec(typeSpec *ast.TypeSpec) {
 }
 
 func (eng *parseEngine) parseFuncDecl(funcDecl *ast.FuncDecl) {
+	fromNode := eng.rootPackage
+	if optClusterFiles {
+		fromNode = eng.currentFile
+	}
+
+
 	obj, err := getObjFromIdent(funcDecl.Name)
 	if err != nil {
 		panic(err)
@@ -230,14 +240,14 @@ func (eng *parseEngine) parseFuncDecl(funcDecl *ast.FuncDecl) {
 	}
 
 	funcNode := LookupOrCreateNode(obj, variant, funcDecl.Name.Name)
-	parentFunc = funcNode
+	eng.parentFunc = funcNode
 
 	switch x := obj.Type().(type) {
 	case *types.Signature:
 		if isMethod {
 			eng.parseMethod(funcNode, x.Recv())
 		} else {
-			Graph.AddEdge(rootPackage, funcNode)
+			Graph.AddEdge(fromNode, funcNode)
 		}
 
 		eng.parseFuncDeclResults(funcNode, x.Results())
@@ -300,8 +310,8 @@ func (eng *parseEngine) parseCallExpr(callExp *ast.CallExpr) {
 	funcNode := LookupOrCreateNode(obj, variant, obj.Name())
 	
 	// TEST
-	if parentFunc != nil {
-		Graph.AddEdge(parentFunc, funcNode)
+	if eng.parentFunc != nil {
+		Graph.AddEdge(eng.parentFunc, funcNode)
 	}
 }
 
@@ -323,9 +333,9 @@ func (eng *parseEngine) parseExternalFuncCall(callExp *ast.CallExpr, obj types.O
 	Graph.AddEdge(importNode, funcNode)	
 	
 	// TEST
-	if parentFunc != nil {
+	if eng.parentFunc != nil {
 		// Graph.AddEdge(parentFunc, funcNode)
-		Graph.AddEdge(funcNode, parentFunc)
+		Graph.AddEdge(funcNode, eng.parentFunc)
 	}
 	
 	// package -> callnode <- parent
@@ -340,11 +350,10 @@ func (eng *parseEngine) parseImportSpec(importSpec *ast.ImportSpec) {
 	
 	LookupOrCreateCanonicalNode(importPath, ImportedPackage, importPath)	
 	importedPackage := LookupOrCreateCanonicalNode(importPath, ImportedPackage, importPath)
-	Graph.AddEdge(importedPackage, rootPackage)
+	Graph.AddEdge(importedPackage, eng.rootPackage)
 }
 
 
-var eng = parseEngine{}
 
 
 func Visit(node ast.Node) bool {

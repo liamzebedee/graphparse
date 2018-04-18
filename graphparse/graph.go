@@ -259,8 +259,8 @@ func (g *graph) computeNodeRanks(edges []edge) ranksMap {
 		graph.Link(int(edge.from.Id()), int(edge.to.Id()))
 	}
 
-	probability_of_following_a_link := 0.9
-	tolerance := 0.05
+	probability_of_following_a_link := 0.2
+	tolerance := 0.0001
 
 	var ranks rankPairList
 	graph.Rank(probability_of_following_a_link, tolerance, func(identifier int, rank float64) {

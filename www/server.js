@@ -12,32 +12,6 @@ webpackDevServer.addDevServerEntrypoints(config, options);
 const compiler = webpack(config);
 const server = new webpackDevServer(compiler, options);
 
-server.listen(3000, 'localhost', () => {
-  console.log('dev server listening on port 3000');
+server.listen(3001, 'localhost', () => {
+  console.log('dev server listening on port 3001');
 });
-
-// const express = require('express');
-// const webpackDevMiddleware = require('webpack-dev-middleware');
-// const webpack = require('webpack');
-// const webpackConfig = require('./webpack.config.js');
-// const app = express();
-
-// const compiler = webpack(webpackConfig);
-
-// app.use(webpackDevMiddleware(compiler, {
-//   hot: true,
-//   filename: 'bundle.js',
-//   publicPath: '/',
-//   stats: {
-//     colors: true,
-//   },
-//   historyApiFallback: true,
-// }));
-
-// app.use(express.static(__dirname + '/www'));
-
-// const server = app.listen(3000, function() {
-//   const host = server.address().address;
-//   const port = server.address().port;
-//   console.log('app listening at http://%s:%s', host, port);
-// });

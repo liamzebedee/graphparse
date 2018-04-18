@@ -3,13 +3,15 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = {
-  target: 'web',  
+  mode: 'development',
+  target: 'web',
 
   context: path.join(__dirname, 'src'),
+
   entry: {
     // ast: './ast',
-    ast: ['./ast', 'webpack/hot/only-dev-server', 'webpack-dev-server/client?http://0.0.0.0:3000'],
-    graph: ['./graph', 'webpack/hot/only-dev-server', 'webpack-dev-server/client?http://0.0.0.0:3000'],
+    ast: ['./ast', 'webpack/hot/only-dev-server', 'webpack-dev-server/client?http://0.0.0.0:3001'],
+    graph: ['./graph', 'webpack/hot/only-dev-server', 'webpack-dev-server/client?http://0.0.0.0:3001'],
   },
 
   output: {
@@ -24,7 +26,6 @@ module.exports = {
   devtool: "inline-source-map",
   
   plugins: [
-    // new CleanWebpackPlugin(['dist']),
     new HtmlWebpackPlugin({
       title: 'APP'
     }),
@@ -33,7 +34,11 @@ module.exports = {
     new webpack.SourceMapDevToolPlugin({
       filename: "[file].map"
     }),
-    new webpack.EnvironmentPlugin(['NODE_ENV'])
+    new webpack.DefinePlugin({
+      "process.env": { 
+         NODE_ENV: JSON.stringify("production") 
+       }
+    })
   ],
 
   module: {
