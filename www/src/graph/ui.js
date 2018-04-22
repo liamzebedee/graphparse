@@ -10,26 +10,42 @@ import { connect } from 'react-redux'
 import './ui.css';
 
 
+
+
+
 // let nodeColor = d3.scaleOrdinal(d3.schemeCategory20);
 import nodeColor from './colours';
 
-const GraphControls = ({ nodeTypes, q, matches, searchNodes, selectNode }) => {
-    return <div className="info-view">
-        {nodeTypes.map((typ, i) => {
-            return <span style={{ backgroundColor: nodeColor(i), color: 'white' }}>{typ}</span> 
-        })}
+class GraphControls extends React.Component {
+    constructor() {
+        super()
+    }
 
-        <div>
-            <input type='text' onChange={(ev) => searchNodes(ev.target.value)} value={q}/>
+    componentDidMount() {
+        this.props.firstLoad()
+    }
 
-            <div className='results'>
-                { matches.length > 0 ? matches.map((node, i) => {
-                    return <NodeMatch key={i} onClick={() => selectNode(node.id)} {...node}/>
-                }) : 'none' }
+    render() {
+        let { nodeTypes, q, matches, searchNodes, selectNode } = this.props;
+        
+        return <div className="info-view">
+            {nodeTypes.map((typ, i) => {
+                return <span style={{ backgroundColor: nodeColor(i), color: 'white' }}>{typ}</span> 
+            })}
+
+            <div>
+                <input type='text' onChange={(ev) => searchNodes(ev.target.value)} value={q}/>
+
+                <div className='results'>
+                    { matches.length > 0 ? matches.map((node, i) => {
+                        return <NodeMatch key={i} onClick={() => selectNode(node.id)} {...node}/>
+                    }) : 'none' }
+                </div>
             </div>
         </div>
-    </div>
+    }
 }
+
 
 const NodeMatch = ({ onClick, label }) => {
     return <div onClick={onClick}>{label}</div>
@@ -45,8 +61,9 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
+        firstLoad:   () => dispatch(searchNodes(".go")),
         searchNodes: (q) => dispatch(searchNodes(q)),
-        selectNode: (id) => dispatch(selectNodeFromSearch(id))
+        selectNode:  (id) => dispatch(selectNodeFromSearch(id))
     }
 }
 

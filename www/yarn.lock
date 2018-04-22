@@ -4407,6 +4407,12 @@ jsprim@^1.2.2:
     json-schema "0.2.3"
     verror "1.10.0"
 
+keyboard-shortcut@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/keyboard-shortcut/-/keyboard-shortcut-1.2.0.tgz#54d6b4a5d2e2e91129d87d98fc6c70f1c2721187"
+  dependencies:
+    vkeys "^1.1.0"
+
 killable@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/killable/-/killable-1.0.0.tgz#da8b84bd47de5395878f95d64d02f2449fe05e6b"
@@ -7238,6 +7244,10 @@ viz.js@^1.8.0:
 viz.js@^1.8.1:
   version "1.8.1"
   resolved "https://registry.yarnpkg.com/viz.js/-/viz.js-1.8.1.tgz#277ab3cf4367c608a95b281a7472083c3e2ee6cf"
+
+vkeys@^1.1.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/vkeys/-/vkeys-1.2.0.tgz#983b32161b629a526111648223e0432b6004d39b"
 
 vm-browserify@0.0.4:
   version "0.0.4"

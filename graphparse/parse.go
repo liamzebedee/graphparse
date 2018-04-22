@@ -32,6 +32,11 @@ var fileLookup = make(map[string]packageFileInfo)
 
 var eng = parseEngine{}
 
+type packageFileInfo struct {
+	Code string `json:"code"`
+	Pos token.Pos `json:"pos"`
+}
+
 func GenerateCodeGraphFromProg(prog *loader.Program, pkgpath, pkgFilePath string) {
 	// TODO doesn't work with relative package imports
 	if pkgFilePath == "" {

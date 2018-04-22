@@ -15,7 +15,7 @@ import {
     hexToRgb
 } from '../util'
 
-import classNames from 'classnames';
+// import classNames from 'classnames';
 
 
 import { connect } from 'react-redux'
@@ -23,6 +23,8 @@ import { connect } from 'react-redux'
 import styles from './graph.css';
 
 
+import shortcut from 'keyboard-shortcut';
+import copy from 'copy-to-clipboard';
 
 class D3Graph extends React.Component {
     constructor() {
@@ -45,6 +47,10 @@ class D3Graph extends React.Component {
 
     componentDidMount() {
         this.addZoom()
+
+        shortcut('ctrl c', {}, () => {
+            copy(this.state.graphDOT);
+        })
     }
 
     addZoom = () => {
@@ -57,8 +63,16 @@ class D3Graph extends React.Component {
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        let nodes = nextProps.nodes.filter(node => _.contains(nextProps.interested, node.id))
-        let edges = nextProps.edges.filter(edge => _.contains(nextProps.interested, edge.target))
+        let edges = nextProps.edges.filter(edge => {
+            return _.contains(nextProps.interested, edge.target)
+        })
+        let edgesNodes = edges.map(e => [e.source, e.target]).reduce((a, b) => a.concat(b), []);
+
+        let nodes = nextProps.nodes.filter(node => {
+            // return _.contains(nextProps.interested, node.id)
+            return _.contains(edgesNodes, node.id)
+        })
+        
         if(nodes.length < 1 || edges.length < 1) return {} // TODO
 
         let graphDOT = generateGraphDOT(nodes, edges)
@@ -78,17 +92,16 @@ class D3Graph extends React.Component {
 
         return <div>
             <svg width='100%' height='100%' ref={(svg) => this.svg = svg}>
-                <g className='everything' style={{
+                <g class='everything' style={{
                     transform: `translate3d(${zoom.x}px, ${zoom.y}px, 0px) scale(${zoom.k})`
                 }}>
-                    <g className='nodes'>
+                    <g class='nodes'>
                         {this.state.nodes.map(node => {
-                            
                             return <Node key={node.id} {...node}/>
                         })}
                     </g>
 
-                    <g className='edges'>
+                    <g class='edges'>
                         {this.state.edges.map((edge, i) => {
                             if(_.contains(seenEdges, edge.id)) return false;
                             seenEdges.push(edge.id)
@@ -107,7 +120,7 @@ import nodeColor from './colours';
 const Node = ({ interesting, cx, cy, _draw_, _ldraw_, variant, label }) => {
     // dispatch(hoverNode(d.id))
     return <g 
-        className='node'
+        class='node'
         onMouseOver={() => {}}>
         <ellipse 
             stroke='#000000'
@@ -116,9 +129,9 @@ const Node = ({ interesting, cx, cy, _draw_, _ldraw_, variant, label }) => {
             rx={_draw_[1].rect[2]}
             ry={_draw_[1].rect[3]}
             fill={nodeColor(variant)}
-            className={classNames({
-                'interesting': interesting
-            })}
+            // class={classNames({
+            //     'interesting': interesting
+            // })}
         />
         <text 
             textAnchor='middle'
@@ -155,7 +168,7 @@ const toSvgPointSpace = point => [ point[0], -point[1] ];
 
 const generateGraphDOT = (nodes, edges) => `
     digraph graphname {
-        ${nodes.map(({ id, rank, label }) => `${id} [width=${rank}] [height=${rank}] [label="${label}"];`).join('\n')}
+        ${nodes.map(({ id, rank, label }) => `"${id}" [width=${rank}] [height=${rank}] [label="${label}"];`).join('\n')}
         ${edges.map(({ source, target }) => `"${source}" -> "${target}";`).join('\n')}
     }
 `
