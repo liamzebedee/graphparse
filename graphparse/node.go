@@ -41,6 +41,7 @@ type Node interface {
 	Label() string
 	Variant() NodeType
 	String() string
+	DebugInfo() string
 }
 
 type objNode struct {
@@ -167,6 +168,11 @@ func (n *objNode) String() string {
 	return fmt.Sprintf("%s <%s>", n.Label(), nodeTypes[n.Variant()])
 }
 
+func (n *objNode) DebugInfo() string {
+	pos := n.obj.Pos()
+	return fset.Position(pos).String()
+}
+
 
 
 
@@ -205,6 +211,9 @@ func (n *canonicalNode) Variant() NodeType {
 }
 func (n *canonicalNode) String() string {
 	return fmt.Sprintf("%s <%s>", n.Label(), nodeTypes[n.Variant()])
+}
+func (n *canonicalNode) DebugInfo() string {
+	return ""
 }
 
 func LookupOrCreateCanonicalNode(key string, variant NodeType, label string) *canonicalNode {

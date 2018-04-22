@@ -52,3 +52,14 @@ Being able to refactor well and see relationships
 
 
 okay now I have to refactor loadGraphVizLayout
+
+
+
+
+//Fix bug.
+//Make the visualisation make sense
+Deploy for other people.
+
+
+//add more debug information to node
+take existing colours and make them slightly better and static.

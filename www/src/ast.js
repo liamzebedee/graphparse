@@ -73,7 +73,7 @@ class ASTView extends React.Component {
         }
 
         // Fetch initial source file.
-        fetch('http://localhost:8081/src', {})
+        fetch('http://localhost:8081/src/', {})
         .then(response => response.json())
         .then(data => {
             this.setState({
@@ -100,7 +100,7 @@ class ASTView extends React.Component {
         start = this.state.src.pos + start;
         end = this.state.src.pos + end;
         
-        fetch(`http://localhost:8081/src/from/${start}/to/${end}`)
+        fetch(`http://localhost:8081/src/ast-range?start=${start}&end=${end}` )
         .then(response => response.json())
         .then(data => {
             this.setState({

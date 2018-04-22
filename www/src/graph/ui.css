@@ -28,3 +28,8 @@
     background: whitesmoke;
     cursor: pointer;
 }
+
+
+.debug {
+    width: 100px;
+}

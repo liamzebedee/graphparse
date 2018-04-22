@@ -26,23 +26,39 @@
 
 
 import graphJSON from '../../graph.json';
+import _ from 'underscore';
 
-const variantColor = d3
-    .scaleOrdinal()
-    // .domain(graphJSON.nodeTypes)
-    .domain([
-        "Struct",
-        "Method",
-        "Func",
-        "Field",
-        "RootPackage",
-        "File",
-        "ImportedPackage",
-        "ImportedFunc",
-        "FuncCall"
-    ])
-    .range([
-    ]);
+const config = `
+Struct              #aec7e8
+Method              #ff7f0e
+Func                #ffbb78
+Field               #aec7e8
+RootPackage         #2ca02c
+File                #2ca02c
+ImportedPackage     white
+ImportedFunc        white
+FuncCall            white
+`.split('\n').filter(Boolean).map(line => {
+    let [ nodeType, colour ] = line.split(/\s+/)
+    return {
+        nodeType,
+        colour
+    }
+})
 
-// export default variantColor;
-export default d3.scaleOrdinal(d3.schemeCategory20);
+
+// TODO MVP hacking.
+// match to Go enum (authoritative)
+let domain = graphJSON.nodeTypes.map((nodeType, i) => {
+    return _.findIndex(config, { nodeType })
+})
+
+// nodeTypesMapping.map(x => x.nodeType)
+let range = config.map(x => x.colour)
+
+const nodeColor = d3
+    .scaleOrdinal(range)
+    .domain(domain)
+
+export default nodeColor;
+// export default d3.scaleOrdinal(d3.schemeCategory20);

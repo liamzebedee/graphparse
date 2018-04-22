@@ -3,7 +3,7 @@ package graphparse
 import (
 	"bufio"
 	"encoding/json"
-	"log"
+	// "log"
 	"net/http"
 	"go/ast"
 	"go/token"
@@ -11,16 +11,18 @@ import (
 	"fmt"
 	"bytes"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 )
 
 func WebAPI(port string) {
-	router := mux.NewRouter().StrictSlash(true)
+	router := mux.NewRouter().StrictSlash(false)
 	router.Use(corsEnabledHeaders)
 
+	router.HandleFunc("/", getWelcome)
 	
-	src := router.PathPrefix("/src").Subrouter().Methods("GET")
+	src := router.PathPrefix("/src/").Subrouter()
 	src.Path("/ast-range").
 	Queries(
 		"start", "{start:[0-9]+}",
@@ -29,7 +31,7 @@ func WebAPI(port string) {
 	src.Path("/").HandlerFunc(getSrc)
 
 
-	graph := router.PathPrefix("/graph").Subrouter().Methods("GET")
+	graph := router.PathPrefix("/graph/").Subrouter()
 	graph.Path("/last-generated").HandlerFunc(getGraphLastGenerated)
 
 	graph.Path("/code-thread").
@@ -45,8 +47,18 @@ func WebAPI(port string) {
 
 	graph.Path("/").HandlerFunc(getGraph)
 
+	srv := &http.Server{
+        Handler:      router,
+        Addr:         "localhost:8081",
+        // Good practice: enforce timeouts for servers you create!
+        WriteTimeout: 15 * time.Second,
+        ReadTimeout:  15 * time.Second,
+	}
+	// http.Handle("/", router)
 
-	log.Fatal(http.ListenAndServe("0.0.0.0:" + port, router))
+	if err := srv.ListenAndServe(); err != nil {
+		fmt.Println(err)
+	}
 }
 
 
@@ -58,6 +70,10 @@ func corsEnabledHeaders(next http.Handler) http.Handler {
         w.Header().Set("Access-Control-Allow-Origin", "*")
         next.ServeHTTP(w, r)
     })
+}
+
+func getWelcome(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Welcome."))
 }
 
 
@@ -88,7 +104,7 @@ func getASTRange(w http.ResponseWriter, r *http.Request) {
 func getSrc(w http.ResponseWriter, r *http.Request) {
 	// TODO for testing remove later.
 	for f, src := range fileLookup {
-		if f == "chain.go" {
+		if f == "parse.go" {
 			json.NewEncoder(w).Encode(src)
 			return
 		}

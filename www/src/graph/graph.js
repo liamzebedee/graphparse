@@ -1,30 +1,25 @@
 import React from 'react';
 import 'script-loader!../vendor/d3.v4.min.js';
+import Viz from 'viz.js';
+import _ from 'underscore';
+import classNames from 'classnames';
+import { connect } from 'react-redux'
+import shortcut from 'keyboard-shortcut';
+import copy from 'copy-to-clipboard';
 
 import graphDOT from 'raw-loader!../../graph.dot';
 import graphJSON from '../../graph.json';
-
-import Viz from 'viz.js';
-import _ from 'underscore';
-
 import {
     hoverNode,
+    clickNode
 } from './actions'
-
 import {
     hexToRgb
 } from '../util'
-
-// import classNames from 'classnames';
-
-
-import { connect } from 'react-redux'
-
+import nodeColor from './colours';
 import styles from './graph.css';
 
-
-import shortcut from 'keyboard-shortcut';
-import copy from 'copy-to-clipboard';
+const nodeType = (str) => graphJSON.nodeTypes.indexOf(str);
 
 class D3Graph extends React.Component {
     constructor() {
@@ -63,20 +58,44 @@ class D3Graph extends React.Component {
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        let edges = nextProps.edges.filter(edge => {
-            return _.contains(nextProps.interested, edge.target)
-        })
-        let edgesNodes = edges.map(e => [e.source, e.target]).reduce((a, b) => a.concat(b), []);
+        let { nodeLookup, edges } = nextProps;
 
+        const showOnlyInterestedNodes = (edge) => {
+            return _.contains(nextProps.interested, edge.source)
+        }
+        const collapseRedundantEdges = (edge) => {
+            let { source, target } = edge;
+            let [ a, b ] = [ nodeLookup[source], nodeLookup[target] ]
+            if(a.variant == nodeType('Struct')) {
+               return !_.find(edges, (edge) => {
+                   return target === edge.target && source != edge.source
+               })
+            }
+            return true;
+        }
+        let seenEdges = [];
+        function removeDuplicates(edge) {
+            let id = `${edge.source}${edge.target}`;
+            if(_.contains(seenEdges, id)) return null;
+            seenEdges.push(id)
+            return true
+        }
+        edges = edges
+        .filter(showOnlyInterestedNodes)
+        .filter(collapseRedundantEdges)
+        .filter(removeDuplicates)
+
+
+
+        let nodesToInclude = edges.map(e => [e.source, e.target]).reduce((a, b) => a.concat(b), []);
         let nodes = nextProps.nodes.filter(node => {
-            // return _.contains(nextProps.interested, node.id)
-            return _.contains(edgesNodes, node.id)
+            return _.contains(nodesToInclude, node.id)
         })
+
+        if(nodes.length < 1 || edges.length < 1) return {}
         
-        if(nodes.length < 1 || edges.length < 1) return {} // TODO
 
         let graphDOT = generateGraphDOT(nodes, edges)
-        // if(graphDOT == prevState.graphDOT) return {};
 
         let layout = generateLayout(graphDOT, nextProps.nodeLookup)
         
@@ -89,6 +108,7 @@ class D3Graph extends React.Component {
     render() {
         let zoom = this.state.zoom;
         let seenEdges = [];
+        
 
         return <div>
             <svg width='100%' height='100%' ref={(svg) => this.svg = svg}>
@@ -97,7 +117,10 @@ class D3Graph extends React.Component {
                 }}>
                     <g class='nodes'>
                         {this.state.nodes.map(node => {
-                            return <Node key={node.id} {...node}/>
+                            return <Node 
+                                key={node.id} clickNode={this.props.clickNode} 
+                                interesting={_.contains(this.props.interested, node.id)}
+                                {...node}/>
                         })}
                     </g>
 
@@ -114,14 +137,11 @@ class D3Graph extends React.Component {
     }
 }
 
-// let nodeColor = d3.scaleOrdinal(d3.schemeCategory20);
-import nodeColor from './colours';
-
-const Node = ({ interesting, cx, cy, _draw_, _ldraw_, variant, label }) => {
-    // dispatch(hoverNode(d.id))
+const Node = ({ id, interesting, cx, cy, _draw_, _ldraw_, variant, label, clickNode }) => {
     return <g 
         class='node'
-        onMouseOver={() => {}}>
+        onMouseOver={() => hoverNode(id)}
+        onClick={() => clickNode(id)}>
         <ellipse 
             stroke='#000000'
             cx={cx}
@@ -129,9 +149,9 @@ const Node = ({ interesting, cx, cy, _draw_, _ldraw_, variant, label }) => {
             rx={_draw_[1].rect[2]}
             ry={_draw_[1].rect[3]}
             fill={nodeColor(variant)}
-            // class={classNames({
-            //     'interesting': interesting
-            // })}
+            class={classNames({
+                'interesting': interesting
+            })}
         />
         <text 
             textAnchor='middle'
@@ -168,7 +188,10 @@ const toSvgPointSpace = point => [ point[0], -point[1] ];
 
 const generateGraphDOT = (nodes, edges) => `
     digraph graphname {
-        ${nodes.map(({ id, rank, label }) => `"${id}" [width=${rank}] [height=${rank}] [label="${label}"];`).join('\n')}
+        ${nodes.map(({ id, rank, label }) => {
+            rank = 1;
+            return `"${id}" [width=${rank}] [height=${rank}] [label="${label}"];`
+        }).join('\n')}
         ${edges.map(({ source, target }) => `"${source}" -> "${target}";`).join('\n')}
     }
 `
@@ -258,9 +281,12 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        // hoverNode: id => {
-        //     dispatch(hoverNode(id))
-        // }
+        clickNode: id => {
+            dispatch(clickNode(id))
+        },
+        hoverNode: id => {
+            dispatch(hoverNode(id))
+        }
     }
 }
 

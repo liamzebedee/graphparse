@@ -2,18 +2,13 @@ import React from 'react';
 
 import {
     searchNodes,
-    selectNodeFromSearch
+    selectNodeFromSearch,
+    selectNodeByLabel
 } from './actions'
 
 import { connect } from 'react-redux'
 
 import './ui.css';
-
-
-
-
-
-// let nodeColor = d3.scaleOrdinal(d3.schemeCategory20);
 import nodeColor from './colours';
 
 class GraphControls extends React.Component {
@@ -26,12 +21,14 @@ class GraphControls extends React.Component {
     }
 
     render() {
-        let { nodeTypes, q, matches, searchNodes, selectNode } = this.props;
+        let { nodeTypes, q, matches, searchNodes, selectNode, clickedNode } = this.props;
         
         return <div className="info-view">
-            {nodeTypes.map((typ, i) => {
-                return <span style={{ backgroundColor: nodeColor(i), color: 'white' }}>{typ}</span> 
-            })}
+            {/* <div className='node-types'>
+                {nodeTypes.map((typ, i) => {
+                    return <span style={{ backgroundColor: nodeColor(i), color: 'white' }}>{typ}</span> 
+                })}
+            </div> */}
 
             <div>
                 <input type='text' onChange={(ev) => searchNodes(ev.target.value)} value={q}/>
@@ -41,6 +38,10 @@ class GraphControls extends React.Component {
                         return <NodeMatch key={i} onClick={() => selectNode(node.id)} {...node}/>
                     }) : 'none' }
                 </div>
+            </div>
+
+            <div className='debug'>
+                <pre>{ clickedNode ? clickedNode.debugInfo : null }</pre>
             </div>
         </div>
     }
@@ -55,13 +56,17 @@ const NodeMatch = ({ onClick, label }) => {
 const mapStateToProps = state => {
     return {
         ...state.graph.search,
-        nodeTypes: state.graph.nodeTypes
+        nodeTypes: state.graph.nodeTypes,
+        clickedNode: state.graph.clickedNode ? state.graph.nodeLookup[state.graph.clickedNode] : null
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        firstLoad:   () => dispatch(searchNodes(".go")),
+        firstLoad:   () => {
+            dispatch(selectNodeByLabel("parse.go"))
+            dispatch(searchNodes(".go"))
+        },
         searchNodes: (q) => dispatch(searchNodes(q)),
         selectNode:  (id) => dispatch(selectNodeFromSearch(id))
     }

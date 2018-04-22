@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"go/build"
 	"go/parser"
-	// "os"
 
 	"golang.org/x/tools/go/loader"
 )
@@ -149,6 +148,9 @@ func objIsWorthy(obj types.Object) bool {
 	if obj.Pkg() == nil {
 		return false
 	}
+	if obj.Pkg().Name() != thisPackage {
+		return false
+	}
 	return true
 }
 
@@ -167,7 +169,7 @@ type parseEngine struct {
 	pkgPath string
 	rootPackage Node
 	currentFile Node
-	parentFunc Node
+	parentFunc *objNode
 }
 
 var optClusterFiles = true
@@ -286,8 +288,87 @@ func (eng *parseEngine) parseMethod(funcNode Node, recv *types.Var) {
 	Graph.AddEdge(recvTypeNode, funcNode)
 }
 
+/*
+FieldVal, MethodVal - something.X()
+MethodExpr - fn := something.X; // fn(something, yada)
+*/
+func parseXOfSelectorExpr(selX ast.Expr) string {
+	switch y := selX.(type) {
+	case *ast.SelectorExpr:
+		return parseXOfSelectorExpr(y.X) + "." + y.Sel.Name
+	case *ast.Ident:
+		return y.Name
+	default:
+		ParserLog.Printf("didn't understand X of selector %T", y)
+	}
+	return ""
+}
+
+type annotatedSelectorObject struct {
+	kind types.SelectionKind
+	types.Object
+}
+
+func getObjectsFromSelector(sel ast.Expr) (objs []annotatedSelectorObject) {
+	switch x := sel.(type) {
+	case *ast.SelectorExpr:
+		sel := pkginfo.Selections[x]
+		
+		if sel == nil {
+			ParserLog.Printf("skipping selector expr (likely qualified identifier) %T\n", x)
+			break
+		} else {
+			annSelObj := annotatedSelectorObject{
+				sel.Kind(),
+				sel.Obj(),
+			}
+			objs = append(objs, annSelObj)
+		}
+
+
+		if ident, ok := x.X.(*ast.Ident); ok {
+			obj := pkginfo.ObjectOf(ident)
+			if !objIsWorthy(obj) {
+				ParserLog.Printf("encountered unexpected bad obj in selector expression %T - %T", obj, x)
+			} else {
+				annSelObj := annotatedSelectorObject{
+					sel.Kind(),
+					obj,
+				}
+				objs = append(objs, annSelObj)
+			}
+			return objs
+		}
+
+		return append(objs, getObjectsFromSelector(x.X)...)
+		
+	default:
+		ParserLog.Printf("didn't understand X of selector %T", x)
+	}
+	return objs
+}
+
 func (eng *parseEngine) parseCallExpr(callExp *ast.CallExpr) {
 	obj, err := exprToObj(callExp.Fun)
+
+	switch x := callExp.Fun.(type) {
+	case *ast.SelectorExpr:
+		sel := pkginfo.Selections[x]
+		if sel == nil {
+			ParserLog.Printf("skipping selector expr (likely qualified identifier) %T\n", x)
+			break
+		}
+
+		// objs := getObjectsFromSelector(x)
+		eng.parseSelectorCallExpr2(sel)
+		return
+		
+	case *ast.Ident:
+		// continue as usual.
+	default:
+		ParserLog.Printf("missed type of call expr %T\n", x)
+	}
+
 	if err != nil || obj == nil {
 		return
 	}
@@ -300,7 +381,6 @@ func (eng *parseEngine) parseCallExpr(callExp *ast.CallExpr) {
 		// eng.parseExternalFuncCall(callExp, obj)
 		return
 	}
-
 
 	variant := Func
 	switch x := obj.Type().(type) {
@@ -317,6 +397,49 @@ func (eng *parseEngine) parseCallExpr(callExp *ast.CallExpr) {
 	// TEST
 	if eng.parentFunc != nil {
 		Graph.AddEdge(eng.parentFunc, funcNode)
+	}
+}
+
+func (eng *parseEngine) parseSelectorCallExpr2(sel *types.Selection) {
+	a := sel.Recv()
+	b := sel.Obj()
+	
+	objA := typeToObj(a)
+
+	nxt := eng.parentFunc
+	
+	if objIsWorthy(objA) {
+		n1 := LookupOrCreateNode(objA, Func, objA.Name())
+		// Graph.AddEdge(eng.parentFunc, n1)
+		Graph.AddEdge(nxt, n1)
+		nxt = n1
+	}
+
+	if objIsWorthy(b) {
+		n2 := LookupOrCreateNode(b, FuncCall, b.Name())
+		Graph.AddEdge(nxt, n2)
+	}
+}
+
+func (eng *parseEngine) parseSelectorCallExpr(objs []annotatedSelectorObject) {
+	prev := eng.parentFunc
+
+	for i := len(objs) - 1; i != -1; i-- {
+		obj := objs[i]
+
+		nodeTyp := FuncCall
+		switch obj.kind {
+		case types.FieldVal:
+			nodeTyp = Field
+		case types.MethodExpr, types.MethodVal:
+			nodeTyp = Method
+		}
+
+		if eng.parentFunc.obj != obj.Object {
+			currNode := LookupOrCreateNode(obj, nodeTyp, obj.Name())
+			Graph.AddEdge(prev, currNode)
+			prev = currNode
+		}
 	}
 }
 

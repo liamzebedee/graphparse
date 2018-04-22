@@ -7,6 +7,7 @@ import matchSorter from 'match-sorter';
 
 const initialState = {
     interested: [],
+    clickedNode: null,
     search: {
         q: "",
         matches: []
@@ -48,13 +49,16 @@ export function getSubPaths(adjList, fromNodeId) {
 
 function graph(state = initialState, action) {
     switch(action.type) {
+        case "CLICK_NODE":
+            return Object.assign({}, state, {
+                clickedNode: action.id
+            })
         case "HOVER_NODE":
             let interested = getSubPaths(state.adjList, action.id)
             return Object.assign({}, state, {
                 interested,
             })
         case "SEARCH_NODES":
-            // let searchList = state.nodes.map(node => node.label)
             let matches = matchSorter(state.nodes, action.q, { keys: ['label'] })
             return Object.assign({}, state, {
                 search: {
@@ -66,6 +70,19 @@ function graph(state = initialState, action) {
             return Object.assign({}, state, {
                 interested: getSubPaths(state.adjList, action.id)
             })
+
+        case "SELECT_NODE_BY_LABEL": {
+            let matches = matchSorter(state.nodes, action.label, { keys: ['label'] })
+            let match = matches[0];
+
+            return Object.assign({}, state, {
+                search: {
+                    q: action.label,
+                    matches,
+                },
+                interested: getSubPaths(state.adjList, match.id),
+            })
+        }
         default:
             return state
     }
