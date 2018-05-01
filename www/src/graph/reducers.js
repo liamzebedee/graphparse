@@ -6,6 +6,8 @@ import { searchNodes } from './actions';
 import matchSorter from 'match-sorter';
 
 const initialState = {
+    grabbing: false,
+
     interested: [],
     clickedNode: null,
     search: {
@@ -53,11 +55,13 @@ function graph(state = initialState, action) {
             return Object.assign({}, state, {
                 clickedNode: action.id
             })
+        
         case "HOVER_NODE":
             let interested = getSubPaths(state.adjList, action.id)
             return Object.assign({}, state, {
                 interested,
             })
+        
         case "SEARCH_NODES":
             let matches = matchSorter(state.nodes, action.q, { keys: ['label'] })
             return Object.assign({}, state, {
@@ -66,6 +70,7 @@ function graph(state = initialState, action) {
                     matches,
                 }
             })
+        
         case "SELECT_NODE_FROM_SEARCH":
             return Object.assign({}, state, {
                 interested: getSubPaths(state.adjList, action.id)
@@ -83,6 +88,13 @@ function graph(state = initialState, action) {
                 interested: getSubPaths(state.adjList, match.id),
             })
         }
+
+        case "GRABBING_CHANGE":
+            return {
+                grabbing: action.grabbing,
+                ...state,
+            }
+        
         default:
             return state
     }

@@ -3,7 +3,6 @@ import graphDOT from 'raw-loader!../../graph.dot';
 
 import D3GraphCtn from './graph';
 import GraphControlsView from './ui';
-import './style.css';
 
 import {
     createStore,
@@ -12,14 +11,14 @@ import {
     compose
 } from 'redux';
 import { Provider } from 'react-redux'
+import thunk from 'redux-thunk';
 import rootReducer from './reducers';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-const middleware = [() => {}];
 const store = createStore(
     rootReducer,
     composeEnhancers(
-        // applyMiddleware(middleware)
+        applyMiddleware(thunk)
     )
 )
 
@@ -27,7 +26,7 @@ const store = createStore(
 export default class GraphUI extends React.Component {
     render() {
         return <Provider store={store}>
-            <div>
+            <div class='ctn'>
                 <GraphControlsView/>
                 <D3GraphCtn/>
             </div>

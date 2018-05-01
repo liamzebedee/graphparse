@@ -11,13 +11,15 @@ import graphDOT from 'raw-loader!../../graph.dot';
 import graphJSON from '../../graph.json';
 import {
     hoverNode,
-    clickNode
+    clickNode,
+    setGrabbing
 } from './actions'
 import {
     hexToRgb
 } from '../util'
 import nodeColor from './colours';
-import styles from './graph.css';
+
+import './graph.css';
 
 const nodeType = (str) => graphJSON.nodeTypes.indexOf(str);
 
@@ -28,6 +30,8 @@ class D3Graph extends React.Component {
     }
 
     state = {
+        grabbing: false,
+
         zoom: {
             transform: {
                 x: 0,
@@ -46,6 +50,13 @@ class D3Graph extends React.Component {
         shortcut('ctrl c', {}, () => {
             copy(this.state.graphDOT);
         })
+
+        // this.svg.addEventListener('mousedown', () => {          
+        //     this.setState({ grabbing: true })
+        // })
+        // this.svg.addEventListener('mouseup', () => {          
+        //     this.setState({ grabbing: false })
+        // })
     }
 
     addZoom = () => {
@@ -86,7 +97,6 @@ class D3Graph extends React.Component {
         .filter(removeDuplicates)
 
 
-
         let nodesToInclude = edges.map(e => [e.source, e.target]).reduce((a, b) => a.concat(b), []);
         let nodes = nextProps.nodes.filter(node => {
             return _.contains(nodesToInclude, node.id)
@@ -108,14 +118,34 @@ class D3Graph extends React.Component {
     render() {
         let zoom = this.state.zoom;
         let seenEdges = [];
-        
 
-        return <div>
-            <svg width='100%' height='100%' ref={(svg) => this.svg = svg}>
-                <g class='everything' style={{
-                    transform: `translate3d(${zoom.x}px, ${zoom.y}px, 0px) scale(${zoom.k})`
-                }}>
-                    <g class='nodes'>
+        return <svg
+                className={classNames({
+                    grabbing: this.state.grabbing
+                })}
+                // onTouchStart={window.alert}
+                // onMouseMove={window.alert}
+                // onTouchMove={window.alert}
+                // onMouseUp={window.alert}
+                // onTouchEnd={window.alert}
+                ref={(ref) => this.svg = ref}
+                >
+                <defs>
+                    <filter id="shadow" x="0" y="0" width="200%" height="200%">
+                    <feOffset result="offOut" in="SourceAlpha" dx="10" dy="10" />
+                    <feGaussianBlur result="blurOut" in="offOut" stdDeviation="3" />
+                    <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+                    </filter>
+                </defs>
+
+                <g 
+                    style={{
+                        transform: `translate3d(${zoom.x}px, ${zoom.y}px, 0px) scale(${zoom.k})`
+                    }} 
+                    ref={ref => this.everything = ref}
+                    >
+
+                    <g>
                         {this.state.nodes.map(node => {
                             return <Node 
                                 key={node.id} clickNode={this.props.clickNode} 
@@ -124,7 +154,7 @@ class D3Graph extends React.Component {
                         })}
                     </g>
 
-                    <g class='edges'>
+                    <g>
                         {this.state.edges.map((edge, i) => {
                             if(_.contains(seenEdges, edge.id)) return false;
                             seenEdges.push(edge.id)
@@ -132,31 +162,31 @@ class D3Graph extends React.Component {
                         })}
                     </g>
                 </g>
-            </svg>
-        </div>
+        </svg>
     }
 }
 
-const Node = ({ id, interesting, cx, cy, _draw_, _ldraw_, variant, label, clickNode }) => {
+const Node = ({ id, interesting, cx, cy, _draw_, variant, label, clickNode }) => {
     return <g 
         class='node'
         onMouseOver={() => hoverNode(id)}
-        onClick={() => clickNode(id)}>
+        onClick={() => clickNode(id)}
+        transform={`translate(${cx}, ${cy})`}
+        >
         <ellipse 
             stroke='#000000'
-            cx={cx}
-            cy={cy}
             rx={_draw_[1].rect[2]}
             ry={_draw_[1].rect[3]}
             fill={nodeColor(variant)}
             class={classNames({
                 'interesting': interesting
             })}
-        />
+        >
+        </ellipse>
         <text 
             textAnchor='middle'
-            x={_ldraw_[2].pt[0]}
-            y={-_ldraw_[2].pt[1]}>
+            x="0" y="0" alignment-baseline="middle" font-size="12" stroke-width="0" stroke="#000" text-anchor="middle"
+            >
             {label}
         </text>
     </g>
@@ -183,7 +213,7 @@ const Edge = ({ points, arrowPts }) => {
 }
 
 
-const toSvgPointSpace = point => [ point[0], -point[1] ];
+const toSvgPointSpace = point => [ point[0], FLIP_SIGN*point[1] ];
 
 
 const generateGraphDOT = (nodes, edges) => `
@@ -192,9 +222,11 @@ const generateGraphDOT = (nodes, edges) => `
             rank = 1;
             return `"${id}" [width=${rank}] [height=${rank}] [label="${label}"];`
         }).join('\n')}
-        ${edges.map(({ source, target }) => `"${source}" -> "${target}";`).join('\n')}
+        ${edges.map(({ source, target }) => `"${target}" -> "${source}";`).join('\n')}
     }
 `
+
+const FLIP_SIGN = 1;
 
 // // Passes DOT to Graphviz, generates layout of nodes and edges in JSON, merges with node data to be bound to D3
 function generateLayout(graphDOT, nodeLookup) {
@@ -206,7 +238,7 @@ function generateLayout(graphDOT, nodeLookup) {
 
         return {
             cx: pos[0],
-            cy: -pos[1],
+            cy: FLIP_SIGN*pos[1],
             rx: obj._draw_[1].rect[2],
             ry: obj._draw_[1].rect[3],
             ...obj,
@@ -245,32 +277,18 @@ function generateLayout(graphDOT, nodeLookup) {
     }
 }
 
+// function zoomToBoundingBox(node) {
+//     var bounds = path.bounds(d),
+//       dx = bounds[1][0] - bounds[0][0],
+//       dy = bounds[1][1] - bounds[0][1],
+//       x = (bounds[0][0] + bounds[1][0]) / 2,
+//       y = (bounds[0][1] + bounds[1][1]) / 2,
+//       scale = Math.max(1, Math.min(8, 0.9 / Math.max(dx / width, dy / height))),
+//       translate = [width / 2 - scale * x, height / 2 - scale * y];
 
-// function renderGraphviz(g) {
-//     var graphvizSvg = Viz(graphDOT, { format: 'svg' });
-//     g.html(graphvizSvg)
+//     let transform = d3.zoomIdentity.translate(translate[0],translate[1]).scale(scale);
+//     return transform;
 // }
-
-// function focusOnPackageNode(svg, zoom, layout) {
-//     let node = _.find(layout.nodes, node => {
-//         return node.variant == graphJSON.nodeTypes.indexOf('RootPackage')
-//     })
-//     // let transform = to_bounding_box(getCenter(node.cx, node.cy), node.rx, node.ry, 0)
-//     // g.transition().duration(200).call(zoom.transform, transform);
-//     // zoom.translateTo(svg, node.cx / 2, node.cy / 2)
-// }
-
-// function contrastColour(r,g,b) {
-//     let d = 0;
-//     // Counting the perceptive luminance - human eye favors green color... 
-//     let a = 1 - ( 0.299 * r + 0.587 * g + 0.114 * b)/255;
-//     if (a < 0.5)
-//         return "black";
-//     else
-//         return "white";
-// }
-
-
 
 
 const mapStateToProps = state => {
@@ -286,7 +304,8 @@ const mapDispatchToProps = dispatch => {
         },
         hoverNode: id => {
             dispatch(hoverNode(id))
-        }
+        },
+        setGrabbing: (grabbing) => dispatch(setGrabbing(grabbing)),
     }
 }
 

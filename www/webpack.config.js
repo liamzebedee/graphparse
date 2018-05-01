@@ -8,18 +8,13 @@ module.exports = {
 
   context: path.join(__dirname, 'src'),
 
-  entry: {
-    // ast: './ast',
-    ast: ['./ast', 'webpack/hot/only-dev-server', 'webpack-dev-server/client?http://0.0.0.0:3001'],
-    graph: ['./graph', 'webpack/hot/only-dev-server', 'webpack-dev-server/client?http://0.0.0.0:3001'],
-  },
+  // entry: ['./index', 'webpack/hot/only-dev-server', 'webpack-dev-server/client?http://0.0.0.0:3001'],
+  entry: './index',
 
   output: {
-    path: path.join(__dirname, 'dist'),
-    filename: '[name].bundle.js',
-    
-    // devtoolModuleFilenameTemplate: '[absolute-resource-path]',
-    // devtoolFallbackModuleFilenameTemplate: '[absolute-resource-path]?[hash]'
+    path: path.resolve(__dirname, "dist"),
+    filename: 'bundle.js',
+    publicPath: '/',
   },
 
   // devtool: "inline-cheap-module-source-map",
@@ -27,15 +22,15 @@ module.exports = {
   
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'APP'
+      template: './index.html',
+      title: "Basemap"
     }),
-    new webpack.NamedModulesPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.SourceMapDevToolPlugin({
       filename: "[file].map"
     }),
     new webpack.DefinePlugin({
-      "process.env": { 
+      "process.env": {
          NODE_ENV: JSON.stringify("production") 
        }
     })
@@ -54,4 +49,20 @@ module.exports = {
       }
     ],
   },
+};
+
+
+const history = require('connect-history-api-fallback');
+const convert = require('koa-connect');
+
+module.exports.serve = {
+  // content: [path.join(__dirname, 'src')],
+
+  // context: path.join(__dirname, 'src'),
+  add: (app, middleware, options) => {
+    const historyOptions = {
+    };
+
+    app.use(convert(history(historyOptions)));
+  }
 };

@@ -1,7 +1,0 @@
-body {
-}
-
-.nodes g:not(.interesting),
-.edges g:not(.interesting) {
-    /* opacity: 0.2; */
-}

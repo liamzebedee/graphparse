@@ -34,7 +34,7 @@ Method              #ff7f0e
 Func                #ffbb78
 Field               #aec7e8
 RootPackage         #2ca02c
-File                #2ca02c
+File                #52d352
 ImportedPackage     white
 ImportedFunc        white
 FuncCall            white
@@ -52,6 +52,10 @@ FuncCall            white
 let domain = graphJSON.nodeTypes.map((nodeType, i) => {
     return _.findIndex(config, { nodeType })
 })
+
+export function getVariantName(variant) {
+    return graphJSON.nodeTypes[variant]
+}
 
 // nodeTypesMapping.map(x => x.nodeType)
 let range = config.map(x => x.colour)

@@ -63,3 +63,7 @@ Deploy for other people.
 
 //add more debug information to node
 take existing colours and make them slightly better and static.
+
+
+
+center the frame

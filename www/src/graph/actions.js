@@ -21,10 +21,20 @@ export function searchNodes(q) {
     }
 }
 
+export function loadInitialFileForTesting() {
+    return (dispatch, getState) => {
+        dispatch(searchNodes("Server"))
+
+        let top = getState().graph.search.matches[0];
+        if(top == null) { throw new Error() }
+        dispatch(selectNodeFromSearch(top.id))
+    }
+}
+
 export function selectNodeFromSearch(id) {
     return {
         type: "SELECT_NODE_FROM_SEARCH",
-        id
+        id,
     }
 }
 
@@ -32,5 +42,12 @@ export function selectNodeByLabel(label) {
     return {
         type: "SELECT_NODE_BY_LABEL",
         label
+    }
+}
+
+export function setGrabbing(grabbing) {
+    return {
+        type: "GRABBING_CHANGE",
+        grabbing,
     }
 }
