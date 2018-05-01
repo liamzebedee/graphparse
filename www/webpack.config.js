@@ -26,12 +26,12 @@ module.exports = {
       title: "Basemap",
       template: './index.ejs',
     }),
-    new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
       "process.env": {
          NODE_ENV: JSON.stringify("production") 
        }
-    })
+    }),
+    // new webpack.HotModuleReplacementPlugin()
   ],
 
   module: {
@@ -54,6 +54,9 @@ const history = require('connect-history-api-fallback');
 const convert = require('koa-connect');
 
 module.exports.serve = {
+  reload: false,
+  hot: true,
+
   add: (app, middleware, options) => {
     const historyOptions = {};
     app.use(convert(history(historyOptions)));

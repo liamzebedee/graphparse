@@ -274,7 +274,7 @@ function postFilterNodesAndEdges({ nodes, edges, interested, nodeLookup }) {
 
     let seenEdges = [];
     function removeDuplicates(edge) {
-        let id = `${edge.source}${edge.target}`;
+        let id = `${edge.source}${edge.target}`; 
         if(_.contains(seenEdges, id)) return false;
         seenEdges.push(id)
         return true

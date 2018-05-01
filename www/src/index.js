@@ -1,49 +1,35 @@
-import React from 'react'
+import { App, store } from './app';
 import ReactDOM from 'react-dom'
-
-import { createStore, combineReducers, applyMiddleware } from 'redux'
-import { Provider } from 'react-redux'
-
-import createHistory from 'history/createBrowserHistory'
-import { Route } from 'react-router'
-
-import { 
-    ConnectedRouter, 
-    routerReducer, 
-    routerMiddleware, 
-} from 'react-router-redux'
+import React from 'react'
+import  { AppContainer } from 'react-hot-loader';
 
 
-import Home from './home/'
-import GraphUI from './graph';
-// import reducers from './reducers'
+const render = Component => {
+  ReactDOM.render(
+    <AppContainer>
+      <Component />
+    </AppContainer>,
+    document.getElementById('root'),
+  )
+}
 
-const history = createHistory()
-const middleware = routerMiddleware(history)
+render(App)
 
-const store = createStore(
-  combineReducers({
-    router: routerReducer
-  }),
-  applyMiddleware(middleware)
-)
+if (module.hot) {
+  module.hot.accept();
 
-
-ReactDOM.render(
-  <Provider store={store}>
-    <ConnectedRouter history={history}>
-      <div>
-        <Route exact path="/" component={Home}/>
-        <Route path="/repo/:id" component={GraphUI}/>
-        {/* <Route path="/ast" component={GraphUI}/> */}
-      </div>
-    </ConnectedRouter>
-  </Provider>,
-  document.getElementById('root')
-)
+  module.hot.dispose((data) => {
+    data.store = store;
+  });
+}
 
 
-/*
-
-
-*/
+// Webpack Hot Module Replacement API
+if (module.hot) {
+  module.hot.accept('./app', () => {
+    // if you are using harmony modules ({modules:false})
+    // render(App)
+    // in all other cases - re-require App manually
+    render(require('./app').App)
+  })
+}

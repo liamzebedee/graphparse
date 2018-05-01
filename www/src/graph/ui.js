@@ -5,8 +5,6 @@ import {
     loadInitialFileForTesting,
     selectNodeByLabel,
     selectNodeFromSearch,
-
-    uiChangeView,
 } from './actions'
 
 import { connect } from 'react-redux'
@@ -28,10 +26,7 @@ class GraphControls extends React.Component {
         
         return <div className="infoView">
             <div>
-                <a onClick={() => uiChangeView(view)}>
-                    {this.props.view}
-                </a>
-
+  
                 <div className='search'>
                     <input type='text' className="form-control" placeholder="Search types, files" onChange={(ev) => searchNodes(ev.target.value)} value={q}/>
                 </div>
@@ -74,11 +69,10 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
     return {
         firstLoad:   () => {
-            dispatch(loadInitialFileForTesting())            
+            // dispatch(loadInitialFileForTesting())
         },
         searchNodes: (q) => dispatch(searchNodes(q)),
         selectNode:  (id) => dispatch(selectNodeFromSearch(id)),
-        uiChangeView: (currentView) => dispatch(uiChangeView(currentView)),
     }
 }
 
