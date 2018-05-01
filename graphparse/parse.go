@@ -401,24 +401,31 @@ func (eng *parseEngine) parseCallExpr(callExp *ast.CallExpr) {
 }
 
 func (eng *parseEngine) parseSelectorCallExpr2(sel *types.Selection) {
-	a := sel.Recv()
-	b := sel.Obj()
+	// recvTyp := sel.Recv()
+	// recv := typeToObj(recvTyp)
+	obj := sel.Obj()
 	
-	objA := typeToObj(a)
-
-	nxt := eng.parentFunc
 	
-	if objIsWorthy(objA) {
-		n1 := LookupOrCreateNode(objA, Func, objA.Name())
-		// Graph.AddEdge(eng.parentFunc, n1)
-		Graph.AddEdge(nxt, n1)
-		nxt = n1
+	if objIsWorthy(obj) {
+		objNode := LookupOrCreateNode(obj, FuncCall, obj.Name())
+		Graph.AddEdge(eng.parentFunc, objNode)
 	}
 
-	if objIsWorthy(b) {
-		n2 := LookupOrCreateNode(b, FuncCall, b.Name())
-		Graph.AddEdge(nxt, n2)
-	}
+	// recvNode := LookupOrCreateNode(recv, Func, objA.Name())
+
+	// nxt := eng.parentFunc
+	
+	// if objIsWorthy(objA) {
+		// n1 := LookupOrCreateNode(objA, Func, objA.Name())
+	// 	// Graph.AddEdge(eng.parentFunc, n1)
+	// 	// Graph.AddEdge(nxt, n1)
+	// 	nxt = n1
+	// }
+
+	// if objIsWorthy(b) {
+	// 	n2 := LookupOrCreateNode(b, FuncCall, b.Name())
+	// 	Graph.AddEdge(nxt, n2)
+	// }
 }
 
 func (eng *parseEngine) parseSelectorCallExpr(objs []annotatedSelectorObject) {
@@ -462,7 +469,7 @@ func (eng *parseEngine) parseExternalFuncCall(callExp *ast.CallExpr, obj types.O
 	
 	// TEST
 	if eng.parentFunc != nil {
-		// Graph.AddEdge(parentFunc, funcNode)
+		Graph.AddEdge(eng.parentFunc, funcNode)
 		Graph.AddEdge(funcNode, eng.parentFunc)
 	}
 	

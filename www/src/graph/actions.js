@@ -51,3 +51,10 @@ export function setGrabbing(grabbing) {
         grabbing,
     }
 }
+
+export function uiChangeView(currentView) {
+    return {
+        type: "UI_CHANGE_VIEW",
+        view: ("show types" == currentView ? "show relationships" : "show types")
+    }
+}

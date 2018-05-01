@@ -69,55 +69,24 @@ class D3Graph extends React.Component {
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        let { nodeLookup, edges } = nextProps;
+        let { 
+            interested, nodeLookup, 
+            nodes, edges,
+        } = nextProps;
 
-        const showOnlyInterestedNodes = (edge) => {
-            return _.contains(nextProps.interested, edge.source)
-        }
-        const collapseRedundantEdges = (edge) => {
-            let { source, target } = edge;
-            let [ a, b ] = [ nodeLookup[source], nodeLookup[target] ]
-            if(a.variant == nodeType('Struct')) {
-               return !_.find(edges, (edge) => {
-                   return target === edge.target && source != edge.source
-               })
-            }
-            return true;
-        }
-        let seenEdges = [];
-        function removeDuplicates(edge) {
-            let id = `${edge.source}${edge.target}`;
-            if(_.contains(seenEdges, id)) return null;
-            seenEdges.push(id)
-            return true
-        }
-        edges = edges
-        .filter(showOnlyInterestedNodes)
-        .filter(collapseRedundantEdges)
-        .filter(removeDuplicates)
-
-
-        let nodesToInclude = edges.map(e => [e.source, e.target]).reduce((a, b) => a.concat(b), []);
-        let nodes = nextProps.nodes.filter(node => {
-            return _.contains(nodesToInclude, node.id)
-        })
-
-        if(nodes.length < 1 || edges.length < 1) return {}
-        
-
-        let graphDOT = generateGraphDOT(nodes, edges)
-
-        let layout = generateLayout(graphDOT, nextProps.nodeLookup)
+        [nodes, edges] = filterNodesAndEdges({ nodes, edges, interested, nodeLookup });
+        [nodes, edges] = generateLayout({ nodes, edges, nodeLookup });
+        [nodes, edges] = postFilterNodesAndEdges({ nodes, edges, interested, nodeLookup });
         
         return {
             graphDOT,
-            ...layout,
+            nodes,
+            edges,
         }
     }
 
     render() {
         let zoom = this.state.zoom;
-        let seenEdges = [];
 
         return <svg
                 className={classNames({
@@ -130,38 +99,36 @@ class D3Graph extends React.Component {
                 // onTouchEnd={window.alert}
                 ref={(ref) => this.svg = ref}
                 >
-                <defs>
-                    <filter id="shadow" x="0" y="0" width="200%" height="200%">
-                    <feOffset result="offOut" in="SourceAlpha" dx="10" dy="10" />
-                    <feGaussianBlur result="blurOut" in="offOut" stdDeviation="3" />
-                    <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
-                    </filter>
-                </defs>
+            <defs>
+                <filter id="shadow" x="0" y="0" width="200%" height="200%">
+                <feOffset result="offOut" in="SourceAlpha" dx="10" dy="10" />
+                <feGaussianBlur result="blurOut" in="offOut" stdDeviation="3" />
+                <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
+                </filter>
+            </defs>
 
-                <g 
-                    style={{
-                        transform: `translate3d(${zoom.x}px, ${zoom.y}px, 0px) scale(${zoom.k})`
-                    }} 
-                    ref={ref => this.everything = ref}
-                    >
+            <g 
+                style={{
+                    transform: `translate3d(${zoom.x}px, ${zoom.y}px, 0px) scale(${zoom.k})`
+                }} 
+                ref={ref => this.everything = ref}
+                >
 
-                    <g>
-                        {this.state.nodes.map(node => {
-                            return <Node 
-                                key={node.id} clickNode={this.props.clickNode} 
-                                interesting={_.contains(this.props.interested, node.id)}
-                                {...node}/>
-                        })}
-                    </g>
-
-                    <g>
-                        {this.state.edges.map((edge, i) => {
-                            if(_.contains(seenEdges, edge.id)) return false;
-                            seenEdges.push(edge.id)
-                            return <Edge key={edge.id} {...edge}/>
-                        })}
-                    </g>
+                <g>
+                {this.state.nodes.map(node => {
+                    return <Node 
+                        key={node.id} clickNode={this.props.clickNode} 
+                        interesting={_.contains(this.props.interested, node.id)}
+                        {...node}/>
+                })}
                 </g>
+
+                <g>
+                {this.state.edges.map((edge, i) => {
+                    return <Edge key={edge.id} {...edge}/>
+                })}
+                </g>
+            </g>
         </svg>
     }
 }
@@ -212,8 +179,7 @@ const Edge = ({ points, arrowPts }) => {
     </g>
 }
 
-
-const toSvgPointSpace = point => [ point[0], FLIP_SIGN*point[1] ];
+const toSvgPointSpace = point => [ point[0], point[1] ];
 
 
 const generateGraphDOT = (nodes, edges) => `
@@ -222,59 +188,103 @@ const generateGraphDOT = (nodes, edges) => `
             rank = 1;
             return `"${id}" [width=${rank}] [height=${rank}] [label="${label}"];`
         }).join('\n')}
-        ${edges.map(({ source, target }) => `"${target}" -> "${source}";`).join('\n')}
+        ${edges.map(({ source, target, id }) => `"${target}" -> "${source}" [id=${id}];`).join('\n')}
     }
 `
 
-const FLIP_SIGN = 1;
 
-// // Passes DOT to Graphviz, generates layout of nodes and edges in JSON, merges with node data to be bound to D3
-function generateLayout(graphDOT, nodeLookup) {
+// Passes DOT to Graphviz, generates layout of nodes and edges in JSON
+function generateLayout({ nodes, edges, nodeLookup }) {
+    if(nodes.length < 1 || edges.length < 1) return [[], []];
+
+    let graphDOT = generateGraphDOT(nodes, edges)
+
     let graphvizData = JSON.parse(Viz(graphDOT, { format: 'json' }));
     
-    let nodes = graphvizData.objects.map(obj => {
+    nodes = graphvizData.objects.map(obj => {
         let pos = obj.pos.split(',').map(Number);
         let id = new Number(obj.name)
 
         return {
             cx: pos[0],
-            cy: FLIP_SIGN*pos[1],
+            cy: pos[1],
             rx: obj._draw_[1].rect[2],
             ry: obj._draw_[1].rect[3],
             ...obj,
+
             id,
             ...nodeLookup[id]
         }
     })
 
-    let edges = graphvizData.edges.map((edge, i) => {
+    edges = graphvizData.edges.map((edge, i) => {
         let points = edge._draw_[1].points.map(toSvgPointSpace);
         
-        let { head, tail } = edge;
-        function findNodeForGvid(id) {
-            let obj = _.find(graphvizData.objects, obj => obj._gvid == id)
-            if(!obj) throw new Error()
-            return Number(obj.name)
-        }
+        // function findNodeForGvid(id) {
+        //     let obj = _.find(graphvizData.objects, obj => obj._gvid == id)
+        //     if(!obj) throw new Error()
+        //     return Number(obj.name)
+        // }
 
-        let source = findNodeForGvid(head)
-        let target = findNodeForGvid(tail)
+        // let { head, tail } = edge;
+        // let source = findNodeForGvid(head)
+        // let target = findNodeForGvid(tail)
+
+        let edgeData = _.find(edges, edge_ => edge_.id == edge.id)
 
         let arrowPts = edge._hdraw_[3].points.map(toSvgPointSpace)
 
         return {
             points,
             arrowPts,
-            source,
-            target,
-            id: `${i}${source}${target}`
+            ...edgeData
         }
     })
 
-    return {
-        nodes,
-        edges,
+    return [ nodes, edges ];
+}
+
+function filterNodesAndEdges({ nodes, edges, interested, nodeLookup }) {
+    const showOnlyInterestedNodes = (edge) => {
+        return _.contains(interested, edge.source)
     }
+
+    edges = edges
+    .filter(showOnlyInterestedNodes)
+
+    let nodesToInclude = edges.map(e => [e.source, e.target]).reduce((a, b) => a.concat(b), []);
+    nodes = nodes.filter(node => {
+        return _.contains(nodesToInclude, node.id)
+    })
+
+    return [ nodes, edges ]
+}
+
+function postFilterNodesAndEdges({ nodes, edges, interested, nodeLookup }) {
+    const collapseRedundantEdges = (edge) => {
+        let { source, target } = edge;
+        let [ a, b ] = [ nodeLookup[source], nodeLookup[target] ]
+        if(a.variant == nodeType('Struct')) {
+           return !_.find(edges, (edge) => {
+               return target === edge.target && source != edge.source
+           })
+        }
+        return true;
+    }
+
+    let seenEdges = [];
+    function removeDuplicates(edge) {
+        let id = `${edge.source}${edge.target}`;
+        if(_.contains(seenEdges, id)) return false;
+        seenEdges.push(id)
+        return true
+    }
+
+    edges = edges
+    .filter(removeDuplicates)
+    .filter(collapseRedundantEdges)
+
+    return [ nodes, edges ]
 }
 
 // function zoomToBoundingBox(node) {

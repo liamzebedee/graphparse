@@ -35,6 +35,18 @@ type ranksMap = map[nodeid]float64
 type edge struct {
 	from Node
 	to Node
+	id int
+}
+
+var lastEdgeId = 0
+
+func newEdge(from Node, to Node) edge {
+	lastEdgeId++
+	return edge{
+		from,
+		to,
+		lastEdgeId,
+	}
 }
 
 func (e edge) String() string {
@@ -220,7 +232,7 @@ func (g *graph) AddEdge(from, to Node) {
 	if _, ok := nodeLookup[to.Id()]; !ok {
 		panic("to node doesn't exist, cannot add edge")
 	}
-	e := edge{from, to}
+	e := newEdge(from, to)
 	g.edges = append(g.edges, e)
 }
 
@@ -358,6 +370,7 @@ type jsonNodeDef struct {
 type jsonNodeEdge struct {
 	From nodeid `json:"source"`
 	To nodeid   `json:"target"`
+	Id int      `json:"id"`
 }
 type jsonGraph struct {
 	NodesLookup map[nodeid]jsonNodeDef `json:"nodeLookup"`
@@ -396,6 +409,7 @@ func (g *graph) _toJson(edges []edge) jsonGraph {
 		jsonGraph.Edges = append(jsonGraph.Edges, jsonNodeEdge{
 			edge.from.Id(), 
 			edge.to.Id(),
+			edge.id,
 		})
 	})
 

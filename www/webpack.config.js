@@ -18,17 +18,15 @@ module.exports = {
   },
 
   // devtool: "inline-cheap-module-source-map",
-  devtool: "inline-source-map",
+  // devtool: "inline-source-map",
+  devtool: 'eval-source-map',
   
   plugins: [
     new HtmlWebpackPlugin({
-      template: './index.html',
-      title: "Basemap"
+      title: "Basemap",
+      template: './index.ejs',
     }),
     new webpack.HotModuleReplacementPlugin(),
-    new webpack.SourceMapDevToolPlugin({
-      filename: "[file].map"
-    }),
     new webpack.DefinePlugin({
       "process.env": {
          NODE_ENV: JSON.stringify("production") 
@@ -56,13 +54,8 @@ const history = require('connect-history-api-fallback');
 const convert = require('koa-connect');
 
 module.exports.serve = {
-  // content: [path.join(__dirname, 'src')],
-
-  // context: path.join(__dirname, 'src'),
   add: (app, middleware, options) => {
-    const historyOptions = {
-    };
-
+    const historyOptions = {};
     app.use(convert(history(historyOptions)));
   }
 };

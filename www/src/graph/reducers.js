@@ -18,7 +18,10 @@ const initialState = {
     edges: graphJSON.edges,
     nodeLookup: graphJSON.nodeLookup,
     adjList: graphJSON.adjList,
-    nodeTypes: graphJSON.nodeTypes
+    nodeTypes: graphJSON.nodeTypes,
+
+
+    uiView: "show relationships",
 }
 
 export function getSubPaths(adjList, fromNodeId) {
@@ -93,6 +96,12 @@ function graph(state = initialState, action) {
             return {
                 grabbing: action.grabbing,
                 ...state,
+            }
+        
+        case "UI_CHANGE_VIEW":
+            return {
+                uiView: action.view,
+                ...state
             }
         
         default:

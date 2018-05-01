@@ -4,7 +4,9 @@ import {
     searchNodes,
     loadInitialFileForTesting,
     selectNodeByLabel,
-    selectNodeFromSearch
+    selectNodeFromSearch,
+
+    uiChangeView,
 } from './actions'
 
 import { connect } from 'react-redux'
@@ -22,16 +24,14 @@ class GraphControls extends React.Component {
     }
 
     render() {
-        let { nodeTypes, q, matches, searchNodes, selectNode, clickedNode } = this.props;
+        let { nodeTypes, q, matches, searchNodes, selectNode, clickedNode, view, uiChangeView } = this.props;
         
         return <div className="infoView">
-            {/* <div className='node-types'>
-                {nodeTypes.map((typ, i) => {
-                    return <span style={{ backgroundColor: nodeColor(i), color: 'white' }}>{typ}</span> 
-                })}
-            </div> */}
-
             <div>
+                <a onClick={() => uiChangeView(view)}>
+                    {this.props.view}
+                </a>
+
                 <div className='search'>
                     <input type='text' className="form-control" placeholder="Search types, files" onChange={(ev) => searchNodes(ev.target.value)} value={q}/>
                 </div>
@@ -66,7 +66,8 @@ const mapStateToProps = state => {
     return {
         ...state.graph.search,
         nodeTypes: state.graph.nodeTypes,
-        clickedNode: state.graph.clickedNode ? state.graph.nodeLookup[state.graph.clickedNode] : null
+        clickedNode: state.graph.clickedNode ? state.graph.nodeLookup[state.graph.clickedNode] : null,
+        view: state.graph.uiView
     }
 }
 
@@ -76,7 +77,8 @@ const mapDispatchToProps = dispatch => {
             dispatch(loadInitialFileForTesting())            
         },
         searchNodes: (q) => dispatch(searchNodes(q)),
-        selectNode:  (id) => dispatch(selectNodeFromSearch(id))
+        selectNode:  (id) => dispatch(selectNodeFromSearch(id)),
+        uiChangeView: (currentView) => dispatch(uiChangeView(currentView)),
     }
 }
 
