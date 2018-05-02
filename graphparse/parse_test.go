@@ -8,11 +8,31 @@ import (
 	"github.com/stretchr/testify/assert"
 	"bytes"
 	"fmt"
+	"encoding/json"
 )
 
 func TestMain(m *testing.M) {
 	setup()
+
+	var buffer bytes.Buffer
+	Graph.ToString(&buffer)
+	fmt.Println(buffer.String())
+
 	os.Exit(m.Run())
+}
+
+// func TestGraphdotOutput(t *testing.T) {
+// 	var buffer bytes.Buffer
+// 	Graph.ToDot(&buffer)
+// 	assert.NotEmpty(t, buffer.String())
+// 	fmt.Println(buffer.String())
+// }
+
+func TestJsonOutput(t *testing.T) {
+	var buffer bytes.Buffer
+	res := Graph.toJson()
+	json.NewEncoder(&buffer).Encode(res)
+	assert.NotEmpty(t, buffer.String())
 }
 
 func setup() {
@@ -117,9 +137,33 @@ func TestParseImports(t *testing.T) {
 	// assert.NotNil(t, Graph.Edge(findNode(ImportedPackage, "log"), findNode(Func, "New")), "")
 	// assert.NotNil(t, Graph.Edge(findNode(ImportedPackage, "log"), findNode(Func, "New")), "")
 }
-func TestExternalPkgFuncCall(t *testing.T) {
-	// assert.Nil(t, Graph.Edge(findNode(Func, "main"), findNode(Func, "NewServer")), ""))
+
+func TestAExternalPkgFuncCall(t *testing.T) {
+	assert.NotNil(t, Graph.Edge(
+		findNode(Func, "main"), 
+		findNode(Func, "NewServer"),
+	), "")
 }
+
+func TestParseValueSpec(t *testing.T) {
+	assert.NotNil(t, findNode(Field, "logger"))
+
+	assert.NotNil(t, Graph.Edge(
+		findNode(File, "main.go"), 
+		findNode(Field, "logger"),
+	), "logger global is linked to defining file")
+
+	assert.NotNil(t, Graph.Edge(
+		findNode(Method, "Listen"), 
+		findNode(Field, "logger"),
+	), "usages of logger global are noted correctly")
+	
+	assert.Nil(t, Graph.Edge(
+		findNode(File, "server.go"), 
+		findNode(Field, "err"),
+	), "value spec is parsed correctly with respect to parent funcs")
+}
+
 
 func TestParseFile(t *testing.T) {
 	assert.NotNil(t, findNode(File, "main.go"))
@@ -133,25 +177,19 @@ func TestParseFile(t *testing.T) {
 
 
 // e.g. within Client.Close, conn.Close() is called to conn.
-func TestParseCallsToStructMembers(t *testing.T) {
-	assert.NotNil(t, findNode(Method, "Listen"))
-	assert.NotNil(t, findNode(Field, "listener"))
+// func TestParseCallsToStructMembers(t *testing.T) {
+// 	assert.NotNil(t, findNode(Method, "Listen"))
+// 	assert.NotNil(t, findNode(Field, "listener"))
 
-	assert.NotNil(t, Graph.Edge(
-		findNode(Method, "Listen"),
-		findNode(Field, "listener"),
-	), "")
-	assert.NotNil(t, Graph.Edge(
-		findNode(Field, "listener"),
-		findNode(Method, "Accept"),
-	), "")
-}
+// 	assert.NotNil(t, Graph.Edge(
+// 		findNode(Method, "Listen"),
+// 		findNode(Field, "listener"),
+// 	), "")
+// 	assert.NotNil(t, Graph.Edge(
+// 		findNode(Field, "listener"),
+// 		findNode(Method, "Accept"),
+// 	), "")
+// }
 
 
 
-func TestGraphdotOutput(t *testing.T) {
-	var buffer bytes.Buffer
-	Graph.ToDot(&buffer)
-	assert.NotEmpty(t, buffer.String())
-	fmt.Println(buffer.String())
-}

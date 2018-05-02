@@ -49,5 +49,9 @@ func (s *Server) Listen() error {
 }
 
 func (s *Server) handleClient(conn net.Conn) {
-	return
+	var err error
+	if err == nil {
+	} else {
+		return
+	}
 }

@@ -23,7 +23,7 @@ import (
 
 var prog *loader.Program
 var pkginfo *loader.PackageInfo 
-var Graph *graph
+
 var fset *token.FileSet
 var thisPackage string
 
@@ -31,12 +31,17 @@ var fileLookup = make(map[string]packageFileInfo)
 
 var eng = parseEngine{}
 
+var Graph *graph
+
 type packageFileInfo struct {
 	Code string `json:"code"`
 	Pos token.Pos `json:"pos"`
 }
 
+
 func GenerateCodeGraphFromProg(prog *loader.Program, pkgpath, pkgFilePath string) {
+	Graph = NewGraph()
+
 	// TODO doesn't work with relative package imports
 	if pkgFilePath == "" {
 		pkgFilePath = build.Default.GOPATH + "/src/" + pkgpath
@@ -50,7 +55,6 @@ func GenerateCodeGraphFromProg(prog *loader.Program, pkgpath, pkgFilePath string
 		panic("pkg was not loaded")
 	}
 	fset = prog.Fset
-	Graph = NewGraph()
 
 	thisPackage = pkginfo.Pkg.Name()
 	fmt.Println("Generating graph for package", thisPackage)
@@ -76,6 +80,8 @@ func GenerateCodeGraphFromProg(prog *loader.Program, pkgpath, pkgFilePath string
 		// ast.Print(fset, f)
 	}
 
+	Graph.processUnknownReferences()
+
 	Graph.markGenerated()
 }
 
@@ -95,74 +101,6 @@ func GenerateCodeGraph(pkgpath string) {
 	}
 
 	GenerateCodeGraphFromProg(prog, pkgpath, "")
-}
-
-
-
-
-func getObjFromIdent(ident *ast.Ident) (types.Object, error) {
-	// I wrote this in a subconcious spree of, "I have a gut feeling that this will do it"
-	obj := pkginfo.ObjectOf(ident)
-
-	// we want to have a canonical obj so we can make an id out of it
-	// in this case, we use the def obj
-	// obj := pkginfo.Defs[ident]
-	
-	// if obj == nil {
-	// 	return nil, fmt.Errorf("obj not found for ident", ident)
-	// }
-
-	// Universe scope
-	// if obj.Pkg() == nil {
-	// 	return nil, fmt.Errorf("universe object ", obj.Type(), ident)
-	// }
-
-	if obj != nil {
-		return obj, nil
-	}
-
-	return nil, fmt.Errorf("unexpected error", obj)
-}
-
-func exprToObj(expr ast.Expr) (types.Object, error) {
-	switch x := expr.(type) {
-	case *ast.SelectorExpr:
-		if sel := pkginfo.Selections[x]; sel != nil {
-			return sel.Obj(), nil
-		}
-		// Probably fully-qualified
-		return pkginfo.ObjectOf(x.Sel), nil
-	
-	case *ast.Ident:
-		obj, err := getObjFromIdent(x)
-		return obj, err
-	
-	default:
-		ParserLog.Printf("missed type %T\n", x)
-	}
-
-	return nil, fmt.Errorf("couldn't get object for expression:", expr)
-}
-
-func objIsWorthy(obj types.Object) bool {
-	if obj.Pkg() == nil {
-		return false
-	}
-	if obj.Pkg().Name() != thisPackage {
-		return false
-	}
-	return true
-}
-
-
-
-func importToCanonicalKey(importSpec *ast.ImportSpec) string {
-	importName, err := strconv.Unquote(importSpec.Path.Value)
-	if err == nil {
-		return importName
-	} else {
-		panic(err)
-	}
 }
 
 type parseEngine struct {
@@ -188,8 +126,7 @@ func (eng *parseEngine) parseFile(f *ast.File) {
 
 	eng.currentFile = LookupOrCreateCanonicalNode(currentFilePath, File, fileName)
 
-	Graph.AddEdge(eng.rootPackage, eng.currentFile)
-	
+	Graph.AddEdge(eng.rootPackage, eng.currentFile, Def)
 }
 
 func (eng *parseEngine) parseTypeSpec(typeSpec *ast.TypeSpec) {
@@ -205,8 +142,8 @@ func (eng *parseEngine) parseTypeSpec(typeSpec *ast.TypeSpec) {
 			panic(err)
 		}
 
-		typeNode := LookupOrCreateNode(obj, Struct, obj.Name())
-		Graph.AddEdge(fromNode, typeNode)
+		typeNode := CreateNode(obj, Struct, obj.Name())
+		Graph.AddEdge(fromNode, typeNode, Def)
 	
 	case *ast.Ident:
 		obj, err := getObjFromIdent(typeSpec.Name)
@@ -214,8 +151,8 @@ func (eng *parseEngine) parseTypeSpec(typeSpec *ast.TypeSpec) {
 			panic(err)
 		}
 
-		typeNode := LookupOrCreateNode(obj, Struct, obj.Name())
-		Graph.AddEdge(fromNode, typeNode)
+		typeNode := CreateNode(obj, Struct, obj.Name())
+		Graph.AddEdge(fromNode, typeNode, Def)
 	
 	default:
 		ParserLog.Printf("missed type %T\n", x)
@@ -246,7 +183,7 @@ func (eng *parseEngine) parseFuncDecl(funcDecl *ast.FuncDecl) {
 		variant = Method
 	}
 
-	funcNode := LookupOrCreateNode(obj, variant, funcDecl.Name.Name)
+	funcNode := CreateNode(obj, variant, funcDecl.Name.Name)
 	eng.parentFunc = funcNode
 
 	switch x := obj.Type().(type) {
@@ -254,7 +191,7 @@ func (eng *parseEngine) parseFuncDecl(funcDecl *ast.FuncDecl) {
 		if isMethod {
 			eng.parseMethod(funcNode, x.Recv())
 		} else {
-			Graph.AddEdge(fromNode, funcNode)
+			Graph.AddEdge(fromNode, funcNode, Def)
 		}
 
 		eng.parseFuncDeclResults(funcNode, x.Results())
@@ -262,7 +199,16 @@ func (eng *parseEngine) parseFuncDecl(funcDecl *ast.FuncDecl) {
 	default:
 		ParserLog.Printf("missed type %T\n", x)
 	}
+
+	eng.parseFuncBody(funcDecl.Body)
+	eng.parentFunc = nil
 }
+
+func (eng *parseEngine) parseFuncBody(body *ast.BlockStmt) {
+	ast.Inspect(body, VisitBody)
+}
+
+
 
 func (eng *parseEngine) parseFuncDeclResults(funcNode Node, results *types.Tuple) {
 	for i := 0; i < results.Len(); i++ {
@@ -277,75 +223,17 @@ func (eng *parseEngine) parseFuncDeclResults(funcNode Node, results *types.Tuple
 			continue
 		}
 
-		resultTypeNode := LookupOrCreateNode(obj, Func, obj.Name())
-		Graph.AddEdge(funcNode, resultTypeNode)
+		// resultTypeNode := LookupOrCreateNode(obj, Func, obj.Name())
+		resultTypeNode := LookupNode(obj)	
+		Graph.AddEdge(funcNode, resultTypeNode, Use)
 	}
 }
 
 func (eng *parseEngine) parseMethod(funcNode Node, recv *types.Var) {
 	obj := typeToObj(recv.Type())
-	recvTypeNode := LookupOrCreateNode(obj, Struct, obj.Name())
-	Graph.AddEdge(recvTypeNode, funcNode)
-}
-
-/*
-FieldVal, MethodVal - something.X()
-MethodExpr - fn := something.X; // fn(something, yada)
-*/
-func parseXOfSelectorExpr(selX ast.Expr) string {
-	switch y := selX.(type) {
-	case *ast.SelectorExpr:
-		return parseXOfSelectorExpr(y.X) + "." + y.Sel.Name
-	case *ast.Ident:
-		return y.Name
-	default:
-		ParserLog.Printf("didn't understand X of selector %T", y)
-	}
-	return ""
-}
-
-type annotatedSelectorObject struct {
-	kind types.SelectionKind
-	types.Object
-}
-
-func getObjectsFromSelector(sel ast.Expr) (objs []annotatedSelectorObject) {
-	switch x := sel.(type) {
-	case *ast.SelectorExpr:
-		sel := pkginfo.Selections[x]
-		
-		if sel == nil {
-			ParserLog.Printf("skipping selector expr (likely qualified identifier) %T\n", x)
-			break
-		} else {
-			annSelObj := annotatedSelectorObject{
-				sel.Kind(),
-				sel.Obj(),
-			}
-			objs = append(objs, annSelObj)
-		}
-
-
-		if ident, ok := x.X.(*ast.Ident); ok {
-			obj := pkginfo.ObjectOf(ident)
-			if !objIsWorthy(obj) {
-				ParserLog.Printf("encountered unexpected bad obj in selector expression %T - %T", obj, x)
-			} else {
-				annSelObj := annotatedSelectorObject{
-					sel.Kind(),
-					obj,
-				}
-				objs = append(objs, annSelObj)
-			}
-			return objs
-		}
-
-		return append(objs, getObjectsFromSelector(x.X)...)
-		
-	default:
-		ParserLog.Printf("didn't understand X of selector %T", x)
-	}
-	return objs
+	// recvTypeNode := LookupOrCreateNode(obj, Struct, obj.Name())
+	recvTypeNode := LookupNode(obj)
+	Graph.AddEdge(recvTypeNode, funcNode, Def)
 }
 
 func (eng *parseEngine) parseCallExpr(callExp *ast.CallExpr) {
@@ -358,18 +246,19 @@ func (eng *parseEngine) parseCallExpr(callExp *ast.CallExpr) {
 			ParserLog.Printf("skipping selector expr (likely qualified identifier) %T\n", x)
 			break
 		}
-
 		// objs := getObjectsFromSelector(x)
-		eng.parseSelectorCallExpr2(sel)
+		eng.parseSelectorCallExpr2(sel, x)
 		return
 		
 	case *ast.Ident:
 		// continue as usual.
+
 	default:
 		ParserLog.Printf("missed type of call expr %T\n", x)
 	}
 
 	if err != nil || obj == nil {
+		ParserLog.Println("ignoring call expr for obj - ", obj, ", error: ", err)
 		return
 	}
 
@@ -382,50 +271,39 @@ func (eng *parseEngine) parseCallExpr(callExp *ast.CallExpr) {
 		return
 	}
 
-	variant := Func
-	switch x := obj.Type().(type) {
-	case *types.Signature:
-		if x.Recv() != nil {
-			variant = Method
-		}
-	default:
-		ParserLog.Printf("missed type %T\n", x)
-	}
-	
-	funcNode := LookupOrCreateNode(obj, variant, obj.Name())
+	funcNode := funcObjToNode(obj)
 	
 	// TEST
 	if eng.parentFunc != nil {
-		Graph.AddEdge(eng.parentFunc, funcNode)
+		Graph.AddEdge(eng.parentFunc, funcNode, Use)
 	}
 }
 
-func (eng *parseEngine) parseSelectorCallExpr2(sel *types.Selection) {
-	// recvTyp := sel.Recv()
-	// recv := typeToObj(recvTyp)
-	obj := sel.Obj()
+func (eng *parseEngine) parseSelectorCallExpr2(sel *types.Selection, selAst *ast.SelectorExpr) {
+	// Selection X.Y
 	
-	
-	if objIsWorthy(obj) {
-		objNode := LookupOrCreateNode(obj, FuncCall, obj.Name())
-		Graph.AddEdge(eng.parentFunc, objNode)
+	fmt.Println(sel.Recv)
+	// Parse the X
+	// recv := sel.Recv()
+	// recvObj := typeToObj(recv)
+	recvObj, err := exprToObj(selAst.X)
+	if err == nil {
+		if objIsWorthy(recvObj) {
+			recvNode := LookupNode(recvObj)
+			Graph.AddEdge(eng.parentFunc, recvNode, Use)
+		}
+	} else {
+		ParserLog.Println("")
 	}
 
-	// recvNode := LookupOrCreateNode(recv, Func, objA.Name())
-
-	// nxt := eng.parentFunc
 	
-	// if objIsWorthy(objA) {
-		// n1 := LookupOrCreateNode(objA, Func, objA.Name())
-	// 	// Graph.AddEdge(eng.parentFunc, n1)
-	// 	// Graph.AddEdge(nxt, n1)
-	// 	nxt = n1
-	// }
 
-	// if objIsWorthy(b) {
-	// 	n2 := LookupOrCreateNode(b, FuncCall, b.Name())
-	// 	Graph.AddEdge(nxt, n2)
-	// }
+	// Parse the Y
+	selObj := sel.Obj()
+	if objIsWorthy(selObj) {
+		objNode := LookupNode(selObj)
+		Graph.AddEdge(eng.parentFunc, objNode, Use)
+	}
 }
 
 func (eng *parseEngine) parseSelectorCallExpr(objs []annotatedSelectorObject) {
@@ -434,17 +312,18 @@ func (eng *parseEngine) parseSelectorCallExpr(objs []annotatedSelectorObject) {
 	for i := len(objs) - 1; i != -1; i-- {
 		obj := objs[i]
 
-		nodeTyp := FuncCall
-		switch obj.kind {
-		case types.FieldVal:
-			nodeTyp = Field
-		case types.MethodExpr, types.MethodVal:
-			nodeTyp = Method
-		}
+		// nodeTyp := FuncCall
+		// switch obj.kind {
+		// case types.FieldVal:
+		// 	nodeTyp = Field
+		// case types.MethodExpr, types.MethodVal:
+		// 	nodeTyp = Method
+		// }
 
 		if eng.parentFunc.obj != obj.Object {
-			currNode := LookupOrCreateNode(obj, nodeTyp, obj.Name())
-			Graph.AddEdge(prev, currNode)
+			// currNode := LookupOrCreateNode(obj, nodeTyp, obj.Name())
+			currNode := LookupNode(obj)
+			Graph.AddEdge(prev, currNode, Use)
 			prev = currNode
 		}
 	}
@@ -463,14 +342,15 @@ func (eng *parseEngine) parseExternalFuncCall(callExp *ast.CallExpr, obj types.O
 	default:
 		ParserLog.Printf("missed type %T\n", x)
 	}
-	funcNode := LookupOrCreateNode(obj, variant, obj.Name())
+	funcNode := CreateNode(obj, variant, obj.Name())
+	// funcNode := LookupOrCreateNode(obj, variant, obj.Name())
 
-	Graph.AddEdge(importNode, funcNode)	
+	Graph.AddEdge(importNode, funcNode, Use)	
 	
 	// TEST
 	if eng.parentFunc != nil {
-		Graph.AddEdge(eng.parentFunc, funcNode)
-		Graph.AddEdge(funcNode, eng.parentFunc)
+		Graph.AddEdge(eng.parentFunc, funcNode, Use)
+		Graph.AddEdge(funcNode, eng.parentFunc, Use)
 	}
 	
 	// package -> callnode <- parent
@@ -485,16 +365,36 @@ func (eng *parseEngine) parseImportSpec(importSpec *ast.ImportSpec) {
 	
 	LookupOrCreateCanonicalNode(importPath, ImportedPackage, importPath)	
 	importedPackage := LookupOrCreateCanonicalNode(importPath, ImportedPackage, importPath)
-	Graph.AddEdge(importedPackage, eng.rootPackage)
+	Graph.AddEdge(importedPackage, eng.rootPackage, Def)
 }
 
+// Parses constant and variable declarations
+func (eng *parseEngine) parseValueSpec(x *ast.ValueSpec) {
+	// trying first with one value
+	ident := x.Names[0]
+	if len(x.Names) > 1 {
+		ParserLog.Println("value spec has more than one ident %s", x.Names)
+	}
 
+	obj, err := getObjFromIdent(ident)
+	if err != nil {
+		ParserLog.Fatal("couldn't parse valuespec obj:", err)
+	}
+
+	// node := LookupOrCreateNode(obj, Field, obj.Name())
+	node := CreateNode(obj, Field, obj.Name())
+	if eng.parentFunc != nil {
+		Graph.AddEdge(eng.parentFunc, node, Def)
+	} else {
+		Graph.AddEdge(eng.currentFile, node, Def)
+	}
+}
 
 
 func Visit(node ast.Node) bool {
 	switch x := node.(type) {
 	case *ast.ImportSpec:
-		// eng.parseImportSpec(x)
+		eng.parseImportSpec(x)
 	case *ast.File:
 		eng.parseRootPackage(x)
 		eng.parseFile(x)
@@ -502,8 +402,26 @@ func Visit(node ast.Node) bool {
 		eng.parseTypeSpec(x)
 	case *ast.FuncDecl:
 		eng.parseFuncDecl(x)
+		return false
+	case *ast.ValueSpec:
+		eng.parseValueSpec(x)
+	case *ast.Ident, nil:
+		break
+	default:
+		ParserLog.Printf("missed type %T\n", x)
+		return true
+	}
+	return true
+}
+
+
+func VisitBody(node ast.Node) bool {
+	switch x := node.(type) {
 	case *ast.CallExpr:
+		// ast.Print(fset, x)
 		eng.parseCallExpr(x)
+	case *ast.ValueSpec:
+		eng.parseValueSpec(x)
 	case *ast.Ident, nil:
 		break
 	default:

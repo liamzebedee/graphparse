@@ -2,7 +2,19 @@
 // Most popular in order:
 // - methods
 // - structs (stand out)
+// - fields/vars
 
+// grouping
+// * files/rootpackage
+// * imports
+// * structs
+// * methods/funcs
+// * vars/fields
+
+
+// logic and data
+// logic = methods/funcs
+// data = structs/vars/fields
 
 
 // https://github.com/kevinsawicki/monokai/blob/master/styles/colors.less
@@ -32,7 +44,7 @@ const config = `
 Struct              #aec7e8
 Method              #ff7f0e
 Func                #ffbb78
-Field               #aec7e8
+Field               #70fafd
 RootPackage         #2ca02c
 File                #52d352
 ImportedPackage     white

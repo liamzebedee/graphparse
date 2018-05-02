@@ -1,5 +1,7 @@
 import graphJSON from '../../graph.json';
 
+import _ from 'underscore';
+
 export function hoverNode(id) {
     return {
         type: "HOVER_NODE",
@@ -23,11 +25,12 @@ export function searchNodes(q) {
 
 export function loadInitialFileForTesting() {
     return (dispatch, getState) => {
-        dispatch(searchNodes("Server"))
+        // dispatch(searchNodes("Server"))
+        dispatch(searchNodes("parse.go"))
 
-        let top = getState().graph.search.matches[0];
-        if(top == null) { throw new Error() }
-        dispatch(selectNodeFromSearch(top.id))
+        let topMatch = getState().graph.search.matches[0];
+        if(topMatch == null) { return }
+        dispatch(selectNodeFromSearch(topMatch.id))
     }
 }
 
@@ -57,3 +60,24 @@ export const VIEWS = [
     "show relationships",
     "show types"
 ];
+
+export function changeView(uiView) {
+    if(!_.contains(VIEWS, uiView)) throw new Error();
+    return {
+        type: "UI_CHANGE_VIEW",
+        uiView
+    }
+}
+
+export function changeDepth(depth) {
+    return {
+        type: "CHANGE_DEPTH",
+        depth
+    }
+}
+
+export function toggleShowDefinitions() {
+    return {
+        type: "toggleShowDefinitions"
+    }
+}

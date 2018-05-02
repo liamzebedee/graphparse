@@ -17,6 +17,7 @@ const (
 	ImportedPackage
 	ImportedFunc
 	FuncCall
+	Template
 )
 var nodeTypes = []string{
 	"Struct",
@@ -28,6 +29,7 @@ var nodeTypes = []string{
 	"ImportedPackage",
 	"ImportedFunc",
 	"FuncCall",
+	"___template___",
 }
 
 type baseNode struct {
@@ -96,9 +98,6 @@ func typeIsNamed(typ types.Type) bool {
 	return false
 }
 
-		// types.Interface
-		// obj.Type().(*types.Named).Obj().
-
 func typeToObj(typ types.Type) (types.Object) {
 	switch typ := typ.(type) {
 	// End recursive case.
@@ -107,7 +106,7 @@ func typeToObj(typ types.Type) (types.Object) {
 		return nil
 	case *types.Named:
 		return typ.Obj()
-	
+
 	// Recursive cases
 	case *types.Array:
 	case *types.Slice:
@@ -135,27 +134,6 @@ func objToId(obj types.Object) nodeid {
 // as the token.Pos of where the type is declared
 func (n *objNode) Id() nodeid {
 	return objToId(n.obj)
-	// switch n.variant {
-	// case Struct:
-	// 	obj := typeToObj(n.obj.Type())
-
-	// 	if obj == nil {
-	// 		fmt.Println(n.obj.Type())
-	// 		fmt.Println(n.obj)
-	// 		panic("cant find obj for type")
-	// 	}
-
-	// 	return nodeid(obj.Pos())
-	// default:
-	// 	objId := n.obj.String()
-	// 	x, ok := objLookups[objId]
-	// 	if !ok {
-	// 		x = &objlookup{objId}
-	// 		objLookups[objId] = x
-	// 	}
-	// 	return pointerToId(x)
-	// }
-	
 	panic("can't get id")
 }
 func (n *objNode) Label() string {
@@ -174,24 +152,68 @@ func (n *objNode) DebugInfo() string {
 }
 
 
+var objNodeLookup = make(map[nodeid]*objNode)
 
-
-func LookupOrCreateNode(obj types.Object, variant NodeType, label string) *objNode {
+func LookupNode(obj types.Object) *objNode {
 	if obj == nil {
 		panic("obj must be non-nil")
 	}
 
-	node, ok := nodeLookup[objToId(obj)]
-
-	if !ok {
-		node = &objNode{
+	id := objToId(obj)
+	
+	if node, ok := nodeLookup[id]; ok {
+		return node.(*objNode)
+	} else if node, ok := objNodeLookup[id]; ok {
+		return node
+	} else {
+		// create template of node for later.
+		template := &objNode{
 			obj,
-			baseNode{variant, label},
+			baseNode{Template, obj.Name()},
 		}
-		addNodeToLookup(node)
+		objNodeLookup[id] = template
+		return template
+	}
+}
+
+func CreateNode(obj types.Object, variant NodeType, label string) *objNode {
+	if obj == nil {
+		panic("obj must be non-nil")
+	}
+	if label == "" {
+		panic("label must be something")
 	}
 
-	return node.(*objNode)
+	id := objToId(obj)
+
+	if node, ok := nodeLookup[id]; ok {
+		ParserLog.Fatalln("already created: ", node)
+		return node.(*objNode)
+	}
+
+	node := objNodeLookup[id]
+	if node == nil {
+		node = &objNode{
+			obj,
+			baseNode{},
+		}
+	} else {
+		delete(objNodeLookup, id)
+	}
+
+	node.baseNode = baseNode{variant, label}
+
+	// check for template node (uncompleted references)
+	// template, _ := objNodeLookup[id]
+	// if template != nil {
+	// 	*template = *node
+	// 	delete(objNodeLookup, id)
+	// }
+
+	ParserLog.Println("created node: ", node.String())
+	addNodeToLookup(node)
+	
+	return node
 }
 
 var canonicalNodeLookup = make(map[string]*canonicalNode)

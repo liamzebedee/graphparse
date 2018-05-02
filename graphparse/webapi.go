@@ -3,7 +3,6 @@ package graphparse
 import (
 	"bufio"
 	"encoding/json"
-	// "log"
 	"net/http"
 	"go/ast"
 	"go/token"
@@ -46,6 +45,9 @@ func WebAPI(port string) {
 	).HandlerFunc(getContractedGraph)
 
 	graph.Path("/").HandlerFunc(getGraph)
+
+
+	// graph2 := router.Path("/graph2/{repo}/{user}/{project}").HandlerFunc(generateGraph)
 
 	srv := &http.Server{
         Handler:      router,
@@ -184,6 +186,15 @@ func getContractedGraph(w http.ResponseWriter, r *http.Request) {
 
 
 func getGraph(w http.ResponseWriter, r *http.Request) {
+	res := Graph.toJson()
+	json.NewEncoder(w).Encode(res)
+}
+
+
+// Graph API v2
+// ------------
+
+func generateGraph(w http.ResponseWriter, r *http.Request) {
 	res := Graph.toJson()
 	json.NewEncoder(w).Encode(res)
 }

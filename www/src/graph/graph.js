@@ -19,6 +19,8 @@ import {
 } from '../util'
 import nodeColor from './colours';
 
+import TypesOverview from './types-overview';
+
 import './graph.css';
 
 const nodeType = (str) => graphJSON.nodeTypes.indexOf(str);
@@ -72,6 +74,7 @@ class D3Graph extends React.Component {
         let { 
             interested, nodeLookup, 
             nodes, edges,
+            showDefinitions
         } = nextProps;
 
         [nodes, edges] = filterNodesAndEdges({ nodes, edges, interested, nodeLookup });
@@ -87,6 +90,7 @@ class D3Graph extends React.Component {
 
     render() {
         let zoom = this.state.zoom;
+        let { uiView } = this.props;
 
         return <svg
                 className={classNames({
@@ -114,20 +118,23 @@ class D3Graph extends React.Component {
                 ref={ref => this.everything = ref}
                 >
 
-                <g>
-                {this.state.nodes.map(node => {
-                    return <Node 
-                        key={node.id} clickNode={this.props.clickNode} 
-                        interesting={_.contains(this.props.interested, node.id)}
-                        {...node}/>
-                })}
-                </g>
+                { uiView == "show relationships" ? [
+                    <g>
+                    {this.state.nodes.map(node => {
+                        return <Node 
+                            key={node.id} clickNode={this.props.clickNode} 
+                            interesting={_.contains(this.props.interested, node.id)}
+                            {...node}/>
+                    })}
+                    </g>,
+    
+                    <g>
+                    {this.state.edges.map((edge, i) => {
+                        return <Edge key={edge.id} {...edge}/>
+                    })}
+                    </g>
+                ] : <TypesOverview/> }
 
-                <g>
-                {this.state.edges.map((edge, i) => {
-                    return <Edge key={edge.id} {...edge}/>
-                })}
-                </g>
             </g>
         </svg>
     }
@@ -251,6 +258,7 @@ function filterNodesAndEdges({ nodes, edges, interested, nodeLookup }) {
 
     edges = edges
     .filter(showOnlyInterestedNodes)
+    .filter(edge => edge.variant == 0)
 
     let nodesToInclude = edges.map(e => [e.source, e.target]).reduce((a, b) => a.concat(b), []);
     nodes = nodes.filter(node => {
@@ -319,9 +327,8 @@ const mapDispatchToProps = dispatch => {
     }
 }
 
-const D3GraphCtn = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(D3Graph)
  
-export default D3GraphCtn;
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(D3Graph);

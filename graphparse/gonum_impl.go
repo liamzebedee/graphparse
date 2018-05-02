@@ -70,8 +70,8 @@ func (g *graph) HasEdgeBetween(x, y graphGn.Node) bool {
 // reachable from u as defined by the From method.
 func (g *graph) Edge(u, v graphGn.Node) graphGn.Edge {
 	for _, e := range g.edges {
-		if e.from.ID() == u.ID() && 
-		   e.to.ID()   == v.ID() {
+		if e.from == u && 
+		   e.to   == v {
 			return e
 		}
 

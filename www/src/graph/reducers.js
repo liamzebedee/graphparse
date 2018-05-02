@@ -8,7 +8,9 @@ import matchSorter from 'match-sorter';
 const initialState = {
     grabbing: false,
 
+    currentNode: null,
     interested: [],
+
     clickedNode: null,
     search: {
         q: "",
@@ -21,19 +23,24 @@ const initialState = {
     nodeTypes: graphJSON.nodeTypes,
 
 
+    maxDepth: 3,
     uiView: "show relationships",
+    showDefinitions: false,
 }
 
-export function getSubPaths(adjList, fromNodeId) {
+export function getSubPaths(adjList, fromNodeId, maxDepth) {
     let currentNodes = [
         fromNodeId
     ];
 
     let interested = new Set();
     let visited = new Set();
+    
+    let depth = -1;
 
     do {
         let next = [];
+        depth++;
 
         currentNodes.map(node => {
             if(visited.has(node)) return;
@@ -47,10 +54,11 @@ export function getSubPaths(adjList, fromNodeId) {
 
         currentNodes = next;
 
-    } while(currentNodes.length)
+    } while(currentNodes.length && depth < maxDepth)
 
     return Array.from(interested);
 }
+
 
 function graph(state = initialState, action) {
     switch(action.type) {
@@ -59,11 +67,11 @@ function graph(state = initialState, action) {
                 clickedNode: action.id
             })
         
-        case "HOVER_NODE":
-            let interested = getSubPaths(state.adjList, action.id)
-            return Object.assign({}, state, {
-                interested,
-            })
+        // case "HOVER_NODE":
+        //     let interested = getSubPaths(state.adjList, action.id, state.maxDepth)
+        //     return Object.assign({}, state, {
+        //         interested,
+        //     })
         
         case "SEARCH_NODES":
             let matches = matchSorter(state.nodes, action.q, { keys: ['label'] })
@@ -76,7 +84,8 @@ function graph(state = initialState, action) {
         
         case "SELECT_NODE_FROM_SEARCH":
             return Object.assign({}, state, {
-                interested: getSubPaths(state.adjList, action.id)
+                interested: getSubPaths(state.adjList, action.id, state.maxDepth),
+                currentNode: action.id
             })
 
         case "SELECT_NODE_BY_LABEL": {
@@ -88,28 +97,40 @@ function graph(state = initialState, action) {
                     q: action.label,
                     matches,
                 },
-                interested: getSubPaths(state.adjList, match.id),
+                currentNode: match.id,
+                interested: getSubPaths(state.adjList, match.id, state.maxDepth),
             })
         }
 
+        case "CHANGE_DEPTH":
+            return {
+                ...state,
+                maxDepth: action.depth,
+                interested: getSubPaths(state.adjList, state.currentNode, action.depth),
+            }
+
         case "GRABBING_CHANGE":
             return {
-                grabbing: action.grabbing,
                 ...state,
+                grabbing: action.grabbing,
             }
         
         case "UI_CHANGE_VIEW":
             return {
-                uiView: action.view,
-                ...state
+                ...state,
+                uiView: action.uiView,
             }
-        
+            
+        case "toggleShowDefinitions":
+            return {
+                ...state,
+                showDefinitions: !state.showDefinitions
+            }
+
         default:
             return state
     }
 }
 
 
-export default combineReducers({
-    graph,
-})
+export default graph;

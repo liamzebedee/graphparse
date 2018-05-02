@@ -1,4 +1,4 @@
-import { App, store } from './app';
+import App from './app';
 import ReactDOM from 'react-dom'
 import React from 'react'
 import  { AppContainer } from 'react-hot-loader';
@@ -28,8 +28,8 @@ if (module.hot) {
 if (module.hot) {
   module.hot.accept('./app', () => {
     // if you are using harmony modules ({modules:false})
-    // render(App)
+    render(App)
     // in all other cases - re-require App manually
-    render(require('./app').App)
+    // render(require('./app'))
   })
 }

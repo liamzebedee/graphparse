@@ -30,21 +30,27 @@ func addNodeToLookup(n Node) {
 
 type ranksMap = map[nodeid]float64
 
-
+type EdgeType int
+const (
+	Use EdgeType = iota
+	Def
+)
 
 type edge struct {
 	from Node
 	to Node
+	variant EdgeType
 	id int
 }
 
 var lastEdgeId = 0
 
-func newEdge(from Node, to Node) edge {
+func newEdge(from Node, to Node, variant EdgeType) edge {
 	lastEdgeId++
 	return edge{
 		from,
 		to,
+		variant,
 		lastEdgeId,
 	}
 }
@@ -61,6 +67,38 @@ type graph struct {
 func NewGraph() *graph {
 	return &graph{
 	}
+}
+
+func (g *graph) ToString(w io.Writer) {
+	for _, n := range nodeLookup {
+		w.Write([]byte(n.String() + "\n"))
+	}
+	w.Write([]byte("\n"))
+	for _, e := range g.edges {
+		w.Write([]byte(e.String() + "\n"))
+	}
+}
+
+func (g *graph) processUnknownReferences() {
+	var missing []Node
+	var edges []edge
+
+	for _, e := range g.edges {
+		if node, ok := nodeLookup[e.from.Id()]; !ok {
+			missing = append(missing, node)
+			continue
+		}
+		if node, ok := nodeLookup[e.to.Id()]; !ok {
+			missing = append(missing, node)
+			continue
+		}
+		edges = append(edges, e)
+	}
+
+	fmt.Println(len(missing), "missing nodes")
+	fmt.Println(missing)
+
+	g.edges = edges
 }
 
 func lookupObjectNode(obj types.Object) (*objNode) {
@@ -219,20 +257,20 @@ func (g *graph) contractEdges(shouldContract func(Node) bool) []edge {
 }
 
 
-func (g *graph) AddEdge(from, to Node) {
+func (g *graph) AddEdge(from, to Node, variant EdgeType) {
 	if from == nil {
 		panic("from node must be non-nil")
 	}
 	if to == nil {
 		panic("to node must be non-nil")
 	}
-	if _, ok := nodeLookup[from.Id()]; !ok {
-		panic("from node doesn't exist, cannot add edge")
-	}
-	if _, ok := nodeLookup[to.Id()]; !ok {
-		panic("to node doesn't exist, cannot add edge")
-	}
-	e := newEdge(from, to)
+	// if _, ok := nodeLookup[from.Id()]; !ok {
+	// 	ParserLog.Fatalln("from node doesn't exist, cannot add edge", from)
+	// }
+	// if _, ok := nodeLookup[to.Id()]; !ok {
+	// 	ParserLog.Fatalln("to node doesn't exist, cannot add edge", to)
+	// }
+	e := newEdge(from, to, variant)
 	g.edges = append(g.edges, e)
 }
 
@@ -308,7 +346,11 @@ func (g *graph) computeNodeRanks(edges []edge) ranksMap {
 // Maps ranks with node lookup
 func (g *graph) mapRanks(ranks ranksMap, fn func(n Node, rank float64)) {
 	for id, rank := range ranks {
-		fn(nodeLookup[id], rank)
+		node, ok := nodeLookup[id]
+		if !ok {
+			panic(id)
+		}
+		fn(node, rank)
 	}
 }
 
@@ -368,9 +410,10 @@ type jsonNodeDef struct {
 	DebugInfo string `json:"debugInfo"`
 }
 type jsonNodeEdge struct {
-	From nodeid `json:"source"`
-	To nodeid   `json:"target"`
-	Id int      `json:"id"`
+	From nodeid      `json:"source"`
+	To nodeid        `json:"target"`
+	Variant EdgeType `json:"variant"`
+	Id int           `json:"id"`
 }
 type jsonGraph struct {
 	NodesLookup map[nodeid]jsonNodeDef `json:"nodeLookup"`
@@ -409,6 +452,7 @@ func (g *graph) _toJson(edges []edge) jsonGraph {
 		jsonGraph.Edges = append(jsonGraph.Edges, jsonNodeEdge{
 			edge.from.Id(), 
 			edge.to.Id(),
+			edge.variant,
 			edge.id,
 		})
 	})
