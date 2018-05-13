@@ -52,6 +52,9 @@ func setup() {
 	}
 
 	GenerateCodeGraphFromProg(prog, pkgPath, pkgFilePath)
+
+	// Write test data to file for testing with JS.
+	Graph.WriteJsonToFile("../test/graph.json")
 }
 
 func findNode(variant NodeType, label string) Node {

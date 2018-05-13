@@ -9,7 +9,8 @@ const initialState = {
     grabbing: false,
 
     currentNode: null,
-    interested: [],
+    selection: [],
+    maxDepth: 3,
 
     clickedNode: null,
     search: {
@@ -22,50 +23,16 @@ const initialState = {
     adjList: graphJSON.adjList,
     nodeTypes: graphJSON.nodeTypes,
 
-
-    maxDepth: 3,
     uiView: "show relationships",
     showDefinitions: false,
-}
-
-export function getSubPaths(adjList, fromNodeId, maxDepth) {
-    let currentNodes = [
-        fromNodeId
-    ];
-
-    let interested = new Set();
-    let visited = new Set();
-    
-    let depth = -1;
-
-    do {
-        let next = [];
-        depth++;
-
-        currentNodes.map(node => {
-            if(visited.has(node)) return;
-            else visited.add(node)
-
-            interested.add(node)
-
-            let outs = adjList[""+node]
-            if(outs) next = next.concat(outs)
-        })
-
-        currentNodes = next;
-
-    } while(currentNodes.length && depth < maxDepth)
-
-    return Array.from(interested);
 }
 
 
 function graph(state = initialState, action) {
     switch(action.type) {
-        case "CLICK_NODE":
-            return Object.assign({}, state, {
-                clickedNode: action.id
-            })
+        // case "CLICK_NODE":
+        //     return Object.assign({}, state, {
+        //     })
         
         // case "HOVER_NODE":
         //     let interested = getSubPaths(state.adjList, action.id, state.maxDepth)
@@ -73,18 +40,8 @@ function graph(state = initialState, action) {
         //         interested,
         //     })
         
-        case "SEARCH_NODES":
-            let matches = matchSorter(state.nodes, action.q, { keys: ['label'] })
-            return Object.assign({}, state, {
-                search: {
-                    q: action.q,
-                    matches,
-                }
-            })
-        
         case "SELECT_NODE_FROM_SEARCH":
             return Object.assign({}, state, {
-                interested: getSubPaths(state.adjList, action.id, state.maxDepth),
                 currentNode: action.id
             })
 
@@ -98,15 +55,22 @@ function graph(state = initialState, action) {
                     matches,
                 },
                 currentNode: match.id,
-                interested: getSubPaths(state.adjList, match.id, state.maxDepth),
             })
         }
+
+        case "SEARCH_NODES":
+            let matches = matchSorter(state.nodes, action.q, { keys: ['label'] })
+            return Object.assign({}, state, {
+                search: {
+                    q: action.q,
+                    matches,
+                }
+            })
 
         case "CHANGE_DEPTH":
             return {
                 ...state,
                 maxDepth: action.depth,
-                interested: getSubPaths(state.adjList, state.currentNode, action.depth),
             }
 
         case "GRABBING_CHANGE":

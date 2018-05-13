@@ -39,6 +39,7 @@
 
 import graphJSON from '../../graph.json';
 import _ from 'underscore';
+import * as d3 from 'd3v4';
 
 const config = `
 Struct              #aec7e8

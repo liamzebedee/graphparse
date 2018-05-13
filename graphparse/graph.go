@@ -361,8 +361,8 @@ func (g *graph) mapEdges(edges []edge, fn func(e edge)) {
 	}
 }
 
-func (g *graph) WriteDotToFile() {
-	dotfilePath, _ := filepath.Abs("./www/graph.dot")
+func (g *graph) WriteDotToFile(path string) {
+	dotfilePath, _ := filepath.Abs(path)
 	f, err := os.Create(dotfilePath)
 	if err != nil {
 		panic(err)
@@ -482,8 +482,8 @@ func (g *graph) toJson() jsonGraph {
 	return g._toJson(g.edges)
 }
 
-func (g *graph) WriteJsonToFile() {
-	path, _ := filepath.Abs("./www/graph.json")
+func (g *graph) WriteJsonToFile(relpath string) {
+	path, _ := filepath.Abs(relpath)
 	f, err := os.Create(path)
 	buf := new(bytes.Buffer)
 	w := bufio.NewWriter(f)

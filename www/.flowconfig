@@ -1,0 +1,16 @@
+[ignore]
+
+[include]
+
+[libs]
+
+[lints]
+
+[options]
+module.name_mapper='^raw-loader!\(.*\.dot?\)' -> 'raw-loader'
+module.name_mapper='^raw-loader!\(.*\.css?\)' -> 'raw-loader'
+
+esproposal.class_static_fields=enable
+esproposal.class_instance_fields=enable
+
+[strict]

@@ -1,14 +1,12 @@
 import React from 'react';
-import 'script-loader!../vendor/d3.v4.min.js';
-import Viz from 'viz.js';
-import _ from 'underscore';
+// import 'script-loader!../vendor/d3.v4.min.js';
 import classNames from 'classnames';
 import { connect } from 'react-redux'
 import shortcut from 'keyboard-shortcut';
 import copy from 'copy-to-clipboard';
+import _ from 'underscore';
+import * as d3 from 'd3v4';
 
-import graphDOT from 'raw-loader!../../graph.dot';
-import graphJSON from '../../graph.json';
 import {
     hoverNode,
     clickNode,
@@ -20,10 +18,19 @@ import {
 import nodeColor from './colours';
 
 import TypesOverview from './types-overview';
+import {
+
+} from './graph-logic';
 
 import './graph.css';
 
-const nodeType = (str) => graphJSON.nodeTypes.indexOf(str);
+import {
+    // preFilterNodesAndEdges,
+    // generateLayout,
+    GraphLogic
+} from './graph-logic';
+
+const logic = new GraphLogic();
 
 class D3Graph extends React.Component {
     constructor() {
@@ -41,6 +48,7 @@ class D3Graph extends React.Component {
                 z: 0
             }
         },
+
         nodes: [],
         edges: [],
         graphDOT: "",
@@ -52,13 +60,6 @@ class D3Graph extends React.Component {
         shortcut('ctrl c', {}, () => {
             copy(this.state.graphDOT);
         })
-
-        // this.svg.addEventListener('mousedown', () => {          
-        //     this.setState({ grabbing: true })
-        // })
-        // this.svg.addEventListener('mouseup', () => {          
-        //     this.setState({ grabbing: false })
-        // })
     }
 
     addZoom = () => {
@@ -72,19 +73,20 @@ class D3Graph extends React.Component {
 
     static getDerivedStateFromProps(nextProps, prevState) {
         let { 
-            interested, nodeLookup, 
             nodes, edges,
-            showDefinitions
+            currentNode,
+            selection,
+
+            showDefinitions,
+            maxDepth
         } = nextProps;
 
-        [nodes, edges] = filterNodesAndEdges({ nodes, edges, interested, nodeLookup });
-        [nodes, edges] = generateLayout({ nodes, edges, nodeLookup });
-        [nodes, edges] = postFilterNodesAndEdges({ nodes, edges, interested, nodeLookup });
-        
+        logic.refresh(nodes, edges, currentNode, selection, maxDepth);
+
+        let layout = logic.getLayout();
+
         return {
-            graphDOT,
-            nodes,
-            edges,
+            ...layout
         }
     }
 
@@ -93,14 +95,6 @@ class D3Graph extends React.Component {
         let { uiView } = this.props;
 
         return <svg
-                className={classNames({
-                    grabbing: this.state.grabbing
-                })}
-                // onTouchStart={window.alert}
-                // onMouseMove={window.alert}
-                // onTouchMove={window.alert}
-                // onMouseUp={window.alert}
-                // onTouchEnd={window.alert}
                 ref={(ref) => this.svg = ref}
                 >
             <defs>
@@ -123,7 +117,6 @@ class D3Graph extends React.Component {
                     {this.state.nodes.map(node => {
                         return <Node 
                             key={node.id} clickNode={this.props.clickNode} 
-                            interesting={_.contains(this.props.interested, node.id)}
                             {...node}/>
                     })}
                     </g>,
@@ -140,7 +133,9 @@ class D3Graph extends React.Component {
     }
 }
 
-const Node = ({ id, interesting, cx, cy, _draw_, variant, label, clickNode }) => {
+const Node = ({ id, interesting, layout, variant, label, clickNode }) => {
+    let { cx, cy, rx, ry } = layout;
+    
     return <g 
         class='node'
         onMouseOver={() => hoverNode(id)}
@@ -149,8 +144,8 @@ const Node = ({ id, interesting, cx, cy, _draw_, variant, label, clickNode }) =>
         >
         <ellipse 
             stroke='#000000'
-            rx={_draw_[1].rect[2]}
-            ry={_draw_[1].rect[3]}
+            rx={rx}
+            ry={ry}
             fill={nodeColor(variant)}
             class={classNames({
                 'interesting': interesting
@@ -166,7 +161,10 @@ const Node = ({ id, interesting, cx, cy, _draw_, variant, label, clickNode }) =>
     </g>
 }
 
-const Edge = ({ points, arrowPts }) => {
+const Edge = (edge) => {
+    let layout = edge.layout;
+    let { points, arrowPts } = layout;
+
     let computeD = () => {
         return points.map((point, i) => {
             if(i == 0) return `M${point.join(',')}C`;
@@ -186,114 +184,6 @@ const Edge = ({ points, arrowPts }) => {
     </g>
 }
 
-const toSvgPointSpace = point => [ point[0], point[1] ];
-
-
-const generateGraphDOT = (nodes, edges) => `
-    digraph graphname {
-        ${nodes.map(({ id, rank, label }) => {
-            rank = 1;
-            return `"${id}" [width=${rank}] [height=${rank}] [label="${label}"];`
-        }).join('\n')}
-        ${edges.map(({ source, target, id }) => `"${target}" -> "${source}" [id=${id}];`).join('\n')}
-    }
-`
-
-
-// Passes DOT to Graphviz, generates layout of nodes and edges in JSON
-function generateLayout({ nodes, edges, nodeLookup }) {
-    if(nodes.length < 1 || edges.length < 1) return [[], []];
-
-    let graphDOT = generateGraphDOT(nodes, edges)
-
-    let graphvizData = JSON.parse(Viz(graphDOT, { format: 'json' }));
-    
-    nodes = graphvizData.objects.map(obj => {
-        let pos = obj.pos.split(',').map(Number);
-        let id = new Number(obj.name)
-
-        return {
-            cx: pos[0],
-            cy: pos[1],
-            rx: obj._draw_[1].rect[2],
-            ry: obj._draw_[1].rect[3],
-            ...obj,
-
-            id,
-            ...nodeLookup[id]
-        }
-    })
-
-    edges = graphvizData.edges.map((edge, i) => {
-        let points = edge._draw_[1].points.map(toSvgPointSpace);
-        
-        // function findNodeForGvid(id) {
-        //     let obj = _.find(graphvizData.objects, obj => obj._gvid == id)
-        //     if(!obj) throw new Error()
-        //     return Number(obj.name)
-        // }
-
-        // let { head, tail } = edge;
-        // let source = findNodeForGvid(head)
-        // let target = findNodeForGvid(tail)
-
-        let edgeData = _.find(edges, edge_ => edge_.id == edge.id)
-
-        let arrowPts = edge._hdraw_[3].points.map(toSvgPointSpace)
-
-        return {
-            points,
-            arrowPts,
-            ...edgeData
-        }
-    })
-
-    return [ nodes, edges ];
-}
-
-function filterNodesAndEdges({ nodes, edges, interested, nodeLookup }) {
-    const showOnlyInterestedNodes = (edge) => {
-        return _.contains(interested, edge.source)
-    }
-
-    edges = edges
-    .filter(showOnlyInterestedNodes)
-    .filter(edge => edge.variant == 0)
-
-    let nodesToInclude = edges.map(e => [e.source, e.target]).reduce((a, b) => a.concat(b), []);
-    nodes = nodes.filter(node => {
-        return _.contains(nodesToInclude, node.id)
-    })
-
-    return [ nodes, edges ]
-}
-
-function postFilterNodesAndEdges({ nodes, edges, interested, nodeLookup }) {
-    const collapseRedundantEdges = (edge) => {
-        let { source, target } = edge;
-        let [ a, b ] = [ nodeLookup[source], nodeLookup[target] ]
-        if(a.variant == nodeType('Struct')) {
-           return !_.find(edges, (edge) => {
-               return target === edge.target && source != edge.source
-           })
-        }
-        return true;
-    }
-
-    let seenEdges = [];
-    function removeDuplicates(edge) {
-        let id = `${edge.source}${edge.target}`; 
-        if(_.contains(seenEdges, id)) return false;
-        seenEdges.push(id)
-        return true
-    }
-
-    edges = edges
-    .filter(removeDuplicates)
-    .filter(collapseRedundantEdges)
-
-    return [ nodes, edges ]
-}
 
 // function zoomToBoundingBox(node) {
 //     var bounds = path.bounds(d),

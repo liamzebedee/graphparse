@@ -15,13 +15,13 @@ const render = Component => {
 
 render(App)
 
-if (module.hot) {
-  module.hot.accept();
+// if (module.hot) {
+//   module.hot.accept();
 
-  module.hot.dispose((data) => {
-    data.store = store;
-  });
-}
+//   module.hot.dispose((data) => {
+//     data.store = store;
+//   });
+// }
 
 
 // Webpack Hot Module Replacement API

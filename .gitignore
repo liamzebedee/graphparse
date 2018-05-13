@@ -4,3 +4,6 @@ www/www/bundle.js
 subnet
 www/dist/*.js
 graphparse-redesign
+www/lib/
+www/graph.dot
+www/graph.json

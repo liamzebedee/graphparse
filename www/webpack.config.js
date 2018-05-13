@@ -1,14 +1,16 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
+const FlowWebpackPlugin = require('flow-webpack-plugin')
+const serve = require('./webpack.serve');
 
 module.exports = {
   mode: 'development',
   target: 'web',
+  serve,
 
   context: path.join(__dirname, 'src'),
 
-  // entry: ['./index', 'webpack/hot/only-dev-server', 'webpack-dev-server/client?http://0.0.0.0:3001'],
   entry: './index',
 
   output: {
@@ -17,11 +19,10 @@ module.exports = {
     publicPath: '/',
   },
 
-  // devtool: "inline-cheap-module-source-map",
-  // devtool: "inline-source-map",
   devtool: 'eval-source-map',
   
   plugins: [
+    new FlowWebpackPlugin(),
     new HtmlWebpackPlugin({
       title: "Basemap",
       template: './index.ejs',
@@ -31,7 +32,6 @@ module.exports = {
          NODE_ENV: JSON.stringify("production") 
        }
     }),
-    // new webpack.HotModuleReplacementPlugin()
   ],
 
   module: {
@@ -47,18 +47,4 @@ module.exports = {
       }
     ],
   },
-};
-
-
-const history = require('connect-history-api-fallback');
-const convert = require('koa-connect');
-
-module.exports.serve = {
-  reload: false,
-  hot: true,
-
-  add: (app, middleware, options) => {
-    const historyOptions = {};
-    app.use(convert(history(historyOptions)));
-  }
 };
