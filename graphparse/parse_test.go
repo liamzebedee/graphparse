@@ -167,7 +167,6 @@ func TestParseValueSpec(t *testing.T) {
 	), "value spec is parsed correctly with respect to parent funcs")
 }
 
-
 func TestParseFile(t *testing.T) {
 	assert.NotNil(t, findNode(File, "main.go"))
 	assert.NotNil(t, findNode(File, "server.go"))
@@ -178,6 +177,12 @@ func TestParseFile(t *testing.T) {
 	), "")
 }
 
+func TestAllEdgesExist(t *testing.T) {
+	for _, e := range Graph.edges {
+		assert.True(t, Graph.nodeExists(e.From().ID()))
+		assert.True(t, Graph.nodeExists(e.To().ID()))
+	}
+}
 
 // e.g. within Client.Close, conn.Close() is called to conn.
 // func TestParseCallsToStructMembers(t *testing.T) {

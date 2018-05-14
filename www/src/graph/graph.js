@@ -121,7 +121,7 @@ class D3Graph extends React.Component {
                     })}
                     </g>,
     
-                    <g>
+                    <g class='edges'>
                     {this.state.edges.map((edge, i) => {
                         return <Edge key={edge.id} {...edge}/>
                     })}
@@ -161,6 +161,13 @@ const Node = ({ id, interesting, layout, variant, label, clickNode }) => {
     </g>
 }
 
+
+const edgeVariantStr = (variant) => {
+    switch(variant) {
+        case 0: return 'use';
+        case 1: return 'def';
+    }
+}
 const Edge = (edge) => {
     let layout = edge.layout;
     let { points, arrowPts } = layout;
@@ -172,14 +179,12 @@ const Edge = (edge) => {
         }).join('')
     }
 
-    return <g>
+    return <g class={`${edgeVariantStr(edge.variant)}`}>
         <path 
-            fill='none'
-            stroke='#000000'
+            
             d={computeD()}/>
         <polygon
-            fill="#000000"
-            stroke="#000000"
+            
             points={`${arrowPts.join(' ')} ${arrowPts[0]}`}/>
     </g>
 }

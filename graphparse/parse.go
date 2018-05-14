@@ -282,7 +282,6 @@ func (eng *parseEngine) parseCallExpr(callExp *ast.CallExpr) {
 func (eng *parseEngine) parseSelectorCallExpr2(sel *types.Selection, selAst *ast.SelectorExpr) {
 	// Selection X.Y
 	
-	fmt.Println(sel.Recv)
 	// Parse the X
 	// recv := sel.Recv()
 	// recvObj := typeToObj(recv)

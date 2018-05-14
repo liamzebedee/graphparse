@@ -69,6 +69,15 @@ func NewGraph() *graph {
 	}
 }
 
+func (g *graph) nodeExists(id int64) bool {
+	for _, n := range g.Nodes() {
+		if n.ID() == id {
+			return true
+		}
+	}
+	return false
+}
+
 func (g *graph) ToString(w io.Writer) {
 	for _, n := range nodeLookup {
 		w.Write([]byte(n.String() + "\n"))
@@ -80,23 +89,28 @@ func (g *graph) ToString(w io.Writer) {
 }
 
 func (g *graph) processUnknownReferences() {
-	var missing []Node
+	var missing []edge
 	var edges []edge
 
-	for _, e := range g.edges {
-		if node, ok := nodeLookup[e.from.Id()]; !ok {
-			missing = append(missing, node)
-			continue
-		}
-		if node, ok := nodeLookup[e.to.Id()]; !ok {
-			missing = append(missing, node)
-			continue
-		}
-		edges = append(edges, e)
-	}
-
 	fmt.Println(len(missing), "missing nodes")
-	fmt.Println(missing)
+	for _, n := range objNodeLookup {
+		fmt.Println(n.obj, n.DebugInfo())
+	}
+	// for _, e := range g.edges {
+	// 	if _, ok := nodeLookup[e.from.Id()]; !ok {
+	// 		missing = append(missing, e)
+	// 		continue
+	// 	}
+	// 	if _, ok := nodeLookup[e.to.Id()]; !ok {
+	// 		missing = append(missing, e)
+	// 		continue
+	// 	}
+	// 	edges = append(edges, e)
+	// }
+
+	// for _, x := range missing {
+	// 	fmt.Println(x)
+	// }
 
 	g.edges = edges
 }

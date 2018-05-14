@@ -37,3 +37,21 @@ text {
     fill-opacity: 0.7;
     cursor: pointer;
 }
+
+.edges .use path {
+    fill: none;
+    stroke: purple;
+}
+.edges .use polygon {
+    fill: purple;
+    stroke: purple;
+}
+
+.edges .def path {
+    fill: none;
+    stroke: black;
+}
+.edges .def polygon  {
+    fill: black;
+    stroke: black;
+}

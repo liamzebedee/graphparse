@@ -9,6 +9,7 @@
 [options]
 module.name_mapper='^raw-loader!\(.*\.dot?\)' -> 'raw-loader'
 module.name_mapper='^raw-loader!\(.*\.css?\)' -> 'raw-loader'
+module.name_mapper='^\(.*\.json?\)' -> 'raw-loader'
 
 esproposal.class_static_fields=enable
 esproposal.class_instance_fields=enable

@@ -5,6 +5,7 @@ import { searchNodes } from './actions';
 
 import matchSorter from 'match-sorter';
 
+
 const initialState = {
     grabbing: false,
 

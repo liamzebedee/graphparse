@@ -6,3 +6,16 @@ export function hexToRgb(hex) {
         b: parseInt(result[3], 16)
     } : null;
 }
+
+import _ from 'underscore';
+export const removeDuplicates = (identity: (any) => any) => {
+    var seen = [];
+    return (x) => {
+        let id = identity(x); 
+        if(_.contains(seen, id)) {
+            return false;
+        }
+        seen.push(id)
+        return true
+    }
+}
