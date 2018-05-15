@@ -37,7 +37,7 @@ type node = {
     selected: boolean,
 
     outs: edge[],
-};
+} & nodeSel;
 
 type nodeLayout = {|
     layout: {
@@ -56,6 +56,10 @@ type edgeLayout = {|
     },
     id: edgeid,
 |};
+
+type nodeSel = {
+    shownNodeTypes: nodeVariant[]
+};
 
 // Merge items from coll2 into coll1 by key 'id', overwriting values.
 export function mergeByKey(key: string, coll1: any[], coll2: any[], failOnMissing: boolean = true) : any[] {
@@ -79,7 +83,6 @@ export function mergeByKey(key: string, coll1: any[], coll2: any[], failOnMissin
 export class GraphLogic {
     nodesLayout: nodeLayout[] = [];
     edgesLayout: edgeLayout[] = [];
-    selection: nodeid[] = [];
     maxDepth: number = 1;
     graphDOT: string = "";
     
@@ -125,7 +128,13 @@ export class GraphLogic {
     constructor() {
     }
 
-    refresh(nodes: node[], edges: edge[], currentNode: ?nodeid, selection: nodeid[], maxDepth: number = 3) {
+    refresh(
+        nodes: node[], 
+        edges: edge[], 
+        currentNode: ?nodeid, 
+        selection: { [nodeid]: nodeSel }, 
+        maxDepth: number = 3
+    ) {
         const nodeExists = (id) => _.findWhere(nodes, { id, }) != null;
         let edgesThatExist = edges.filter(edge => {
             return nodeExists(edge.source) && nodeExists(edge.target);
@@ -142,11 +151,14 @@ export class GraphLogic {
         });
 
         this.currentNode = currentNode;
-        this.selection = selection;
         this.maxDepth = maxDepth;
 
         // Merge nodes with selection information
-        // nodes = mergeByKey(nodes, selection);
+        let selectionArr = Object.entries(selection).map(entry => {
+            return { id: +entry[0], ...entry[1] }
+        });
+
+        this.nodes = mergeByKey('id', this.nodes, selectionArr);
 
         this.preFilterNodesAndEdges();
         this.generateLayout();
@@ -185,21 +197,25 @@ export class GraphLogic {
 
         let nodesToTraverse: Array<traversedNode> = [];
         let depth = -1;
-        let visited = new Set();
+        let visited: Set<nodeid> = new Set();
 
         if(this.currentNode == null) {
             return Array.from(visited);
         }
-        nodesToTraverse.push(this.getNodeById(this.currentNode))
+        let current = this.getNodeById(this.currentNode);
+        nodesToTraverse.push(current)
+        visited.add(current.id)
 
         const traverse = (parent: traversedNode) : Array<traversedNode> => {
             let parentFromDef = parent.fromDef || true;
 
-            let outs = parent.outs.map(out => {
+            let outs = parent.outs
+            .map(out => {
                 let child: traversedNode = this.getNodeById(out.target);
                 child.fromDef = (out.variant == DefEdge);
                 return child;
-            }).filter(child => {
+            })
+            .filter(child => {
                 if(parentFromDef) {
                     // show defs,uses
                     return true;
@@ -209,6 +225,12 @@ export class GraphLogic {
                     return true;
                 }
             })
+            .filter(child => {
+                if(parent.shownNodeTypes) {
+                    return _.contains(parent.shownNodeTypes, child.variant)
+                }
+                return true;
+            })
 
             return outs
         }
@@ -216,13 +238,6 @@ export class GraphLogic {
         do {
             // visit
             depth++;
-
-            // two cases
-            // 1. parent is only a def chain -> show defs,uses
-            // 2. parent is a use chain -> show only more uses
-
-            // if(edge.variant == DefEdge && parent.fromDefChain) 
-            // if(parent.fromDefChain == null) fromDefChain = true
 
             nodesToTraverse = nodesToTraverse.map(traverse)
             .reduce((prev, curr) => prev.concat(curr), [])
@@ -318,3 +333,19 @@ const toSvgPointSpace = point => [ point[0], point[1] ];
 
 export const edgeRelationId = (edge: edge) => `${edge.source}${edge.target}`;
 
+
+const logic = new GraphLogic();
+
+self.addEventListener('message', (ev) => {
+    let msg = ev.data;
+
+    switch(msg.type) {
+        case 'refresh':
+            logic.refresh(...msg.data)
+
+            self.postMessage({
+                type: 'layout',
+                data: logic.getLayout()
+            })
+    }
+})

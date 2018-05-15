@@ -24,6 +24,11 @@
     width: 100%;
 }
 
+.results {
+    transition: 250ms;
+    overflow: hidden;
+}
+
 .results > div {
     padding: 0.5em;
     background: white;
@@ -35,6 +40,13 @@
     cursor: pointer;
 }
 
+.results.active {
+    max-height: 200000px;
+}
+
+.results:not(.active) {
+    max-height: 0px;
+}
 
 .debug {
     width: 100px;

@@ -19,3 +19,11 @@ export const removeDuplicates = (identity: (any) => any) => {
         return true
     }
 }
+
+export function toggleInArray(arr, val) {
+    if(_.contains(arr, val)) {
+        return arr.filter(x => !(x == val));
+    } else {
+        return [...arr, val]
+    }
+}

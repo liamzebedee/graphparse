@@ -25,7 +25,7 @@ function setup() {
         nodes, edges
     } = graphJSON;
     let currentNode = null;
-    let selection = [];
+    let selection = {};
     let maxDepth = 2;
 
     return {
@@ -150,12 +150,6 @@ describe('constructs graph correctly when currentNode is null', () => {
 //     assert.deepStrictEqual(tree, [ 2, 4, 5 ], "respects max depth param")
 // })
 
-// describe("constructAdjList works", () => {
-//     let { logic } = setup();
-//     let { nodes, edges, adjList } = bareData();
-//     assert.deepEqual(constructAdjList(nodes, edges), adjList);
-// })
-
 // describe("preFilterNodesAndEdges sets the nodes and edges", () => {
 //     let { logic } = setup();
 //     let { nodes, edges } = bareData();
@@ -178,7 +172,7 @@ describe('constructs graph correctly when currentNode is null', () => {
 describe('layout handles case where no nodes or edges', () => {
     let { logic } = setup();
 
-    logic.refresh([], [], null, []);
+    logic.refresh([], [], null, {});
 
     assertEmptyArray(logic.nodesLayout)
     assertEmptyArray(logic.edgesLayout)

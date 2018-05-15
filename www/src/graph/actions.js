@@ -16,6 +16,19 @@ export function clickNode(id) {
     }
 }
 
+export function clearSelection() {
+    return {
+        type: "BLUR_SELECTED_NODE"
+    }
+}
+
+export function toggleNodeTypeFilter(nodeTypeFilterIdx) {
+    return {
+        type: "TOGGLE_NODE_TYPE_FILTER",
+        nodeTypeFilterIdx,
+    }
+}
+
 export function searchNodes(q) {
     return {
         type: "SEARCH_NODES",
@@ -79,5 +92,12 @@ export function changeDepth(depth) {
 export function toggleShowDefinitions() {
     return {
         type: "toggleShowDefinitions"
+    }
+}
+
+export function searchFocusChange(state) {
+    return {
+        type: "searchFocusChange",
+        state
     }
 }

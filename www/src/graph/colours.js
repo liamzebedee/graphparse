@@ -11,12 +11,6 @@
 // * methods/funcs
 // * vars/fields
 
-
-// logic and data
-// logic = methods/funcs
-// data = structs/vars/fields
-
-
 // https://github.com/kevinsawicki/monokai/blob/master/styles/colors.less
 
 // @ghost-white: #F8F8F0;
@@ -70,7 +64,6 @@ export function getVariantName(variant) {
     return graphJSON.nodeTypes[variant]
 }
 
-// nodeTypesMapping.map(x => x.nodeType)
 let range = config.map(x => x.colour)
 
 const nodeColor = d3
@@ -78,4 +71,3 @@ const nodeColor = d3
     .domain(domain)
 
 export default nodeColor;
-// export default d3.scaleOrdinal(d3.schemeCategory20);

@@ -1,35 +1,26 @@
 import App from './app';
+import { history, store } from './store';
 import ReactDOM from 'react-dom'
 import React from 'react'
 import { AppContainer } from 'react-hot-loader';
 
+const rootEl = document.getElementById('root');
 
 const render = Component => {
   ReactDOM.render(
     <AppContainer>
-      <Component />
+      <Component store={store} history={history} />
     </AppContainer>,
-    document.getElementById('root'),
+    rootEl,
   )
 }
 
 render(App)
 
 // if (module.hot) {
-//   module.hot.accept();
-
-//   module.hot.dispose((data) => {
-//     data.store = store;
+//   module.hot.accept([
+//     './app',
+//   ], () => {
+//     render(App)
 //   });
-// }
-
-
-// Webpack Hot Module Replacement API
-// if (module.hot) {
-//   module.hot.accept('./app', () => {
-//     // if you are using harmony modules ({modules:false})
-//     // render(App)
-//     // in all other cases - re-require App manually
-//     render(require('./app'))
-//   })
 // }

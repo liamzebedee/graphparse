@@ -10,7 +10,9 @@ import * as d3 from 'd3v4';
 import {
     hoverNode,
     clickNode,
-    setGrabbing
+    setGrabbing,
+    clearSelection,
+    toggleNodeTypeFilter
 } from './actions'
 import {
     hexToRgb
@@ -18,24 +20,24 @@ import {
 import nodeColor from './colours';
 
 import TypesOverview from './types-overview';
-import {
-
-} from './graph-logic';
 
 import './graph.css';
 
-import {
-    // preFilterNodesAndEdges,
-    // generateLayout,
-    GraphLogic
-} from './graph-logic';
-
-const logic = new GraphLogic();
+import Worker from 'worker-loader!./graph-logic';
+const worker = new Worker();
 
 class D3Graph extends React.Component {
     constructor() {
         super()
         this.graphDOT = null;
+
+        worker.addEventListener("message", (ev) => {
+            let msg = ev.data;
+            switch(msg.type) {
+                case 'layout':
+                    this.setState(msg.data)
+            }
+        });
     }
 
     state = {
@@ -55,10 +57,16 @@ class D3Graph extends React.Component {
     }
 
     componentDidMount() {
-        this.addZoom()
+        this.addZoom();
 
         shortcut('ctrl c', {}, () => {
             copy(this.state.graphDOT);
+        });
+
+        [1,2,3,4].map((num) => {
+            shortcut(`${num}`, {}, () => {
+                this.props.toggleNodeTypeFilter(num)
+            })
         })
     }
 
@@ -81,21 +89,27 @@ class D3Graph extends React.Component {
             maxDepth
         } = nextProps;
 
-        logic.refresh(nodes, edges, currentNode, selection, maxDepth);
+        worker.postMessage({
+            type: 'refresh',
+            data: [nodes, edges, currentNode, selection, maxDepth,]
+        });
 
-        let layout = logic.getLayout();
+        // logic.refresh(nodes, edges, currentNode, selection, maxDepth);
 
-        return {
-            ...layout
-        }
+        // let layout = logic.getLayout();
+
+        // return {
+        //     ...layout
+        // }
     }
 
     render() {
         let zoom = this.state.zoom;
-        let { uiView } = this.props;
+        let { uiView, clearSelection, clickNode } = this.props;
 
         return <svg
                 ref={(ref) => this.svg = ref}
+                onClick={clearSelection}
                 >
             <defs>
                 <filter id="shadow" x="0" y="0" width="200%" height="200%">
@@ -116,7 +130,7 @@ class D3Graph extends React.Component {
                     <g>
                     {this.state.nodes.map(node => {
                         return <Node 
-                            key={node.id} clickNode={this.props.clickNode} 
+                            key={node.id} clickNode={clickNode} 
                             {...node}/>
                     })}
                     </g>,
@@ -139,7 +153,10 @@ const Node = ({ id, interesting, layout, variant, label, clickNode }) => {
     return <g 
         class='node'
         onMouseOver={() => hoverNode(id)}
-        onClick={() => clickNode(id)}
+        onClick={(ev) => {
+            ev.stopPropagation();
+            clickNode(id)
+        }}
         transform={`translate(${cx}, ${cy})`}
         >
         <ellipse 
@@ -181,10 +198,8 @@ const Edge = (edge) => {
 
     return <g class={`${edgeVariantStr(edge.variant)}`}>
         <path 
-            
             d={computeD()}/>
         <polygon
-            
             points={`${arrowPts.join(' ')} ${arrowPts[0]}`}/>
     </g>
 }
@@ -219,6 +234,8 @@ const mapDispatchToProps = dispatch => {
             dispatch(hoverNode(id))
         },
         setGrabbing: (grabbing) => dispatch(setGrabbing(grabbing)),
+        clearSelection: () => dispatch(clearSelection()),
+        toggleNodeTypeFilter: (i) => dispatch(toggleNodeTypeFilter(i))
     }
 }
 

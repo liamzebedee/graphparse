@@ -22,6 +22,7 @@ module.exports = {
   devtool: 'eval-source-map',
   
   plugins: [
+    // new webpack.HotModuleReplacementPlugin(),
     new FlowWebpackPlugin(),
     new HtmlWebpackPlugin({
       title: "Basemap",

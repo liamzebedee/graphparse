@@ -1,7 +1,9 @@
 import graphJSON from '../../graph.json';
 import { combineReducers } from 'redux';
 import { searchNodes } from './actions';
-
+import {
+    toggleInArray
+} from '../util'
 
 import matchSorter from 'match-sorter';
 
@@ -10,13 +12,15 @@ const initialState = {
     grabbing: false,
 
     currentNode: null,
-    selection: [],
+    selectedNode: null,
+    selection: {},
     maxDepth: 3,
 
     clickedNode: null,
     search: {
         q: "",
-        matches: []
+        matches: [],
+        state: "blurred"
     },
     nodes: graphJSON.nodes,
     edges: graphJSON.edges,
@@ -29,11 +33,40 @@ const initialState = {
 }
 
 
+const defaultNodeSelection = {
+    shownNodeTypes: []
+}
+
 function graph(state = initialState, action) {
     switch(action.type) {
-        // case "CLICK_NODE":
-        //     return Object.assign({}, state, {
-        //     })
+        case "CLICK_NODE":
+            return {
+                ...state,
+                selectedNode: action.id,
+            }
+        
+        case "BLUR_SELECTED_NODE":
+            return {
+                ...state,
+                selectedNode: null
+            }
+        
+        case "TOGGLE_NODE_TYPE_FILTER":
+            if(!state.selectedNode) return state;
+
+            let nodeSel = state.selection[state.selectedNode] || defaultNodeSelection;
+            let selection = {
+                ...state.selection,
+                [state.selectedNode]: {
+                    ...nodeSel,
+                    shownNodeTypes: toggleInArray(nodeSel.shownNodeTypes, action.nodeTypeFilterIdx)
+                }
+            }
+
+            return {
+                ...state,
+                selection,
+            }
         
         // case "HOVER_NODE":
         //     let interested = getSubPaths(state.adjList, action.id, state.maxDepth)

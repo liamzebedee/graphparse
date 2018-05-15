@@ -3,7 +3,7 @@ const convert = require('koa-connect');
 
 module.exports = {
   reload: false,
-  hot: true,
+  hot: false,
 
   add: (app, middleware, options) => {
     const historyOptions = {};

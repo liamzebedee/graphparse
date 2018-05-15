@@ -8,7 +8,8 @@ import {
     changeDepth,
     VIEWS,
     changeView,
-    toggleShowDefinitions
+    toggleShowDefinitions,
+    searchFocusChange
 } from './actions'
 
 import { connect } from 'react-redux'
@@ -19,6 +20,9 @@ import './ui.css';
 import nodeColor, { getVariantName } from './colours';
 
 class GraphControls extends React.Component {
+    state = {
+        searchFocused: false
+    }
     constructor() {
         super()
     }
@@ -32,12 +36,16 @@ class GraphControls extends React.Component {
             nodeTypes, q, matches, searchNodes, selectNode, clickedNode, 
             uiView, changeView,
             changeDepth, maxDepth,
-            toggleShowDefinitions, showDefinitions
+            toggleShowDefinitions, showDefinitions,
+
+            focusSearch, blurSearch
         } = this.props;
+
+        let { searchFocused } = this.state;
         
         return <div className="infoView">
             <div>
-                <div className="btn-group btn-group-sm" role="group">
+                {/* <div className="btn-group btn-group-sm" role="group">
                 { VIEWS.map(view => 
                     <button 
                         className={classNames("btn btn-secondary", { "active": uiView == view })} 
@@ -45,35 +53,39 @@ class GraphControls extends React.Component {
                         {view}
                     </button>
                 )}
-                </div>
+                </div> */}
 
-                <br/>
+                {/* <input className="depth" type="number" value={maxDepth} onChange={(ev) => changeDepth(ev.target.value)}/> */}
 
-                <input className="depth" type="number" value={maxDepth} onChange={(ev) => changeDepth(ev.target.value)}/>
-
-                <div className="form-check">
+                {/* <div className="form-check">
                     <input className="form-check-input" type="checkbox" 
                         checked={showDefinitions}
                         onChange={toggleShowDefinitions}/>
                     <label className="form-check-label" for="defaultCheck1">
                         Definitions
                     </label>
-                </div>
+                </div> */}
 
                 <div className='search'>
-                    <input type='text' className="form-control" placeholder="Search types, files" onChange={(ev) => searchNodes(ev.target.value)} value={q}/>
+                    <input type='text' className="form-control" placeholder="Search types, files" onChange={(ev) => searchNodes(ev.target.value)} value={q} 
+                    onFocus={() => this.setState({ searchFocused: true })} 
+                    onBlur={() => this.setState({ searchFocused: false })} />
                 </div>
 
-                <div className='results'>
+                
+                <div className={classNames('results', { 'active': searchFocused })}>
                     { matches.length > 0 ? matches.map((node, i) => {
                         return <NodeMatch key={i} onClick={() => selectNode(node.id)} {...node}/>
                     }) : 'none' }
                 </div>
+
+                <footer>Basemap</footer>
             </div>
 
-            <div className='debug'>
+            {/* <div className='debug'>
                 <pre>{ clickedNode ? clickedNode.debugInfo : null }</pre>
-            </div>
+            </div> */}
+
         </div>
     }
 }
@@ -109,7 +121,7 @@ const mapDispatchToProps = dispatch => {
         searchNodes: (q) => dispatch(searchNodes(q)),
         selectNode:  (id) => dispatch(selectNodeFromSearch(id)),
         changeView: (view) => dispatch(changeView(view)),
-        toggleShowDefinitions: () => dispatch(toggleShowDefinitions())
+        toggleShowDefinitions: () => dispatch(toggleShowDefinitions()),
     }
 }
 
