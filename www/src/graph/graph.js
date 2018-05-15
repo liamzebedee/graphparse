@@ -1,5 +1,4 @@
 import React from 'react';
-// import 'script-loader!../vendor/d3.v4.min.js';
 import classNames from 'classnames';
 import { connect } from 'react-redux'
 import shortcut from 'keyboard-shortcut';
