@@ -20,10 +20,13 @@ import nodeColor from './colours';
 
 import TypesOverview from './types-overview';
 
+const graphCSS = require('!!raw-loader!./graph.css');
 import './graph.css';
 
 import Worker from './graph-logic.worker';
 const worker = new Worker();
+
+import Blanket from '@atlaskit/blanket';
 
 class D3Graph extends React.Component {
     constructor() {
@@ -34,7 +37,10 @@ class D3Graph extends React.Component {
             let msg = ev.data;
             switch(msg.type) {
                 case 'layout':
-                    this.setState(msg.data)
+                    this.setState({
+                        rendering: false,
+                        ...msg.data
+                    })
             }
         });
     }
@@ -53,13 +59,15 @@ class D3Graph extends React.Component {
         nodes: [],
         edges: [],
         graphDOT: "",
+        rendering: false,
     }
 
     componentDidMount() {
         this.addZoom();
 
         shortcut('ctrl c', {}, () => {
-            copy(this.state.graphDOT);
+            // copy(this.state.graphDOT);
+            copy(this.svg.outerHTML)
         });
 
         [1,2,3,4].map((num) => {
@@ -93,29 +101,33 @@ class D3Graph extends React.Component {
             data: [nodes, edges, currentNode, selection, maxDepth,]
         });
 
-        // logic.refresh(nodes, edges, currentNode, selection, maxDepth);
-
-        // let layout = logic.getLayout();
-
-        // return {
-        //     ...layout
-        // }
+        return {
+            rendering: false,
+        }
     }
 
     render() {
         let zoom = this.state.zoom;
         let { uiView, clearSelection, clickNode } = this.props;
 
-        return <svg
-                ref={(ref) => this.svg = ref}
-                onClick={clearSelection}
-                >
+        console.log(graphCSS)
+        return <div className='graph-ctn'>
+            <Blanket isTinted={this.state.rendering} canClickThrough={!this.state.rendering}/>
+
+            <svg
+            ref={(ref) => this.svg = ref}
+            onClick={clearSelection}
+            >
             <defs>
                 <filter id="shadow" x="0" y="0" width="200%" height="200%">
                 <feOffset result="offOut" in="SourceAlpha" dx="10" dy="10" />
                 <feGaussianBlur result="blurOut" in="offOut" stdDeviation="3" />
                 <feBlend in="SourceGraphic" in2="blurOut" mode="normal" />
                 </filter>
+
+                <style type="text/css">{`<![CDATA[
+                ${graphCSS}
+                ]]>`}</style>
             </defs>
 
             <g 
@@ -143,6 +155,7 @@ class D3Graph extends React.Component {
 
             </g>
         </svg>
+        </div>;
     }
 }
 
@@ -207,6 +220,7 @@ const Edge = (edge) => {
 // function zoomToBoundingBox(node) {
 //     var bounds = path.bounds(d),
 //       dx = bounds[1][0] - bounds[0][0],
+
 //       dy = bounds[1][1] - bounds[0][1],
 //       x = (bounds[0][0] + bounds[1][0]) / 2,
 //       y = (bounds[0][1] + bounds[1][1]) / 2,

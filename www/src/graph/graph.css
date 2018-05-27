@@ -55,3 +55,7 @@ text {
     fill: black;
     stroke: black;
 }
+
+.graph-ctn {
+    height: 100%;
+}

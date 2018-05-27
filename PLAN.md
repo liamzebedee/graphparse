@@ -1,4 +1,3 @@
-Fix HMR
 Build UX for refactoring all the global variables of Graph
     User story
         I want to see all of the variables I must encapsulate that interact with Graph

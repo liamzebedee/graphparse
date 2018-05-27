@@ -41,7 +41,7 @@ export function mergeByKey(key: string, coll1: any[], coll2: any[], failOnMissin
 export class GraphLogic {
     nodesLayout: nodeLayout[] = [];
     edgesLayout: edgeLayout[] = [];
-    maxDepth: number = 1;
+    maxDepth: number;
     graphDOT: string = "";
     
     nodes: node[] = [];
@@ -62,13 +62,13 @@ export class GraphLogic {
     }
 
     get shownNodes () : node[] {
-        return this.nodes.filter(node => node.shown);
+        return this.nodes.filter(node => node.inTree);
     }
 
     get shownEdges () : edge[] {
         return this.shownNodes.map(node => {
             return node.outs.filter(e => {
-                return this.getNodeById(e.target).shown;
+                return this.getNodeById(e.target).inTree;
             })
         }).reduce((prev, curr) => prev.concat(curr), []);
     }
@@ -91,7 +91,7 @@ export class GraphLogic {
         edges: edge[], 
         currentNode: ?nodeid, 
         selection: { [nodeid]: nodeSel }, 
-        maxDepth: number = 3
+        maxDepth: number = 1,
     ) {
         const nodeExists = (id) => _.findWhere(nodes, { id, }) != null;
         let edgesThatExist = edges.filter(edge => {
@@ -100,23 +100,15 @@ export class GraphLogic {
 
         this.nodes = nodes.map(node => {
             return {
-                ...node,
-
                 shown: false,
                 selected: false,
-                outs: _.where(edgesThatExist, { source: node.id })
+                outs: _.where(edgesThatExist, { source: node.id }),
+                ...node,
             }
         });
 
         this.currentNode = currentNode;
         this.maxDepth = maxDepth;
-
-        // Merge nodes with selection information
-        let selectionArr = Object.entries(selection).map(entry => {
-            return { id: +entry[0], ...entry[1] }
-        });
-
-        this.nodes = mergeByKey('id', this.nodes, selectionArr);
 
         this.preFilterNodesAndEdges();
         this.generateLayout();
@@ -138,13 +130,13 @@ export class GraphLogic {
 
     preFilterNodesAndEdges() {
         let tree = this.getSpanningTree().map(id => {
-            return { id, shown: true }
+            return { id, inTree: true }
         })
         this.nodes = mergeByKey('id', this.nodes, tree)
     }
 
     postFilterNodesAndEdges() {
-        return
+        // this.nodes = this.shownNodes;
     }
 
     // Returns array of node id's that represent the spanning tree of from currentNode down, until maxdepth
@@ -154,7 +146,7 @@ export class GraphLogic {
         } & node;
 
         let nodesToTraverse: Array<traversedNode> = [];
-        let depth = -1;
+        let depth = 0;
         let visited: Set<nodeid> = new Set();
 
         if(this.currentNode == null) {
@@ -197,7 +189,8 @@ export class GraphLogic {
             // visit
             depth++;
 
-            nodesToTraverse = nodesToTraverse.map(traverse)
+            nodesToTraverse = nodesToTraverse
+            .map(traverse)
             .reduce((prev, curr) => prev.concat(curr), [])
             .filter(node => {
                 if(visited.has(node.id)) return false;
@@ -205,9 +198,13 @@ export class GraphLogic {
                     visited.add(node.id);
                     return true;
                 }
-            });
+            })
+            .filter(node => {
+                if(node.shown) return true;
+                return depth < this.maxDepth;
+            })
 
-        } while(depth < this.maxDepth && nodesToTraverse.length);
+        } while(nodesToTraverse.length);
 
         return Array.from(visited);
     }
@@ -221,8 +218,13 @@ export class GraphLogic {
         }
     
         // Generate dot layout
+        // let graphDOT = this.generateGraphDOT(this.nodes, this.edges)
         let graphDOT = this.generateGraphDOT(this.shownNodes, this.shownEdges)
-        let graphvizData = JSON.parse(Viz(graphDOT, { format: 'json' }));
+        let graphvizData = JSON.parse(Viz(graphDOT, {
+            format: 'json',
+            engine: 'dot',
+            // engine: 'dot'
+        }));
     
         this.nodesLayout = graphvizData.objects.map(obj => {    
             let pos = obj.pos.split(',').map(Number);
@@ -274,9 +276,19 @@ export class GraphLogic {
 
         return `
             digraph graphname {
-                ${nodes.map(({ id, rank, label }) => {
+                ${nodes.map(({ id, rank, label, shown }) => {
                     rank = 1;
-                    return `"${id}" [width=${rank}] [height=${rank}] [label="${label}"];`
+
+                    let fixedPos = "";
+                    if(shown) {
+                        let prevlayout: ?nodeLayout = _.findWhere(this.nodesLayout, { id, });
+                        if(!prevlayout) throw new Error("Not found");
+
+                        let { cx, cy } = prevlayout.layout;
+                        fixedPos = `[pos="${cx},${cy}!"]`;
+                    }
+
+                    return `"${id}" [width=${rank}] [height=${rank}] [label="${label}"] ${fixedPos};`
                 }).join('\n')}
 
                 ${weightedEdges.map(({ source, target, id, weight }) => `"${target}" -> "${source}" [id=${id}] [weight=${weight}];`).join('\n')}

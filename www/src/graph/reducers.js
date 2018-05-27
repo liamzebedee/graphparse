@@ -13,8 +13,7 @@ const initialState = {
 
     currentNode: null,
     selectedNode: null,
-    selection: {},
-    maxDepth: 2,
+    maxDepth: 1,
 
     clickedNode: null,
     search: {
@@ -33,46 +32,27 @@ const initialState = {
 }
 
 
-const defaultNodeSelection = {
-    shownNodeTypes: []
-}
-
 function graph(state = initialState, action) {
     switch(action.type) {
         case "CLICK_NODE":
             return {
                 ...state,
                 selectedNode: action.id,
-            }
+                nodes: state.nodes.map(node => {
+                    if(node.id == action.id) {
+                        return {
+                            ...node,
+                            shown: !node.shown
+                        };
+                    } else return node;
+                })
+            };
         
         case "BLUR_SELECTED_NODE":
             return {
                 ...state,
                 selectedNode: null
             }
-        
-        case "TOGGLE_NODE_TYPE_FILTER":
-            if(!state.selectedNode) return state;
-
-            let nodeSel = state.selection[state.selectedNode] || defaultNodeSelection;
-            let selection = {
-                ...state.selection,
-                [state.selectedNode]: {
-                    ...nodeSel,
-                    shownNodeTypes: toggleInArray(nodeSel.shownNodeTypes, action.nodeTypeFilterIdx)
-                }
-            }
-
-            return {
-                ...state,
-                selection,
-            }
-        
-        // case "HOVER_NODE":
-        //     let interested = getSubPaths(state.adjList, action.id, state.maxDepth)
-        //     return Object.assign({}, state, {
-        //         interested,
-        //     })
         
         case "SELECT_NODE_FROM_SEARCH":
             return Object.assign({}, state, {

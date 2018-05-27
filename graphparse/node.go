@@ -4,7 +4,7 @@ import (
 	"go/types"
 	"fmt"
 	// "errors"
-	"github.com/jimlawless/whereami"
+	// "github.com/jimlawless/whereami"
 )
 
 type NodeType int
