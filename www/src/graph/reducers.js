@@ -14,7 +14,7 @@ const initialState = {
     currentNode: null,
     selectedNode: null,
     selection: {},
-    maxDepth: 3,
+    maxDepth: 2,
 
     clickedNode: null,
     search: {

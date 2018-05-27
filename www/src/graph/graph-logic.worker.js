@@ -7,59 +7,17 @@ import {
     removeDuplicates
 } from '../util'
 
-type id = number;
-type nodeid = id;
-type edgeid = id;
+import type {
+    nodeid,
+    node,
+    nodeLayout,
+    edge,
+    edgeLayout,
+    nodeSel
+} from 'graphparse';
 
 const UseEdge = 0;
 const DefEdge = 1;
-
-
-type edge = {|
-    source: nodeid,
-    target: nodeid,
-    variant: 0 | 1,
-    shown: boolean,
-    id: edgeid,
-|};
-
-type nodeVariant = number;
-
-type node = {
-    rank: number,
-    label: string,
-    id: nodeid,
-    variant: nodeVariant,
-    pos: string,
-    debugInfo: string,
-
-    shown: boolean,
-    selected: boolean,
-
-    outs: edge[],
-} & nodeSel;
-
-type nodeLayout = {|
-    layout: {
-        cx: number,
-        cy: number,
-        rx: number,
-        ry: number,
-    },
-    id: nodeid,
-|};
-
-type edgeLayout = {|
-    layout: {
-        points: number[],
-        arrowPts: number[],
-    },
-    id: edgeid,
-|};
-
-type nodeSel = {
-    shownNodeTypes: nodeVariant[]
-};
 
 // Merge items from coll2 into coll1 by key 'id', overwriting values.
 export function mergeByKey(key: string, coll1: any[], coll2: any[], failOnMissing: boolean = true) : any[] {
@@ -89,7 +47,7 @@ export class GraphLogic {
     nodes: node[] = [];
 
     getNodeById (id : nodeid) {
-        let node = _.findWhere(this.nodes, { id, })
+        let node: node = _.findWhere(this.nodes, { id, })
         if(!node) {
             // console.log(this.nodes)
             throw new Error(`node not found: ${id}`)
@@ -349,3 +307,8 @@ self.addEventListener('message', (ev) => {
             })
     }
 })
+
+// $FlowFixMe
+if (module.hot) {
+    module.hot.accept()
+}

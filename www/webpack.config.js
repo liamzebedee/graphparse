@@ -17,6 +17,7 @@ module.exports = {
     path: path.resolve(__dirname, "dist"),
     filename: 'bundle.js',
     publicPath: '/',
+    globalObject: 'this'
   },
 
   devtool: 'eval-source-map',
@@ -40,6 +41,10 @@ module.exports = {
       {
         test: /\.css$/,
         use: [ 'style-loader', 'css-loader' ]
+      },
+      { 
+        test: /worker\.js$/,
+        use: ['babel-loader', 'worker-loader']
       },
       {
         test: /\.js$/,

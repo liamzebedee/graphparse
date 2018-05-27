@@ -22,7 +22,7 @@ import TypesOverview from './types-overview';
 
 import './graph.css';
 
-import Worker from 'worker-loader!./graph-logic';
+import Worker from './graph-logic.worker';
 const worker = new Worker();
 
 class D3Graph extends React.Component {

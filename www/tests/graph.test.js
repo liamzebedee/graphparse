@@ -1,6 +1,6 @@
-// @flow
+
 var assert = require('assert');
-import {describe} from 'mocha'
+import {describe} from 'mocha';
 
 import {
     GraphLogic,
@@ -13,9 +13,18 @@ import {
 const graphJSON = require('../../test/graph.json');
 import lodash from 'lodash';
 import _ from 'underscore';
-var expect = require('chai').expect
 
 
+import chai from 'chai';
+// $FlowFixMe
+const { expect } = chai;
+
+
+
+import type {
+    node,
+    nodeid
+} from 'graphparse';
 
 
 function setup() {

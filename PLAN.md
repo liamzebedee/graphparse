@@ -1,3 +1,34 @@
+Fix HMR
+Build UX for refactoring all the global variables of Graph
+    User story
+        I want to see all of the variables I must encapsulate that interact with Graph
+    tech
+        node = find(Graph)
+        node.uses => map 'use
+            switch(node.type)
+            case func:
+                map func.uses
+            case var:
+                return true if var.def is child of file
+
+use GraphQL?
+
+
+simple mode for editing diagram:
+    cut edges / children
+
+Think about the best way to do this
+    query language a la sql
+    path from Graph -> usages
+Edit node view:
+    hidden
+    only show certain types
+Show better 'packed' view for function body's
+
+
+
+
+
 Load codebase from different URL/path
 
  - Clone($CODEBASE)

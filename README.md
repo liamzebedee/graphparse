@@ -1,6 +1,8 @@
 PageRank AST
 ============
 
+Some 4K lines of code so far...
+
 ![generated AST graph - 20 Nov 2017](https://i.imgur.com/SgXxWeX.png)
 
 WIP implementation of PageRank on the Abstract Syntax Trees of Go source code.

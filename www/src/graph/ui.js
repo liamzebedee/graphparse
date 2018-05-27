@@ -79,7 +79,7 @@ class GraphControls extends React.Component {
                     }) : 'none' }
                 </div>
 
-                <footer>Basemap</footer>
+                <footer>Basemapx</footer>
             </div>
 
             {/* <div className='debug'>
