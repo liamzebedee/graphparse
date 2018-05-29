@@ -38,6 +38,13 @@ export function mergeByKey(key: string, coll1: any[], coll2: any[], failOnMissin
     return coll1.map(a => map[a.id])
 }
 
+type refreshArgs = {
+    nodes: node[], 
+    edges: edge[], 
+    currentNode: ?nodeid, 
+    maxDepth: number
+};
+
 export class GraphLogic {
     nodesLayout: nodeLayout[] = [];
     edgesLayout: edgeLayout[] = [];
@@ -86,12 +93,12 @@ export class GraphLogic {
     constructor() {
     }
 
-    refresh(
-        nodes: node[], 
-        edges: edge[], 
-        currentNode: ?nodeid, 
-        maxDepth: number = 1,
-    ) {
+    refresh({
+        nodes,
+        edges,
+        currentNode,
+        maxDepth = 1
+    }: refreshArgs) {
         const nodeExists = (id) => _.findWhere(nodes, { id, }) != null;
         let edgesThatExist = edges.filter(edge => {
             return nodeExists(edge.source) && nodeExists(edge.target);
@@ -271,7 +278,7 @@ export class GraphLogic {
         return `
             digraph graphname {
                 ${nodes.map(({ id, rank, label, shown }) => {
-                    rank = 1;
+                    // rank = 1;
 
                     let fixedPos = "";
                     // if(shown) {
@@ -331,12 +338,17 @@ export const edgeRelationId = (edge: edge) => `${edge.source}${edge.target}`;
 
 const logic = new GraphLogic();
 
+type refreshMsg = {
+    data: refreshArgs,
+    type: 'refresh'
+};
+
 self.addEventListener('message', (ev) => {
-    let msg = ev.data;
+    let msg: refreshMsg = ev.data;
 
     switch(msg.type) {
         case 'refresh':
-            logic.refresh(...msg.data)
+            logic.refresh(msg.data)
 
             self.postMessage({
                 type: 'layout',

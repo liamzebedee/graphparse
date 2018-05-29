@@ -1,4 +1,4 @@
-svg {
+.svg {
     /* TEMP HACK FIX */
     padding-left: 300px;
     width: 100%;
@@ -8,9 +8,11 @@ svg {
     cursor: grab;
     cursor: -moz-grab;
     cursor: -webkit-grab;
+
+    user-select: none;
 }
 
-svg.grabbing { 
+.svg.grabbing { 
     cursor: grabbing;
     cursor: -moz-grabbing;
     cursor: -webkit-grabbing;

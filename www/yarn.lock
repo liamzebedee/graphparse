@@ -36,6 +36,37 @@
     prop-types "^15.5.10"
     styled-components "1.4.6 - 3"
 
+"@atlaskit/field-base@^9.0.3":
+  version "9.0.3"
+  resolved "https://registry.yarnpkg.com/@atlaskit/field-base/-/field-base-9.0.3.tgz#a722ef6c08146942cd8c050ab21130926e7feefa"
+  dependencies:
+    "@atlaskit/icon" "^11.3.0"
+    "@atlaskit/inline-dialog" "^6.0.2"
+    "@atlaskit/spinner" "^5.0.2"
+    "@atlaskit/theme" "^3.2.2"
+    babel-runtime "^6.26.0"
+    styled-components "1.4.6 - 3"
+
+"@atlaskit/field-range@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@atlaskit/field-range/-/field-range-3.0.2.tgz#2fc01fd1adb8ddd0f7062b6924af691d6b12c0ea"
+  dependencies:
+    "@atlaskit/theme" "^3.2.2"
+    babel-runtime "^6.26.0"
+    prop-types "^15.5.10"
+    styled-components "1.4.6 - 3"
+
+"@atlaskit/field-text-area@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@atlaskit/field-text-area/-/field-text-area-2.1.0.tgz#358195336ed5646d6a0856b0108d5df5834dcef9"
+  dependencies:
+    "@atlaskit/button" "^7.2.5"
+    "@atlaskit/field-base" "^9.0.3"
+    "@atlaskit/theme" "^3.2.2"
+    babel-runtime "^6.26.0"
+    prop-types "^15.5.10"
+    styled-components "1.4.6 - 3"
+
 "@atlaskit/icon@^11.3.0":
   version "11.3.2"
   resolved "https://registry.yarnpkg.com/@atlaskit/icon/-/icon-11.3.2.tgz#59e3583ea4c1039f4cd61ae5cd0b19a2beb9ef9f"
@@ -45,13 +76,28 @@
     styled-components "1.4.6 - 3"
     uuid "^3.1.0"
 
+"@atlaskit/inline-dialog@^6.0.2":
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/@atlaskit/inline-dialog/-/inline-dialog-6.0.2.tgz#ff70e6cc65f13b725eb1f866c28d21129bc6ed99"
+  dependencies:
+    "@atlaskit/layer" "^3.1.1"
+    "@atlaskit/theme" "^3.2.2"
+    styled-components "1.4.6 - 3"
+
+"@atlaskit/layer@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@atlaskit/layer/-/layer-3.1.1.tgz#3b9bbba7d0377569c5c2212d20bee931aebc7ab8"
+  dependencies:
+    react-scrolllock "^2.0.2"
+    styled-components "1.4.6 - 3"
+
 "@atlaskit/reduced-ui-pack@^8.9.2":
   version "8.9.2"
   resolved "https://registry.yarnpkg.com/@atlaskit/reduced-ui-pack/-/reduced-ui-pack-8.9.2.tgz#8005d36e3ac34e08df2a4803c9f99559f2fcaaaa"
   dependencies:
     "@atlaskit/util-shared-styles" "^2.10.3"
 
-"@atlaskit/spinner@5.0.2":
+"@atlaskit/spinner@5.0.2", "@atlaskit/spinner@^5.0.2":
   version "5.0.2"
   resolved "https://registry.yarnpkg.com/@atlaskit/spinner/-/spinner-5.0.2.tgz#a28ba94ae6a1c12f6ab6955e97db90f62546e95f"
   dependencies:
@@ -3197,6 +3243,10 @@ execa@^0.8.0:
     p-finally "^1.0.0"
     signal-exit "^3.0.0"
     strip-eof "^1.0.0"
+
+exenv@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/exenv/-/exenv-1.2.2.tgz#2ae78e85d9894158670b03d47bec1f03bd91bb9d"
 
 exit@^0.1.2:
   version "0.1.2"
@@ -6708,6 +6758,10 @@ react-lifecycles-compat@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/react-lifecycles-compat/-/react-lifecycles-compat-3.0.2.tgz#7279047275bd727a912e25f734c0559527e84eff"
 
+react-prop-toggle@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/react-prop-toggle/-/react-prop-toggle-1.0.2.tgz#8b0b7e74653606b1427cfcf6c4eaa9198330568e"
+
 react-redux@^5.0.7:
   version "5.0.7"
   resolved "https://registry.yarnpkg.com/react-redux/-/react-redux-5.0.7.tgz#0dc1076d9afb4670f993ffaef44b8f8c1155a4c8"
@@ -6749,6 +6803,13 @@ react-router@^4.2.0:
     path-to-regexp "^1.7.0"
     prop-types "^15.5.4"
     warning "^3.0.0"
+
+react-scrolllock@^2.0.2:
+  version "2.0.7"
+  resolved "https://registry.yarnpkg.com/react-scrolllock/-/react-scrolllock-2.0.7.tgz#3b879e1fe308fc900ab76e226e9be594c41226fd"
+  dependencies:
+    exenv "^1.2.2"
+    react-prop-toggle "^1.0.2"
 
 react-transition-group@^2.2.1:
   version "2.3.1"

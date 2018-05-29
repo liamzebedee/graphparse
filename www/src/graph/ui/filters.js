@@ -16,9 +16,10 @@ import {
 import {
     toggleNodeTypeFilter
 } from '../actions';
+import './filters.css';
 
 const Filters = ({ currentNode, toggleFilter }) => {
-    return <div>
+    return <div styleName='filters'>
         { getNodeTypes().map((variantName, variant) => {
             let checked = false;
             if(currentNode) {
@@ -30,6 +31,7 @@ const Filters = ({ currentNode, toggleFilter }) => {
             onChange={() => toggleFilter(variant)}
             isActive={false}
             label={variantName}
+            isFullWidth={false}
             />
         }) } 
     </div>

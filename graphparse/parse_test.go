@@ -184,6 +184,8 @@ func TestAllEdgesExist(t *testing.T) {
 	}
 }
 
+// func TestGenerates
+
 // e.g. within Client.Close, conn.Close() is called to conn.
 // func TestParseCallsToStructMembers(t *testing.T) {
 // 	assert.NotNil(t, findNode(Method, "Listen"))

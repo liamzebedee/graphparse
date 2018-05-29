@@ -19,6 +19,7 @@ import {
 
 
 import Filters from './ui/filters';
+import Depth from './ui/depth';
 
 import './ui.css';
 import nodeColor, { getVariantName } from './colours';
@@ -47,8 +48,8 @@ class GraphControls extends React.Component {
 
         let { searchFocused } = this.state;
         
-        return <AtlaskitThemeProvider mode='light'><div styleName="infoView">
-            <div styleName='row'>
+        return <div styleName="ui-overlay">
+            <div styleName='ui-floating'>
                 <div styleName='search'>
                     <input type='text' className="form-control" placeholder="Search types, files" onChange={(ev) => searchNodes(ev.target.value)} value={q} 
                     onFocus={() => this.setState({ searchFocused: true })} 
@@ -62,10 +63,11 @@ class GraphControls extends React.Component {
                 </div>
             </div>
             
-            <div styleName='row'>
+            <div styleName='ui-floating options'>
                 <Filters/>
+                <Depth/>
             </div>
-        </div></AtlaskitThemeProvider>
+        </div>
     }
 }
 

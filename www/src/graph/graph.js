@@ -66,8 +66,8 @@ class D3Graph extends React.Component {
         this.addZoom();
 
         shortcut('ctrl c', {}, () => {
-            // copy(this.state.graphDOT);
-            copy(this.svg.outerHTML)
+            copy(this.state.graphDOT);
+            // copy(this.svg.outerHTML)
         });
 
         [1,2,3,4].map((num) => {
@@ -98,7 +98,7 @@ class D3Graph extends React.Component {
 
         worker.postMessage({
             type: 'refresh',
-            data: [nodes, edges, currentNode, selection, maxDepth,]
+            data: { nodes, edges, currentNode, maxDepth }
         });
 
         return {
@@ -113,7 +113,7 @@ class D3Graph extends React.Component {
         return <div styleName='graph-ctn'>
             <Blanket isTinted={this.state.rendering} canClickThrough={!this.state.rendering}/>
 
-            <svg
+            <svg styleName='svg'
             ref={(ref) => this.svg = ref}
             onClick={clearSelection}
             >
