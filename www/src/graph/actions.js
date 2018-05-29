@@ -38,12 +38,16 @@ export function searchNodes(q) {
 
 export function loadInitialFileForTesting() {
     return (dispatch, getState) => {
-        // dispatch(searchNodes("Server"))
-        dispatch(searchNodes("parse.go"))
+        // TODO hacky
+        if(getState().graph.firstLoad) {
+            dispatch({ type: "FIRST_LOAD", loaded: true })
+            // dispatch(searchNodes("Server"))
+            dispatch(searchNodes("parse.go"))
 
-        let topMatch = getState().graph.search.matches[0];
-        if(topMatch == null) { return }
-        dispatch(selectNodeFromSearch(topMatch.id))
+            let topMatch = getState().graph.search.matches[0];
+            if(topMatch == null) { return }
+            dispatch(selectNodeFromSearch(topMatch.id))
+        }
     }
 }
 

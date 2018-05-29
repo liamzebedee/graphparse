@@ -110,8 +110,7 @@ class D3Graph extends React.Component {
         let zoom = this.state.zoom;
         let { uiView, clearSelection, clickNode } = this.props;
 
-        console.log(graphCSS)
-        return <div className='graph-ctn'>
+        return <div styleName='graph-ctn'>
             <Blanket isTinted={this.state.rendering} canClickThrough={!this.state.rendering}/>
 
             <svg
@@ -146,7 +145,7 @@ class D3Graph extends React.Component {
                     })}
                     </g>,
     
-                    <g class='edges'>
+                    <g styleName='edges'>
                     {this.state.edges.map((edge, i) => {
                         return <Edge key={edge.id} {...edge}/>
                     })}
@@ -163,7 +162,7 @@ const Node = ({ id, interesting, layout, variant, label, clickNode }) => {
     let { cx, cy, rx, ry } = layout;
     
     return <g 
-        class='node'
+        styleName='node'
         onMouseOver={() => hoverNode(id)}
         onClick={(ev) => {
             ev.stopPropagation();
@@ -176,7 +175,7 @@ const Node = ({ id, interesting, layout, variant, label, clickNode }) => {
             rx={rx}
             ry={ry}
             fill={nodeColor(variant)}
-            class={classNames({
+            styleName={classNames({
                 'interesting': interesting
             })}
         >
@@ -208,7 +207,7 @@ const Edge = (edge) => {
         }).join('')
     }
 
-    return <g class={`${edgeVariantStr(edge.variant)}`}>
+    return <g styleName={`${edgeVariantStr(edge.variant)}`}>
         <path 
             d={computeD()}/>
         <polygon

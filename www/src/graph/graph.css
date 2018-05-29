@@ -1,13 +1,3 @@
-body {
-    margin: 0;
-    zoom: 1;
-}
-
-.ctn {
-    width: 100vw;
-    height: 100vh;
-}
-
 svg {
     /* TEMP HACK FIX */
     padding-left: 300px;

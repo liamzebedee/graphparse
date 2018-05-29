@@ -280,13 +280,13 @@ export class GraphLogic {
                     rank = 1;
 
                     let fixedPos = "";
-                    if(shown) {
-                        let prevlayout: ?nodeLayout = _.findWhere(this.nodesLayout, { id, });
-                        if(!prevlayout) throw new Error("Not found");
+                    // if(shown) {
+                    //     let prevlayout: ?nodeLayout = _.findWhere(this.nodesLayout, { id, });
+                    //     if(!prevlayout) throw new Error("Not found");
 
-                        let { cx, cy } = prevlayout.layout;
-                        fixedPos = `[pos="${cx},${cy}!"]`;
-                    }
+                    //     let { cx, cy } = prevlayout.layout;
+                    //     fixedPos = `[pos="${cx},${cy}!"]`;
+                    // }
 
                     return `"${id}" [width=${rank}] [height=${rank}] [label="${label}"] ${fixedPos};`
                 }).join('\n')}
@@ -296,6 +296,37 @@ export class GraphLogic {
         `
     }
 }
+
+/*
+
+digraph {
+    node parse.go
+    node generatecodegraph
+
+    parse.go -> generatecodegraph
+    generatecodegraph -> generatecodegraphfromprog
+    generatecodegraphfromprog -> generatecodegraphfromprog_body
+ 
+    subgraph generategraphfromprog {
+        node newgraph
+        node pkginfo
+        node visit
+
+        newgraph -> pkginfo
+        pkginfo -> visit
+        visit -> generategraphfromprog_body
+    }
+
+    subgraph generategraphfromprog_body {
+        parseimportspec
+        parse2
+        parse3
+        parse4
+        parse5
+    }
+}
+
+*/
 
 const nodeType = (str) => graphJSON.nodeTypes.indexOf(str);
 

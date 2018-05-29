@@ -23,7 +23,11 @@ module.exports = {
   devtool: 'eval-source-map',
   
   plugins: [
-    // new webpack.HotModuleReplacementPlugin(),
+    new webpack.LoaderOptionsPlugin({
+      options: {
+        context: __dirname,
+      }
+    }),
     new FlowWebpackPlugin(),
     new HtmlWebpackPlugin({
       title: "Basemap",
@@ -40,7 +44,17 @@ module.exports = {
     rules: [
       {
         test: /\.css$/,
-        use: [ 'style-loader', 'css-loader' ]
+        use: [ 
+          'style-loader', 
+          {
+            loader: 'css-loader',
+            options: {
+              importLoader: true,
+              modules: true,
+              localIdentName: "__[name]__[local]___[hash:base64:5]"
+            }
+          }
+        ]
       },
       { 
         test: /worker\.js$/,

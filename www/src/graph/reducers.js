@@ -9,6 +9,7 @@ import matchSorter from 'match-sorter';
 
 
 const initialState = {
+    firstLoad: true,
     grabbing: false,
 
     currentNode: null,
@@ -105,6 +106,12 @@ function graph(state = initialState, action) {
                 showDefinitions: !state.showDefinitions
             }
 
+        case "FIRST_LOAD":
+            return {
+                ...state,
+                firstLoad: false,
+            }
+            
         default:
             return state
     }
