@@ -60,6 +60,10 @@ let domain = graphJSON.nodeTypes.map((nodeType, i) => {
     return _.findIndex(config, { nodeType })
 })
 
+export function getNodeTypes() {
+    return graphJSON.nodeTypes;
+}
+
 export function getVariantName(variant) {
     return graphJSON.nodeTypes[variant]
 }

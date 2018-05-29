@@ -1,4 +1,8 @@
 import React from 'react';
+import { connect } from 'react-redux'
+import classNames from 'classnames';
+import { AtlaskitThemeProvider, themed, colors } from '@atlaskit/theme';
+
 
 import {
     searchNodes,
@@ -9,12 +13,12 @@ import {
     VIEWS,
     changeView,
     toggleShowDefinitions,
-    searchFocusChange
+    searchFocusChange,
+    loadGraph
 } from './actions'
 
-import { connect } from 'react-redux'
 
-import classNames from 'classnames';
+import Filters from './ui/filters';
 
 import './ui.css';
 import nodeColor, { getVariantName } from './colours';
@@ -43,23 +47,25 @@ class GraphControls extends React.Component {
 
         let { searchFocused } = this.state;
         
-        return <div styleName="infoView">
-            <div className='row'>
+        return <AtlaskitThemeProvider mode='light'><div styleName="infoView">
+            <div styleName='row'>
                 <div styleName='search'>
                     <input type='text' className="form-control" placeholder="Search types, files" onChange={(ev) => searchNodes(ev.target.value)} value={q} 
                     onFocus={() => this.setState({ searchFocused: true })} 
                     onBlur={() => this.setState({ searchFocused: false })} />
                 </div>
-            </div>
-            
-            <div className='row'>
+
                 <div styleName={classNames('results', { 'active': searchFocused })}>
-                    { matches.length > 0 ? matches.map((node, i) => {
+                    { matches && matches.length > 0 ? matches.map((node, i) => {
                         return <NodeMatch key={i} onClick={() => selectNode(node.id)} {...node}/>
                     }) : 'none' }
                 </div>
             </div>
-        </div>
+            
+            <div styleName='row'>
+                <Filters/>
+            </div>
+        </div></AtlaskitThemeProvider>
     }
 }
 
@@ -88,6 +94,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
     return {
         firstLoad:   () => {
+            dispatch(loadGraph())
             dispatch(loadInitialFileForTesting())
         },
         changeDepth: (depth) => dispatch(changeDepth(depth)),

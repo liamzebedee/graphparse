@@ -1,4 +1,3 @@
-import graphJSON from '../../graph.json';
 import { combineReducers } from 'redux';
 import { searchNodes } from './actions';
 import {
@@ -7,7 +6,7 @@ import {
 
 import matchSorter from 'match-sorter';
 
-
+import graphJSON from '../../graph.json';
 const initialState = {
     firstLoad: true,
     grabbing: false,
@@ -22,31 +21,37 @@ const initialState = {
         matches: [],
         state: "blurred"
     },
-    nodes: graphJSON.nodes,
-    edges: graphJSON.edges,
-    nodeLookup: graphJSON.nodeLookup,
-    adjList: graphJSON.adjList,
-    nodeTypes: graphJSON.nodeTypes,
 
-    uiView: "show relationships",
     showDefinitions: false,
+
+    nodes: [],
+    edges: [],
+    nodeTypes: graphJSON.nodeTypes,
 }
 
 
 function graph(state = initialState, action) {
     switch(action.type) {
+        case "LOAD_GRAPH":
+            return {
+                ...state,
+                nodes: updateNodes(action.nodes, { id: 'all' }),
+                edges: action.edges
+            }
+
+        case "TOGGLE_NODE_TYPE_FILTER":
+            return {
+                ...state,
+                nodes: updateNodes(state.nodes, {
+                    ...action,
+                    id: state.selectedNode
+                })
+            }
         case "CLICK_NODE":
             return {
                 ...state,
                 selectedNode: action.id,
-                nodes: state.nodes.map(node => {
-                    if(node.id == action.id) {
-                        return {
-                            ...node,
-                            shown: !node.shown
-                        };
-                    } else return node;
-                })
+                nodes: updateNodes(state.nodes, action),
             };
         
         case "BLUR_SELECTED_NODE":
@@ -93,12 +98,6 @@ function graph(state = initialState, action) {
                 ...state,
                 grabbing: action.grabbing,
             }
-        
-        case "UI_CHANGE_VIEW":
-            return {
-                ...state,
-                uiView: action.uiView,
-            }
             
         case "toggleShowDefinitions":
             return {
@@ -114,6 +113,44 @@ function graph(state = initialState, action) {
             
         default:
             return state
+    }
+}
+
+
+const initialFilter = {
+    shownNodeTypes: graphJSON.nodeTypes.map((a,i) => i),
+    selected: false,
+    shown: false,
+};
+
+function updateNodes(nodes = [], action) {
+    return nodes.map(node => {
+        if(action.id == 'all' || node.id === action.id) {
+            return {
+                ...node,
+                filters: updateNodeFilters(node.filters, action)
+            }
+        }
+        return node;
+    })
+}
+
+function updateNodeFilters(state = initialFilter, action) {
+    switch(action.type) {
+        case "TOGGLE_NODE_TYPE_FILTER":
+            return {
+                ...state,
+                shownNodeTypes: toggleInArray(state.shownNodeTypes, action.nodeTypeFilterIdx)
+            }
+
+        case "CLICK_NODE":
+            return {
+                ...state,
+                shown: !state.shown
+            }
+
+        default:
+            return state;
     }
 }
 

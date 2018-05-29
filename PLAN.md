@@ -13,6 +13,19 @@ Build UX for refactoring all the global variables of Graph
 use GraphQL?
 
 
+idea-
+show links to other nodes as you see fit
+simply build iterative understanding for now
+
+
+
+what do I want to do? 
+run a bunch of experiments on different designs
+and then choose the best
+
+
+
+
 simple mode for editing diagram:
     cut edges / children
 

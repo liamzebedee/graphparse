@@ -73,19 +73,6 @@ export function setGrabbing(grabbing) {
 }
 
 
-export const VIEWS = [
-    "show relationships",
-    "show types"
-];
-
-export function changeView(uiView) {
-    if(!_.contains(VIEWS, uiView)) throw new Error();
-    return {
-        type: "UI_CHANGE_VIEW",
-        uiView
-    }
-}
-
 export function changeDepth(depth) {
     return {
         type: "CHANGE_DEPTH",
@@ -103,5 +90,13 @@ export function searchFocusChange(state) {
     return {
         type: "searchFocusChange",
         state
+    }
+}
+
+export function loadGraph() {
+    return {
+        type: "LOAD_GRAPH",
+        nodes: graphJSON.nodes,
+        edges: graphJSON.edges,
     }
 }

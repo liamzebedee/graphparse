@@ -11,7 +11,7 @@ import {
     clickNode,
     setGrabbing,
     clearSelection,
-    toggleNodeTypeFilter
+    toggleNodeTypeFilter,
 } from './actions'
 import {
     hexToRgb
@@ -136,21 +136,19 @@ class D3Graph extends React.Component {
                 ref={ref => this.everything = ref}
                 >
 
-                { uiView == "show relationships" ? [
-                    <g>
-                    {this.state.nodes.map(node => {
-                        return <Node 
-                            key={node.id} clickNode={clickNode} 
-                            {...node}/>
-                    })}
-                    </g>,
-    
-                    <g styleName='edges'>
-                    {this.state.edges.map((edge, i) => {
-                        return <Edge key={edge.id} {...edge}/>
-                    })}
-                    </g>
-                ] : <TypesOverview/> }
+                <g>
+                {this.state.nodes.map(node => {
+                    return <Node 
+                        key={node.id} clickNode={clickNode} 
+                        {...node}/>
+                })}
+                </g>
+
+                <g styleName='edges'>
+                {this.state.edges.map((edge, i) => {
+                    return <Edge key={edge.id} {...edge}/>
+                })}
+                </g>
 
             </g>
         </svg>

@@ -89,13 +89,16 @@ func (g *graph) ToString(w io.Writer) {
 }
 
 func (g *graph) processUnknownReferences() {
-	var missing []edge
-	var edges []edge
+	// var missing []edge
+	// var edges []edge
 
-	fmt.Println(len(missing), "missing nodes")
+	var i int
 	for _, n := range objNodeLookup {
 		fmt.Println(n.obj, n.DebugInfo())
+		i++
 	}
+
+	fmt.Println(i, "missing nodes")
 	// for _, e := range g.edges {
 	// 	if _, ok := nodeLookup[e.from.Id()]; !ok {
 	// 		missing = append(missing, e)
@@ -112,7 +115,7 @@ func (g *graph) processUnknownReferences() {
 	// 	fmt.Println(x)
 	// }
 
-	g.edges = edges
+	// g.edges = edges
 }
 
 func lookupObjectNode(obj types.Object) (*objNode) {
@@ -315,7 +318,7 @@ func (g *graph) computeNodeRanks(edges []edge) ranksMap {
 	if len(edges) == 0 {
 		panic("no edges given, can't compute ranks")
 	}
-	fmt.Println("computing ranks for", len(nodeLookup), "nodes (", len(edges), ")")
+	fmt.Println("computing ranks for", len(nodeLookup), "nodes (", len(edges), " edges)")
 
 	// Compute PageRank distribution
 	graph := pagerank.New()
@@ -362,7 +365,9 @@ func (g *graph) mapRanks(ranks ranksMap, fn func(n Node, rank float64)) {
 	for id, rank := range ranks {
 		node, ok := nodeLookup[id]
 		if !ok {
-			panic(id)
+			// panic(id)
+			fmt.Println("Couldn't find node for id during ranks:", id)
+			continue
 		}
 		fn(node, rank)
 	}

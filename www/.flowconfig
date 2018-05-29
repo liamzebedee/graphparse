@@ -1,6 +1,7 @@
 [ignore]
 .*node_modules/underscore.*
 .*node_modules/chai.*
+.*node_modules/@atlaskit.*
 
 [include]
 

@@ -90,7 +90,6 @@ export class GraphLogic {
         nodes: node[], 
         edges: edge[], 
         currentNode: ?nodeid, 
-        selection: { [nodeid]: nodeSel }, 
         maxDepth: number = 1,
     ) {
         const nodeExists = (id) => _.findWhere(nodes, { id, }) != null;
@@ -100,8 +99,6 @@ export class GraphLogic {
 
         this.nodes = nodes.map(node => {
             return {
-                shown: false,
-                selected: false,
                 outs: _.where(edgesThatExist, { source: node.id }),
                 ...node,
             }
@@ -176,10 +173,7 @@ export class GraphLogic {
                 }
             })
             .filter(child => {
-                if(parent.shownNodeTypes) {
-                    return _.contains(parent.shownNodeTypes, child.variant)
-                }
-                return true;
+                return _.contains(parent.filters.shownNodeTypes, child.variant)
             })
 
             return outs
@@ -200,7 +194,7 @@ export class GraphLogic {
                 }
             })
             .filter(node => {
-                if(node.shown) return true;
+                if(node.filters.shown) return true;
                 return depth < this.maxDepth;
             })
 

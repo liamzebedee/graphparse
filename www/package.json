@@ -14,6 +14,9 @@
   },
   "dependencies": {
     "@atlaskit/blanket": "^5.0.2",
+    "@atlaskit/checkbox": "^2.1.0",
+    "@atlaskit/reduced-ui-pack": "^8.9.2",
+    "@atlaskit/theme": "^3.2.2",
     "array-merge-by-key": "^1.0.1",
     "bootstrap": "^4.1.0",
     "classnames": "^2.2.5",
