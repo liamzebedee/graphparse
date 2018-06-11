@@ -18,13 +18,11 @@ import (
 )
 
 
-var nodeLookup = make(map[nodeid]Node)
-var rootNode Node
 
-func addNodeToLookup(n Node) {
-	nodeLookup[n.Id()] = n
-	if rootNode == nil && n.Variant() == RootPackage {
-		rootNode = n
+func (g *Graph) addNodeToLookup(n Node) {
+	g.nodeLookup[n.Id()] = n
+	if g.rootNode == nil && n.Variant() == RootPackage {
+		g.rootNode = n
 	}
 }
 
@@ -59,17 +57,23 @@ func (e edge) String() string {
 	return fmt.Sprintf("%s -> %s", e.from.String(), e.to.String())
 }
 
-type graph struct {
+
+type Graph struct {
 	edges []edge
 	generatedAt string
+	objNodeLookup map[nodeid]*objNode
+	nodeLookup map[nodeid]Node
+	rootNode Node
 }
 
-func NewGraph() *graph {
-	return &graph{
+func NewGraph() *Graph {
+	return &Graph{
+		objNodeLookup: make(map[nodeid]*objNode),
+		nodeLookup: make(map[nodeid]Node),
 	}
 }
 
-func (g *graph) nodeExists(id int64) bool {
+func (g *Graph) nodeExists(id int64) bool {
 	for _, n := range g.Nodes() {
 		if n.ID() == id {
 			return true
@@ -78,8 +82,8 @@ func (g *graph) nodeExists(id int64) bool {
 	return false
 }
 
-func (g *graph) ToString(w io.Writer) {
-	for _, n := range nodeLookup {
+func (g *Graph) ToString(w io.Writer) {
+	for _, n := range g.nodeLookup {
 		w.Write([]byte(n.String() + "\n"))
 	}
 	w.Write([]byte("\n"))
@@ -88,38 +92,8 @@ func (g *graph) ToString(w io.Writer) {
 	}
 }
 
-func (g *graph) processUnknownReferences() {
-	// var missing []edge
-	// var edges []edge
-
-	var i int
-	for _, n := range objNodeLookup {
-		fmt.Println(n.obj, n.DebugInfo())
-		i++
-	}
-
-	fmt.Println(i, "missing nodes")
-	// for _, e := range g.edges {
-	// 	if _, ok := nodeLookup[e.from.Id()]; !ok {
-	// 		missing = append(missing, e)
-	// 		continue
-	// 	}
-	// 	if _, ok := nodeLookup[e.to.Id()]; !ok {
-	// 		missing = append(missing, e)
-	// 		continue
-	// 	}
-	// 	edges = append(edges, e)
-	// }
-
-	// for _, x := range missing {
-	// 	fmt.Println(x)
-	// }
-
-	// g.edges = edges
-}
-
-func lookupObjectNode(obj types.Object) (*objNode) {
-	for _, n := range nodeLookup {
+func (g *Graph) lookupObjectNode(obj types.Object) (*objNode) {
+	for _, n := range g.nodeLookup {
 		if objNode, ok := n.(*objNode); ok {
 			if objNode.obj == obj {
 				return objNode
@@ -130,10 +104,10 @@ func lookupObjectNode(obj types.Object) (*objNode) {
 	return nil
 }
 
-func pathEnclosingNodes(g *graph,  a, b Node) ([]edge) {
+func pathEnclosingNodes(g *Graph,  a, b Node) ([]edge) {
 	// g2 := simple.NewDirectedGraph()
 	g2 := simple.NewUndirectedGraph()
-	for _, n := range nodeLookup {
+	for _, n := range g.nodeLookup {
 		g2.AddNode(n)
 	}
 	for _, e := range g.edges {
@@ -173,7 +147,7 @@ func filterEdges(edges []edge, cond func(edge) bool) []int {
 	return l
 }
 
-func (g *graph) contractEdges(shouldContract func(Node) bool) []edge {
+func (g *Graph) contractEdges(shouldContract func(Node) bool) []edge {
 	edges := newArrayList()
 	for _, v := range g.edges {
 		edges.append(v)
@@ -274,7 +248,7 @@ func (g *graph) contractEdges(shouldContract func(Node) bool) []edge {
 }
 
 
-func (g *graph) AddEdge(from, to Node, variant EdgeType) {
+func (g *Graph) AddEdge(from, to Node, variant EdgeType) {
 	if from == nil {
 		panic("from node must be non-nil")
 	}
@@ -291,11 +265,11 @@ func (g *graph) AddEdge(from, to Node, variant EdgeType) {
 	g.edges = append(g.edges, e)
 }
 
-func (g *graph) markGenerated() {
+func (g *Graph) markGenerated() {
 	g.generatedAt = time.Now().String()
 }
 
-func (g *graph) parents(n Node) (l []Node) {
+func (g *Graph) parents(n Node) (l []Node) {
 	for _, edge := range g.edges {
 		if edge.to == n {
 			l = append(l, edge.to)
@@ -304,7 +278,7 @@ func (g *graph) parents(n Node) (l []Node) {
 	return l
 }
 
-func (g *graph) children(n Node) (l []Node) {
+func (g *Graph) children(n Node) (l []Node) {
 	for _, edge := range g.edges {
 		if edge.from == n {
 			l = append(l, edge.from)
@@ -314,23 +288,23 @@ func (g *graph) children(n Node) (l []Node) {
 }
 
 
-func (g *graph) computeNodeRanks(edges []edge) ranksMap {
+func (g *Graph) computeNodeRanks(edges []edge) ranksMap {
 	if len(edges) == 0 {
 		panic("no edges given, can't compute ranks")
 	}
-	fmt.Println("computing ranks for", len(nodeLookup), "nodes (", len(edges), " edges)")
+	fmt.Println("computing ranks for", len(g.nodeLookup), "nodes (", len(edges), " edges)")
 
 	// Compute PageRank distribution
-	graph := pagerank.New()
+	Graph := pagerank.New()
 	for _, edge := range edges {
-		graph.Link(int(edge.from.Id()), int(edge.to.Id()))
+		Graph.Link(int(edge.from.Id()), int(edge.to.Id()))
 	}
 
 	probability_of_following_a_link := 0.2
 	tolerance := 0.0001
 
 	var ranks rankPairList
-	graph.Rank(probability_of_following_a_link, tolerance, func(identifier int, rank float64) {
+	Graph.Rank(probability_of_following_a_link, tolerance, func(identifier int, rank float64) {
 		ranks = append(ranks, rankPair{nodeid(identifier), rank})
 	})
 
@@ -361,9 +335,9 @@ func (g *graph) computeNodeRanks(edges []edge) ranksMap {
 
 
 // Maps ranks with node lookup
-func (g *graph) mapRanks(ranks ranksMap, fn func(n Node, rank float64)) {
+func (g *Graph) mapRanks(ranks ranksMap, fn func(n Node, rank float64)) {
 	for id, rank := range ranks {
-		node, ok := nodeLookup[id]
+		node, ok := g.nodeLookup[id]
 		if !ok {
 			// panic(id)
 			fmt.Println("Couldn't find node for id during ranks:", id)
@@ -374,13 +348,13 @@ func (g *graph) mapRanks(ranks ranksMap, fn func(n Node, rank float64)) {
 }
 
 
-func (g *graph) mapEdges(edges []edge, fn func(e edge)) {
+func (g *Graph) mapEdges(edges []edge, fn func(e edge)) {
 	for _, edge := range edges {
 		fn(edge)
 	}
 }
 
-func (g *graph) WriteDotToFile(path string) {
+func (g *Graph) WriteDotToFile(path string) {
 	dotfilePath, _ := filepath.Abs(path)
 	f, err := os.Create(dotfilePath)
 	if err != nil {
@@ -391,7 +365,7 @@ func (g *graph) WriteDotToFile(path string) {
 	g.ToDot(f)
 }
 
-func (g *graph) ToDot(w io.Writer) {
+func (g *Graph) ToDot(w io.Writer) {
 	buf := bufio.NewWriter(w)
 	defer buf.Flush()
 	
@@ -426,7 +400,7 @@ type jsonNodeDef struct {
 	Id nodeid `json:"id"`
 	Variant NodeType `json:"variant"`
 	Pos string
-	DebugInfo string `json:"debugInfo"`
+	// DebugInfo string `json:"debugInfo"`
 }
 type jsonNodeEdge struct {
 	From nodeid      `json:"source"`
@@ -450,7 +424,7 @@ func newJsonGraph() jsonGraph {
 	}
 }
 
-func (g *graph) _toJson(edges []edge) jsonGraph {
+func (g *Graph) _toJson(edges []edge) jsonGraph {
 	jsonGraph := newJsonGraph()
 	
 	ranks := g.computeNodeRanks(edges)
@@ -461,7 +435,7 @@ func (g *graph) _toJson(edges []edge) jsonGraph {
 			Rank: rank,
 			Label: node.Label(),
 			Variant: node.Variant(),
-			DebugInfo: node.DebugInfo(),
+			// DebugInfo: node.DebugInfo(),
 		}
 		jsonGraph.NodesLookup[node.Id()] = n
 		jsonGraph.Nodes = append(jsonGraph.Nodes, n)
@@ -484,24 +458,11 @@ func (g *graph) _toJson(edges []edge) jsonGraph {
 	return jsonGraph
 }
 
-func (g *graph) toJson() jsonGraph {
-	// edges := g.contractEdges(func(n Node) bool {
-	// 	// return false
-		
-	// 	switch(n.Variant()) {
-	// 	case Struct, RootPackage:
-	// 		return false
-	// 	default:
-	// 		if n.Variant() == Func && (strings.HasPrefix(n.Label(), "New") || strings.HasPrefix(n.Label(), "new")) {
-	// 			return false
-	// 		}
-	// 		return true
-	// 	}
-	// })
+func (g *Graph) ToJson() jsonGraph {
 	return g._toJson(g.edges)
 }
 
-func (g *graph) WriteJsonToFile(relpath string) {
+func (g *Graph) WriteJsonToFile(relpath string) {
 	path, _ := filepath.Abs(relpath)
 	f, err := os.Create(path)
 	buf := new(bytes.Buffer)
@@ -513,7 +474,7 @@ func (g *graph) WriteJsonToFile(relpath string) {
 	defer w.Flush()
 
 	
-	jsonGraph := g.toJson()
+	jsonGraph := g.ToJson()
 
 	json.NewEncoder(buf).Encode(jsonGraph)
 	f.WriteString(buf.String())

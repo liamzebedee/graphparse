@@ -1,6 +1,7 @@
-import graphJSON from '../../graph.json';
-
+// import graphJSON from '../../graph.json';
 import _ from 'underscore';
+import { axios } from '../util';
+import { Base64 } from 'js-base64';
 
 export function hoverNode(id) {
     return {
@@ -33,21 +34,6 @@ export function searchNodes(q) {
     return {
         type: "SEARCH_NODES",
         q
-    }
-}
-
-export function loadInitialFileForTesting() {
-    return (dispatch, getState) => {
-        // TODO hacky
-        if(getState().graph.firstLoad) {
-            dispatch({ type: "FIRST_LOAD", loaded: true })
-            // dispatch(searchNodes("Server"))
-            dispatch(searchNodes("parse.go"))
-
-            let topMatch = getState().graph.search.matches[0];
-            if(topMatch == null) { return }
-            dispatch(selectNodeFromSearch(topMatch.id))
-        }
     }
 }
 
@@ -93,10 +79,41 @@ export function searchFocusChange(state) {
     }
 }
 
-export function loadGraph() {
-    return {
-        type: "LOAD_GRAPH",
-        nodes: graphJSON.nodes,
-        edges: graphJSON.edges,
+// export function loadGraph({ nodes, edges }) {
+//     return {
+//         type: "LOAD_GRAPH",
+//         nodes,
+//         edges,
+//     }
+// }
+
+export function load(graphID) {
+    return (dispatch, getState) => {
+        axios.get(`/graph/public/${Base64.encode(graphID)}`)
+        .then(res => {
+            dispatch({
+                type: "LOAD_GRAPH",
+                nodes: res.data.nodes,
+                edges: res.data.edges,
+            });
+        })
+        .catch(err => {
+            throw err;
+        })
     }
 }
+
+// export function loadInitialFileForTesting() {
+//     return (dispatch, getState) => {
+//         // TODO hacky
+//         if(getState().graph.firstLoad) {
+//             dispatch({ type: "FIRST_LOAD", loaded: true })
+//             // dispatch(searchNodes("Server"))
+//             dispatch(searchNodes("parse.go"))
+
+//             let topMatch = getState().graph.search.matches[0];
+//             if(topMatch == null) { return }
+//             dispatch(selectNodeFromSearch(topMatch.id))
+//         }
+//     }
+// }

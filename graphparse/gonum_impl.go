@@ -10,8 +10,8 @@ import (
 // Graph
 // -----
 
-// Has returns whether the node exists within the graph.
-func (g *graph) Has(n graphGn.Node) bool {
+// Has returns whether the node exists within the Graph.
+func (g *Graph) Has(n graphGn.Node) bool {
 	for _, e := range g.edges {
 		// if n == graphGn.Node(e.from)  { return true }
 		// if n == graphGn.Node(e.to)    { return true }
@@ -21,8 +21,8 @@ func (g *graph) Has(n graphGn.Node) bool {
 	return false
 }
 
-// Nodes returns all the nodes in the graph.
-func (g *graph) Nodes() []graphGn.Node {
+// Nodes returns all the nodes in the Graph.
+func (g *Graph) Nodes() []graphGn.Node {
 	unique := make(map[nodeid]Node)
 	nodes := []graphGn.Node{}
 	for _, e := range g.edges {
@@ -37,7 +37,7 @@ func (g *graph) Nodes() []graphGn.Node {
 
 // From returns all nodes that can be reached directly
 // from the given node.
-func (g *graph) From(n graphGn.Node) []graphGn.Node {
+func (g *Graph) From(n graphGn.Node) []graphGn.Node {
 	nodes := []graphGn.Node{}
 	for _, e := range g.edges {
 		if e.to.ID() == n.ID() {
@@ -52,7 +52,7 @@ func (g *graph) From(n graphGn.Node) []graphGn.Node {
 
 // HasEdgeBeteen returns whether an edge exists between
 // nodes x and y without considering direction.
-func (g *graph) HasEdgeBetween(x, y graphGn.Node) bool {
+func (g *Graph) HasEdgeBetween(x, y graphGn.Node) bool {
 	return g.Edge(x, y) != nil
 	// for _, e := range g.edges {
 	// 	if e.from == x && e.to == y {
@@ -68,7 +68,7 @@ func (g *graph) HasEdgeBetween(x, y graphGn.Node) bool {
 // Edge returns the edge from u to v if such an edge
 // exists and nil otherwise. The node v must be directly
 // reachable from u as defined by the From method.
-func (g *graph) Edge(u, v graphGn.Node) graphGn.Edge {
+func (g *Graph) Edge(u, v graphGn.Node) graphGn.Edge {
 	for _, e := range g.edges {
 		if e.from == u && 
 		   e.to   == v {

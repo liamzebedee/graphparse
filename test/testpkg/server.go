@@ -29,6 +29,37 @@ func NewServer(addr string, port int) (*Server, error) {
 	}, nil
 }
 
+// Listen.body
+	// logger.Printf
+	// for !s.isShuttingDown
+		// conn, err, sessions clients
+		// if err	
+			// if shutting down
+				// printf
+			// return
+	// return nil
+
+
+// is transformed into:
+// Listen -> Listen.body
+// Listen -> Listen.returntype
+// Listen -> Listen.receiver
+
+/*
+Listen.body -> Sequence[
+	Node (logger)
+
+
+what is faster to iterate in? 
+code or design? 
+
+do it from the front back
+what do I want? 
+diagram of how things interact
+
+
+]
+*/
 func (s *Server) Listen() error {
 	logger.Printf("listening on port %d", s.port, "\n")
 

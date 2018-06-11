@@ -32,10 +32,6 @@ class GraphControls extends React.Component {
         super()
     }
 
-    componentDidMount() {
-        this.props.firstLoad()
-    }
-
     render() {
         let {
             nodeTypes, q, matches, searchNodes, selectNode, clickedNode, 
@@ -95,10 +91,6 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        firstLoad:   () => {
-            dispatch(loadGraph())
-            dispatch(loadInitialFileForTesting())
-        },
         changeDepth: (depth) => dispatch(changeDepth(depth)),
         searchNodes: (q) => dispatch(searchNodes(q)),
         selectNode:  (id) => dispatch(selectNodeFromSearch(id)),

@@ -11,11 +11,13 @@ import (
 	"encoding/json"
 )
 
+var graph *Graph
+
 func TestMain(m *testing.M) {
 	setup()
 
 	var buffer bytes.Buffer
-	Graph.ToString(&buffer)
+	graph.ToString(&buffer)
 	fmt.Println(buffer.String())
 
 	os.Exit(m.Run())
@@ -30,9 +32,10 @@ func TestMain(m *testing.M) {
 
 func TestJsonOutput(t *testing.T) {
 	var buffer bytes.Buffer
-	res := Graph.toJson()
+	res := graph.toJson()
 	json.NewEncoder(&buffer).Encode(res)
 	assert.NotEmpty(t, buffer.String())
+	assert.True(t, len(buffer.String()) > 4)
 }
 
 func setup() {
@@ -51,16 +54,19 @@ func setup() {
 		panic(err)
 	}
 
-	GenerateCodeGraphFromProg(prog, pkgPath, pkgFilePath)
+	graph, err = GenerateCodeGraphFromProg(prog, pkgPath, pkgFilePath)
+	if err != nil {
+		panic(err)
+	}
 
 	// Write test data to file for testing with JS.
-	Graph.WriteJsonToFile("../test/graph.json")
+	graph.WriteJsonToFile("../test/graph.json")
 }
 
 func findNode(variant NodeType, label string) Node {
 	var found Node
 
-	for _, node := range nodeLookup {
+	for _, node := range graph.nodeLookup {
 		if(node.Variant() == variant && node.Label() == label) {
 			if found != nil {
 				// same income, same super.
@@ -81,39 +87,39 @@ func TestParseRootPackage(t *testing.T) {
 func TestParseStruct(t *testing.T) {
 	assert.NotNil(t, findNode(Struct, "Server"))
 	if(!optClusterFiles) {
-		assert.True(t, Graph.HasEdgeBetween(findNode(RootPackage, "testpkg"), findNode(Struct, "Server")))
+		assert.True(t, graph.HasEdgeBetween(findNode(RootPackage, "testpkg"), findNode(Struct, "Server")))
 	}
 }
 
 func TestParseTypeAlias(t *testing.T) {
 	assert.NotNil(t, findNode(Struct, "clientID"))
 	if(!optClusterFiles) {
-		assert.True(t, Graph.HasEdgeBetween(findNode(RootPackage, "testpkg"), findNode(Struct, "clientID")))
+		assert.True(t, graph.HasEdgeBetween(findNode(RootPackage, "testpkg"), findNode(Struct, "clientID")))
 	}
 }
 
 func TestParseFuncDecl(t *testing.T) {
 	assert.NotNil(t, findNode(Func, "NewServer"))
 	if(!optClusterFiles) {
-		assert.True(t, Graph.HasEdgeBetween(findNode(RootPackage, "testpkg"), findNode(Func, "NewServer")))
+		assert.True(t, graph.HasEdgeBetween(findNode(RootPackage, "testpkg"), findNode(Func, "NewServer")))
 	}
 }
 
 func TestParseFuncDeclResults(t *testing.T) {
-	assert.NotNil(t, Graph.Edge(findNode(Func, "NewServer"), findNode(Struct, "Server")), "links to return result type")
+	assert.NotNil(t, graph.Edge(findNode(Func, "NewServer"), findNode(Struct, "Server")), "links to return result type")
 }
 
 func TestParseMethod(t *testing.T) {
-	assert.NotNil(t, Graph.Edge(findNode(Struct, "Server"), findNode(Method, "Listen")), "links from type to method")
+	assert.NotNil(t, graph.Edge(findNode(Struct, "Server"), findNode(Method, "Listen")), "links from type to method")
 }
 
 func TestDoesntLinkMethodAsChildOfPackage(t *testing.T) {
-	assert.Nil(t, Graph.Edge(findNode(RootPackage, "testpkg"), findNode(Method, "Listen")), "should only link methods as child of their struct")
+	assert.Nil(t, graph.Edge(findNode(RootPackage, "testpkg"), findNode(Method, "Listen")), "should only link methods as child of their struct")
 }
 
 func TestParseFuncCall(t *testing.T) {
 	assert.NotNil(t, findNode(Func, "main"))
-	assert.NotNil(t, Graph.Edge(findNode(Func, "main"), findNode(Func, "NewServer")), "")
+	assert.NotNil(t, graph.Edge(findNode(Func, "main"), findNode(Func, "NewServer")), "")
 }
 
 
@@ -123,7 +129,7 @@ func TestParseFuncCall(t *testing.T) {
 // }
 
 func TestHandlesBuiltins(t *testing.T) {
-	for _, node := range nodeLookup {
+	for _, node := range graph.nodeLookup {
 		if(node.Label() == "panic") {
 			assert.Failf(t, "", "builtin functions aren't added: ", node)
 		}
@@ -142,7 +148,7 @@ func TestParseImports(t *testing.T) {
 }
 
 func TestAExternalPkgFuncCall(t *testing.T) {
-	assert.NotNil(t, Graph.Edge(
+	assert.NotNil(t, graph.Edge(
 		findNode(Func, "main"), 
 		findNode(Func, "NewServer"),
 	), "")
@@ -151,17 +157,17 @@ func TestAExternalPkgFuncCall(t *testing.T) {
 func TestParseValueSpec(t *testing.T) {
 	assert.NotNil(t, findNode(Field, "logger"))
 
-	assert.NotNil(t, Graph.Edge(
+	assert.NotNil(t, graph.Edge(
 		findNode(File, "main.go"), 
 		findNode(Field, "logger"),
 	), "logger global is linked to defining file")
 
-	assert.NotNil(t, Graph.Edge(
+	assert.NotNil(t, graph.Edge(
 		findNode(Method, "Listen"), 
 		findNode(Field, "logger"),
 	), "usages of logger global are noted correctly")
 	
-	assert.Nil(t, Graph.Edge(
+	assert.Nil(t, graph.Edge(
 		findNode(File, "server.go"), 
 		findNode(Field, "err"),
 	), "value spec is parsed correctly with respect to parent funcs")
@@ -171,17 +177,25 @@ func TestParseFile(t *testing.T) {
 	assert.NotNil(t, findNode(File, "main.go"))
 	assert.NotNil(t, findNode(File, "server.go"))
 	
-	assert.NotNil(t, Graph.Edge(
+	assert.NotNil(t, graph.Edge(
 		findNode(File, "server.go"), 
 		findNode(Func, "NewServer"),
 	), "")
 }
 
 func TestAllEdgesExist(t *testing.T) {
-	for _, e := range Graph.edges {
-		assert.True(t, Graph.nodeExists(e.From().ID()))
-		assert.True(t, Graph.nodeExists(e.To().ID()))
+	for _, e := range graph.edges {
+		assert.True(t, graph.nodeExists(e.From().ID()))
+		assert.True(t, graph.nodeExists(e.To().ID()))
 	}
+}
+
+// maybe we can locate the node for a line number?
+// nah what is unique will suffice
+
+func TestParseEdgeContext(t *testing.T) {
+	// node1 := findNode(Method, "Listen")
+	
 }
 
 // func TestGenerates

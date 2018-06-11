@@ -7,6 +7,33 @@ Include only useful filters
 be able to explore the btcd codebase's use of witness (up and down the hierarchy)
 don't draw links back to originating node if it's a call within itself? 
 
+I want to see how Graph is related up this fucking call stack
+Is it that difficult? 
+you have a relatio
+
+https://datavizcatalogue.com/methods/sunburst_diagram.html
+https://datavizcatalogue.com/methods/network_diagram.html
+https://www.visualcinnamon.com/2015/08/stretched-chord.html
+
+
+build initial context for graph
+calc stats of + filter graph
+build layout for graph
+render graph
+
+
+webapi:
+    graph
+        endpoints...
+    
+
+
+
+load graph from repo
+repo = 
+
+
+
 
 Make selecting a node independent from clicking
 Make clicking a default action to expand
@@ -15,6 +42,11 @@ Fix the error with cx (when layout is null)
 
 
 
+find all files that use this method
+ins:Method depth:3
+
+
+https://datavizcatalogue.com/methods/sunburst_diagram.html
 
 
 

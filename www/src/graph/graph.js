@@ -87,7 +87,7 @@ class D3Graph extends React.Component {
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        let { 
+        let {
             nodes, edges,
             currentNode,
             selection,
@@ -95,7 +95,7 @@ class D3Graph extends React.Component {
             showDefinitions,
             maxDepth
         } = nextProps;
-
+        
         worker.postMessage({
             type: 'refresh',
             data: { nodes, edges, currentNode, maxDepth }

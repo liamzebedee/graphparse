@@ -7,6 +7,7 @@ import {
 import matchSorter from 'match-sorter';
 
 import graphJSON from '../../graph.json';
+
 const initialState = {
     firstLoad: true,
     grabbing: false,

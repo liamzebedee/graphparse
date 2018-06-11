@@ -163,7 +163,10 @@ export class GraphLogic {
         const traverse = (parent: traversedNode) : Array<traversedNode> => {
             let parentFromDef = parent.fromDef || true;
 
+
             let outs = parent.outs
+
+            
             .map(out => {
                 let child: traversedNode = this.getNodeById(out.target);
                 child.fromDef = (out.variant == DefEdge);

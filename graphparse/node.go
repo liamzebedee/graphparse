@@ -44,18 +44,17 @@ type Node interface {
 	Label() string
 	Variant() NodeType
 	String() string
-	DebugInfo() string
+	// Pos() posInfo
+}
+
+type posInfo struct {
+
 }
 
 type objNode struct {
 	obj types.Object
 	baseNode
 }
-
-type objlookup struct {
-	id string
-}
-var objLookups = make(map[string]*objlookup)
 
 /*
 
@@ -135,7 +134,6 @@ func objToId(obj types.Object) nodeid {
 // as the token.Pos of where the type is declared
 func (n *objNode) Id() nodeid {
 	return objToId(n.obj)
-	panic("can't get id")
 }
 func (n *objNode) Label() string {
 	return n.baseNode.label
@@ -147,24 +145,24 @@ func (n *objNode) String() string {
 	return fmt.Sprintf("%s <%s>", n.Label(), nodeTypes[n.Variant()])
 }
 
-func (n *objNode) DebugInfo() string {
-	pos := n.obj.Pos()
-	return fset.Position(pos).String()
-}
+// func (n *objNode) Pos() posInfo {
+// 	pos := n.obj.Pos()
+// 	return fset.Position(pos).String()
+// }
 
 
-var objNodeLookup = make(map[nodeid]*objNode)
 
-func LookupNode(obj types.Object) *objNode {
+
+func (g *Graph) LookupNode(obj types.Object) *objNode {
 	if obj == nil {
 		panic("obj must be non-nil")
 	}
 
 	id := objToId(obj)
 	
-	if node, ok := nodeLookup[id]; ok {
+	if node, ok := g.nodeLookup[id]; ok {
 		return node.(*objNode)
-	} else if node, ok := objNodeLookup[id]; ok {
+	} else if node, ok := g.objNodeLookup[id]; ok {
 		return node
 	} else {
 		// create template of node for later.
@@ -172,12 +170,12 @@ func LookupNode(obj types.Object) *objNode {
 			obj,
 			baseNode{Template, obj.Name()},
 		}
-		objNodeLookup[id] = template
+		g.objNodeLookup[id] = template
 		return template
 	}
 }
 
-func CreateNode(obj types.Object, variant NodeType, label string) *objNode {
+func (g *Graph) CreateNode(obj types.Object, variant NodeType, label string) *objNode {
 	if obj == nil {
 		panic("obj must be non-nil")
 	}
@@ -187,19 +185,19 @@ func CreateNode(obj types.Object, variant NodeType, label string) *objNode {
 
 	id := objToId(obj)
 
-	if node, ok := nodeLookup[id]; ok {
+	if node, ok := g.nodeLookup[id]; ok {
 		ParserLog.Fatalln("already created: ", node)
 		return node.(*objNode)
 	}
 
-	node := objNodeLookup[id]
+	node := g.objNodeLookup[id]
 	if node == nil {
 		node = &objNode{
 			obj,
 			baseNode{},
 		}
 	} else {
-		delete(objNodeLookup, id)
+		delete(g.objNodeLookup, id)
 	}
 
 	node.baseNode = baseNode{variant, label}
@@ -212,7 +210,7 @@ func CreateNode(obj types.Object, variant NodeType, label string) *objNode {
 	// }
 
 	ParserLog.Println("created node: ", node.String())
-	addNodeToLookup(node)
+	g.addNodeToLookup(node)
 	
 	return node
 }
@@ -239,7 +237,7 @@ func (n *canonicalNode) DebugInfo() string {
 	return ""
 }
 
-func LookupOrCreateCanonicalNode(key string, variant NodeType, label string) *canonicalNode {
+func (g *Graph) LookupOrCreateCanonicalNode(key string, variant NodeType, label string) *canonicalNode {
 	node, ok := canonicalNodeLookup[key]
 
 	if !ok {
@@ -247,7 +245,7 @@ func LookupOrCreateCanonicalNode(key string, variant NodeType, label string) *ca
 			baseNode{variant, label},
 		}
 		canonicalNodeLookup[key] = node
-		addNodeToLookup(node)
+		g.addNodeToLookup(node)
 	}
 
 	return node

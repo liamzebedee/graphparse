@@ -7,9 +7,9 @@ import (
 	"strconv"
 )
 
-func getObjFromIdent(ident *ast.Ident) (types.Object, error) {
+func (eng *parseEngine) getObjFromIdent(ident *ast.Ident) (types.Object, error) {
 	// I wrote this in a subconcious spree of, "I have a gut feeling that this will do it"
-	obj := pkginfo.ObjectOf(ident)
+	obj := eng.pkginfo.ObjectOf(ident)
 
 	// we want to have a canonical obj so we can make an id out of it
 	// in this case, we use the def obj
@@ -31,17 +31,17 @@ func getObjFromIdent(ident *ast.Ident) (types.Object, error) {
 	return nil, fmt.Errorf("unexpected error", obj)
 }
 
-func exprToObj(expr ast.Expr) (types.Object, error) {
+func (eng *parseEngine) exprToObj(expr ast.Expr) (types.Object, error) {
 	switch x := expr.(type) {
 	case *ast.SelectorExpr:
-		if sel := pkginfo.Selections[x]; sel != nil {
+		if sel := eng.pkginfo.Selections[x]; sel != nil {
 			return sel.Obj(), nil
 		}
 		// Probably fully-qualified
-		return pkginfo.ObjectOf(x.Sel), nil
+		return eng.pkginfo.ObjectOf(x.Sel), nil
 	
 	case *ast.Ident:
-		obj, err := getObjFromIdent(x)
+		obj, err := eng.getObjFromIdent(x)
 		return obj, err
 	
 	default:
@@ -51,11 +51,11 @@ func exprToObj(expr ast.Expr) (types.Object, error) {
 	return nil, fmt.Errorf("couldn't get object for expression:", expr)
 }
 
-func objIsWorthy(obj types.Object) bool {
+func (eng *parseEngine) objIsWorthy(obj types.Object) bool {
 	if obj.Pkg() == nil {
 		return false
 	}
-	if obj.Pkg().Name() != thisPackage {
+	if obj.Pkg().Name() != eng.thisPackage {
 		return false
 	}
 	return true
@@ -94,10 +94,10 @@ type annotatedSelectorObject struct {
 }
 
 
-func getObjectsFromSelector(sel ast.Expr) (objs []annotatedSelectorObject) {
+func (eng *parseEngine) getObjectsFromSelector(sel ast.Expr) (objs []annotatedSelectorObject) {
 	switch x := sel.(type) {
 	case *ast.SelectorExpr:
-		sel := pkginfo.Selections[x]
+		sel := eng.pkginfo.Selections[x]
 		
 		if sel == nil {
 			ParserLog.Printf("skipping selector expr (likely qualified identifier) %T\n", x)
@@ -112,8 +112,8 @@ func getObjectsFromSelector(sel ast.Expr) (objs []annotatedSelectorObject) {
 
 
 		if ident, ok := x.X.(*ast.Ident); ok {
-			obj := pkginfo.ObjectOf(ident)
-			if !objIsWorthy(obj) {
+			obj := eng.pkginfo.ObjectOf(ident)
+			if !eng.objIsWorthy(obj) {
 				ParserLog.Printf("encountered unexpected bad obj in selector expression %T - %T", obj, x)
 			} else {
 				annSelObj := annotatedSelectorObject{
@@ -125,7 +125,7 @@ func getObjectsFromSelector(sel ast.Expr) (objs []annotatedSelectorObject) {
 			return objs
 		}
 
-		return append(objs, getObjectsFromSelector(x.X)...)
+		return append(objs, eng.getObjectsFromSelector(x.X)...)
 		
 	default:
 		ParserLog.Printf("didn't understand X of selector %T", x)
@@ -133,7 +133,7 @@ func getObjectsFromSelector(sel ast.Expr) (objs []annotatedSelectorObject) {
 	return objs
 }
 
-func funcObjToNode(obj types.Object) *objNode {
+func (eng *parseEngine) funcObjToNode(obj types.Object) *objNode {
 	// variant := Func
 	// switch x := obj.Type().(type) {
 	// case *types.Signature:
@@ -145,7 +145,7 @@ func funcObjToNode(obj types.Object) *objNode {
 	// }
 	
 	// funcNode := LookupOrCreateNode(obj, variant, obj.Name())
-	funcNode := LookupNode(obj)
+	funcNode := eng.Graph.LookupNode(obj)
 	return funcNode
 }
 

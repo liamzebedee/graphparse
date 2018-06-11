@@ -12,8 +12,8 @@ export default ({ history, store }) => <Provider store={store}>
     <ConnectedRouter history={history}>
         <div>
             <Route exact path="/" component={Home}/>
-            <Route path="/repo/:id" component={GraphUI}/>
-            <Route path="/ast" component={ASTView}/>
+            <Route path="/repo/" component={GraphUI}/>
+            {/* <Route path="/ast" component={ASTView}/> */}
         </div>
     </ConnectedRouter>
 </Provider>;
