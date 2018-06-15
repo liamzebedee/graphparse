@@ -162,11 +162,8 @@ export class GraphLogic {
 
         const traverse = (parent: traversedNode) : Array<traversedNode> => {
             let parentFromDef = parent.fromDef || true;
-
-
             let outs = parent.outs
 
-            
             .map(out => {
                 let child: traversedNode = this.getNodeById(out.target);
                 child.fromDef = (out.variant == DefEdge);
@@ -226,8 +223,8 @@ export class GraphLogic {
         let graphDOT = this.generateGraphDOT(this.shownNodes, this.shownEdges)
         let graphvizData = JSON.parse(Viz(graphDOT, {
             format: 'json',
-            engine: 'dot',
-            // engine: 'dot'
+            // engine: 'neato',
+            engine: 'dot'
         }));
     
         this.nodesLayout = graphvizData.objects.map(obj => {    
@@ -280,6 +277,7 @@ export class GraphLogic {
 
         return `
             digraph graphname {
+                graph [ordering=in];
                 ${nodes.map(({ id, rank, label, shown }) => {
                     // rank = 1;
 

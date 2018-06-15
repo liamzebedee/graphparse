@@ -79,41 +79,21 @@ export function searchFocusChange(state) {
     }
 }
 
-// export function loadGraph({ nodes, edges }) {
-//     return {
-//         type: "LOAD_GRAPH",
-//         nodes,
-//         edges,
-//     }
-// }
-
 export function load(graphID) {
     return (dispatch, getState) => {
         axios.get(`/graph/public/${Base64.encode(graphID)}`)
         .then(res => {
+            let graph = res.data;
+
             dispatch({
                 type: "LOAD_GRAPH",
-                nodes: res.data.nodes,
-                edges: res.data.edges,
+                nodes: graph.nodes,
+                edges: graph.edges,
             });
+            dispatch(selectNodeFromSearch(graph.rootNode));
         })
         .catch(err => {
             throw err;
         })
     }
 }
-
-// export function loadInitialFileForTesting() {
-//     return (dispatch, getState) => {
-//         // TODO hacky
-//         if(getState().graph.firstLoad) {
-//             dispatch({ type: "FIRST_LOAD", loaded: true })
-//             // dispatch(searchNodes("Server"))
-//             dispatch(searchNodes("parse.go"))
-
-//             let topMatch = getState().graph.search.matches[0];
-//             if(topMatch == null) { return }
-//             dispatch(selectNodeFromSearch(topMatch.id))
-//         }
-//     }
-// }

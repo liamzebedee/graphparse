@@ -1,0 +1,35 @@
+.search {
+    background: white;
+    border: none;
+    border-bottom: 1px solid rgba(230,230,230,0.7);
+    font-size: 16px;
+    width: 100%;
+}
+
+.search input {
+    width: 100%;
+}
+
+.results {
+    transition: 250ms;
+    overflow: hidden;
+}
+
+.results > div {
+    padding: 0.5em;
+    background: white;
+    transition: all 50ms;
+}
+
+.results > div:hover {
+    background: whitesmoke;
+    cursor: pointer;
+}
+
+.results.active {
+    max-height: 200000px;
+}
+
+.results:not(.active) {
+    max-height: 0px;
+}

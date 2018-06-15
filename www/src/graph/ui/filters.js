@@ -18,9 +18,18 @@ import {
 } from '../actions';
 import './filters.css';
 
+const SHOWN_FILTERS = [
+    'Struct',
+    'Method',
+    'Func',
+    'Field',
+    'File'
+]
+
 const Filters = ({ currentNode, toggleFilter }) => {
     return <div styleName='filters'>
         { getNodeTypes().map((variantName, variant) => {
+            if(!_.contains(SHOWN_FILTERS, variantName)) return;
             let checked = false;
             if(currentNode) {
                 checked = _.contains(currentNode.filters.shownNodeTypes, variant);

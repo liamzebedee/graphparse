@@ -5,12 +5,6 @@ import (
 	"github.com/liamzebedee/graphparse/graphparse"
 	"github.com/liamzebedee/graphparse/graphparse/webapi"
 )
-// idea: actually model it like webpages
-//       looking for a piece of code? use current scope as starting page
-//       use the type system to autofill the vars? 
-
-// other thing with VR:
-// need a visual shape-based constraint/design language
 
 var Graph1 *graphparse.Graph
 
@@ -24,8 +18,6 @@ func main() {
 	// graph := GenerateCodeGraph("github.com/btcsuite/btcd/blockchain")
 	// Graph1.WriteDotToFile("./www/graph.dot")
 	// Graph1.WriteJsonToFile("./www/graph.json")
-	
 	fmt.Println("Running web api on port 8082...")
-
 	webapi.WebAPI("8082")
 }

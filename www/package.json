@@ -16,6 +16,7 @@
     "@atlaskit/blanket": "^5.0.2",
     "@atlaskit/checkbox": "^2.1.0",
     "@atlaskit/field-range": "^3.0.2",
+    "@atlaskit/field-text": "^6.0.3",
     "@atlaskit/field-text-area": "^2.1.0",
     "@atlaskit/reduced-ui-pack": "^8.9.2",
     "@atlaskit/theme": "^3.2.2",

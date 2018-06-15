@@ -1,3 +1,55 @@
+
+space - toggle node visibility
+
+change options in sidebar -> affects currently selected node
+
+click node - select
+click top half - show ins
+click bottom half - show outs
+
+click graph and no node - clear selection
+
+
+http://rich-iannone.github.io/DiagrammeR/graphviz_and_mermaid.html
+https://github.com/noflo/klayjs-noflo
+https://rtsys.informatik.uni-kiel.de/confluence/display/KIELER/KLay+Layered
+
+http://typefox.io/
+
+https://github.com/OpenKieler/elkjs
+https://github.com/noflo/klayjs-noflo
+
+https://rtsys.informatik.uni-kiel.de/confluence/display/KIELER/KLay+Layered
+
+https://ptolemy.berkeley.edu/ptolemyII/index.htm#4
+https://ptolemy.berkeley.edu/ptolemyII/ptIIlatest/ptII/ptolemy/domains/modal/doc/index.htm
+
+https://github.com/OpenKieler/debukviz
+
+What is the pain I'm trying to solve? 
+
+https://rtsys.informatik.uni-kiel.de/elklive/elkgraph.html
+https://github.com/eclipse/elk/pull/106#issuecomment-268772479
+https://www.eclipse.org/elk/documentation/tooldevelopers/graphdatastructure/jsonformat.html
+
+
+
+1) visualise graphparse pre and post-redesign, to illuminate how much you could've estimated the cost.
+2) try and understand btcd
+
+
+try and put as much information in there as possible as a design sprint
+
+
+empathise - hard to see codebase relationships
+define - understanding code from a birds-eye view is not possible really
+ideate - 
+prototype - 
+validate
+
+
+
+
 1. Write down two use cases
 2. Iterate and explore until I solve the interface issue for those two cases.
 3. Then distribute to 3 friends to get feedback / ideas
@@ -261,3 +313,12 @@ take existing colours and make them slightly better and static.
 
 
 center the frame
+
+
+
+// idea: actually model it like webpages
+//       looking for a piece of code? use current scope as starting page
+//       use the type system to autofill the vars? 
+
+// other thing with VR:
+// need a visual shape-based constraint/design language

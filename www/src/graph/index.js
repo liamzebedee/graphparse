@@ -18,8 +18,8 @@ class GraphUI extends React.Component {
 
     render() {
         return <div styleName='ctn'>
-            <UI/>
             <Graph/>
+            <UI/>
         </div>
     }
 }
@@ -29,7 +29,5 @@ class GraphUI extends React.Component {
 export default connect(null, dispatch => ({
     load: (codebaseId) => {
         dispatch(load(codebaseId));
-        // dispatch(loadGraph())
-        // dispatch(loadInitialFileForTesting())
     }
 }))(GraphUI)

@@ -414,6 +414,7 @@ type jsonGraph struct {
 	Edges []jsonNodeEdge `json:"edges"`
 	NodeTypes []string `json:"nodeTypes"`
 	AdjList map[nodeid][]nodeid `json:"adjList"`
+	RootNode nodeid `json:"rootNode"`
 }
 func newJsonGraph() jsonGraph {
 	return jsonGraph{
@@ -426,6 +427,7 @@ func newJsonGraph() jsonGraph {
 
 func (g *Graph) _toJson(edges []edge) jsonGraph {
 	jsonGraph := newJsonGraph()
+	jsonGraph.RootNode = g.rootNode.Id()
 	
 	ranks := g.computeNodeRanks(edges)
 

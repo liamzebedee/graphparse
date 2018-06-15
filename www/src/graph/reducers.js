@@ -36,7 +36,9 @@ function graph(state = initialState, action) {
         case "LOAD_GRAPH":
             return {
                 ...state,
-                nodes: updateNodes(action.nodes, { id: 'all' }),
+                nodes: updateNodes(action.nodes, {
+                    id: 'all' 
+                }),
                 edges: action.edges
             }
 
@@ -54,12 +56,6 @@ function graph(state = initialState, action) {
                 selectedNode: action.id,
                 nodes: updateNodes(state.nodes, action),
             };
-        
-        case "BLUR_SELECTED_NODE":
-            return {
-                ...state,
-                selectedNode: null
-            }
         
         case "SELECT_NODE_FROM_SEARCH":
             return Object.assign({}, state, {

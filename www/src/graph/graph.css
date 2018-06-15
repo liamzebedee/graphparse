@@ -1,6 +1,12 @@
+.graph-ctn {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+}
+
 .svg {
-    /* TEMP HACK FIX */
-    padding-left: 300px;
     width: 100%;
     height: 100%;
 
@@ -46,8 +52,4 @@ text {
 .edges .def polygon  {
     fill: black;
     stroke: black;
-}
-
-.graph-ctn {
-    height: 100%;
 }

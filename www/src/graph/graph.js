@@ -138,6 +138,7 @@ class D3Graph extends React.Component {
 
                 <g>
                 {this.state.nodes.map(node => {
+                    // console.log(node)
                     return <Node 
                         key={node.id} clickNode={clickNode} 
                         {...node}/>
@@ -157,6 +158,7 @@ class D3Graph extends React.Component {
 }
 
 const Node = ({ id, interesting, layout, variant, label, clickNode }) => {
+    if(!layout) return;
     let { cx, cy, rx, ry } = layout;
     
     return <g 
