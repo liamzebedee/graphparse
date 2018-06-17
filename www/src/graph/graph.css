@@ -31,9 +31,17 @@ text {
     pointer-events: none;
 }
 
+.node {
+    pointer-events: bounding-box;
+}
+
 .node:hover ellipse {
     fill-opacity: 0.7;
     cursor: pointer;
+}
+
+.node.active {
+    stroke-width: 3px;
 }
 
 .edges .use path {

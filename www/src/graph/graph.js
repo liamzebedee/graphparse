@@ -93,12 +93,11 @@ class D3Graph extends React.Component {
             selection,
 
             showDefinitions,
-            maxDepth
         } = nextProps;
         
         worker.postMessage({
             type: 'refresh',
-            data: { nodes, edges, currentNode, maxDepth }
+            data: JSON.parse(JSON.stringify({ nodes, edges, currentNode }))
         });
 
         return {
@@ -158,7 +157,6 @@ class D3Graph extends React.Component {
 }
 
 const Node = ({ id, interesting, layout, variant, label, clickNode }) => {
-    if(!layout) return;
     let { cx, cy, rx, ry } = layout;
     
     return <g 
@@ -182,7 +180,7 @@ const Node = ({ id, interesting, layout, variant, label, clickNode }) => {
         </ellipse>
         <text 
             textAnchor='middle'
-            x="0" y="0" alignment-baseline="middle" font-size="12" stroke-width="0" stroke="#000" text-anchor="middle"
+            x="0" y="0" alignmentBaseline="middle" fontSize="12" strokeWidth="0" stroke="#000" textAnchor="middle"
             >
             {label}
         </text>

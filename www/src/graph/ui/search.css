@@ -7,7 +7,14 @@
 }
 
 .search input {
-    width: 100%;
+    border: none;
+    padding: 1em;
+    padding-top: 0em;
+    font-size: 1rem;
+}
+
+.search input:focus {
+    outline: none;
 }
 
 .results {

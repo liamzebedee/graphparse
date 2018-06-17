@@ -2,6 +2,8 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const FlowWebpackPlugin = require('flow-webpack-plugin')
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
 const serve = require('./webpack.serve');
 
 module.exports = {
@@ -33,11 +35,12 @@ module.exports = {
       title: "Basemap",
       template: './index.ejs',
     }),
-    new webpack.DefinePlugin({
-      "process.env": {
-         NODE_ENV: JSON.stringify("production") 
-       }
-    }),
+    // new webpack.DefinePlugin({
+    //   "process.env": {
+    //      NODE_ENV: JSON.stringify("production") 
+    //    }
+    // }),
+    // new BundleAnalyzerPlugin()
   ],
 
   module: {

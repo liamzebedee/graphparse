@@ -11,6 +11,8 @@
     flex-direction: column;
     flex: 1;
     height: 100vh;
+
+    user-select: none;
 }
 
 .ui-pane {

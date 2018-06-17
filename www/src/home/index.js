@@ -2,8 +2,9 @@ import React from 'react'
 
 import { Link } from 'react-router-dom'
 
-import 'bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap';
+// import 'bootstrap/dist/css/bootstrap.min.css';
+import '../bootstrap-overrides.css';
 import './index.css'
 
 const Home = () => {
@@ -50,7 +51,7 @@ const Home = () => {
             </ul>
           </p>
           <p>
-            <Link to="/repo/github.com/twitchyliquid64/subnet" className="btn btn-primary my-2">Show example</Link>
+            <Link to="/repo/?name=github.com/twitchyliquid64/subnet/subnet" className="btn btn-primary my-2">Show example</Link>
             &nbsp;
             <a href="#" className="btn btn-secondary my-2">Generate from GitHub repo</a>
           </p>

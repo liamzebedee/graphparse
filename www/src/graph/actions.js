@@ -14,7 +14,7 @@ export function clickNode(id) {
     return {
         type: "CLICK_NODE",
         id,
-    }
+    };
 }
 
 export function clearSelection() {
@@ -63,12 +63,6 @@ export function changeDepth(depth) {
     return {
         type: "CHANGE_DEPTH",
         depth
-    }
-}
-
-export function toggleShowDefinitions() {
-    return {
-        type: "toggleShowDefinitions"
     }
 }
 

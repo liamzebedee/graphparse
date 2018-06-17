@@ -5,3 +5,12 @@
 .ui-pad {
     padding: 0.5rem 0.5rem;
 }
+
+.relations {
+    display: flex;
+    flex-direction: row;
+}
+
+.relations > section {
+    flex: 1;
+}

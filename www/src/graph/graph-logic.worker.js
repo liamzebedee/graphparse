@@ -13,8 +13,13 @@ import type {
     nodeLayout,
     edge,
     edgeLayout,
-    nodeSel
+    nodeSel,
+    relationshipsSel
 } from 'graphparse';
+
+import { getNodeSelection } from './selectors';
+// $FlowFixMe
+import { BASE } from '/Users/liamz/Documents/open-source/proxy-object-defaults';
 
 const UseEdge = 0;
 const DefEdge = 1;
@@ -106,8 +111,11 @@ export class GraphLogic {
 
         this.nodes = nodes.map(node => {
             return {
-                outs: _.where(edgesThatExist, { source: node.id }),
+                // todo reordered this, maybe it's the src of a bug?
                 ...node,
+                selection: getNodeSelection(node),
+                outs: _.where(edgesThatExist, { source: node.id }),
+                ins: _.where(edgesThatExist, { target: node.id }),
             }
         });
 
@@ -141,57 +149,86 @@ export class GraphLogic {
 
     postFilterNodesAndEdges() {
         // this.nodes = this.shownNodes;
+        this.nodes = this.nodes.map(node => {
+            return {
+                ...node,
+                selection: node.selection[BASE]
+            }
+        })
+    }
+
+    makeVisitor(depth: number): nodeVisitor {
+        const relsShownFilter = (relsel: relationshipsSel) => () => relsel.shown;
+        const shownFilter = (node: node) => node.selection.shown;
+        const depthFilter = (relsel: relationshipsSel) => {
+            return (node) => depth < relsel.maxDepth;
+        }
+        const usesFilter = (relsel, useEdge) => useEdge ? relsel.showUses : true;
+        const defsFilter = (relsel, defEdge) => defEdge ? relsel.showDefs : true;
+        const nodeTypesFilter = (shownNodeTypes, child) => {
+            return _.contains(shownNodeTypes, child.variant)
+        }
+
+        return (parent: visitedNode) : Array<visitedNode> => {
+            // if(!shownFilter(parent)) return [];
+            if(
+                [parent]
+                .filter(shownFilter)
+                .length == 0
+            ) return [];
+
+            const edgeContext = (getNodeFromEdge: any) => {
+                return (edge) => {
+                    let node = this.getNodeById(getNodeFromEdge(edge));
+                    let useEdge = edge.variant == UseEdge;
+                    let defEdge = edge.variant == DefEdge;
+                    return { node, useEdge, defEdge }
+                }
+            }
+
+            return [].concat(
+                parent.ins
+                .map(edgeContext(edge => edge.source))
+                .filter(relsShownFilter(parent.selection.ins))
+                .filter(({ node })    => shownFilter(node))
+                .filter(({ useEdge }) => usesFilter(parent.selection.ins, useEdge))
+                .filter(({ defEdge }) => defsFilter(parent.selection.ins, defEdge))
+                .filter(({ node })    => nodeTypesFilter(parent.selection.ins.shownNodeTypes, node))
+                .map(({ node })       => node),
+
+                parent.outs
+                .map(edgeContext(edge => edge.target))
+                .filter(relsShownFilter(parent.selection.outs))
+                .filter(({ node })    => shownFilter(node))
+                .filter(({ useEdge }) => usesFilter(parent.selection.outs, useEdge))
+                .filter(({ defEdge }) => defsFilter(parent.selection.outs, defEdge))
+                .filter(({ node })    => nodeTypesFilter(parent.selection.outs.shownNodeTypes, node))
+                .map(({ node })       => node),
+            );
+        }
     }
 
     // Returns array of node id's that represent the spanning tree of from currentNode down, until maxdepth
-    getSpanningTree() : nodeid[] {
-        type traversedNode = {
-            fromDef: ?boolean
-        } & node;
-
-        let nodesToTraverse: Array<traversedNode> = [];
-        let depth = 0;
+    getSpanningTree(fromNode: ?nodeid = this.currentNode) : nodeid[] {
+        let tree: nodeid[] = [];
         let visited: Set<nodeid> = new Set();
+        let depth = 0;
+        let toVisit: Array<visitedNode> = [];
 
-        if(this.currentNode == null) {
+        if(fromNode == null) {
             return Array.from(visited);
         }
-        let current = this.getNodeById(this.currentNode);
-        nodesToTraverse.push(current)
+        let current = this.getNodeById(fromNode);
+        toVisit.push(current)
         visited.add(current.id)
-
-        const traverse = (parent: traversedNode) : Array<traversedNode> => {
-            let parentFromDef = parent.fromDef || true;
-            let outs = parent.outs
-
-            .map(out => {
-                let child: traversedNode = this.getNodeById(out.target);
-                child.fromDef = (out.variant == DefEdge);
-                return child;
-            })
-            .filter(child => {
-                if(parentFromDef) {
-                    // show defs,uses
-                    return true;
-                } else {
-                    // show uses
-                    if(child.fromDef) return false;
-                    return true;
-                }
-            })
-            .filter(child => {
-                return _.contains(parent.filters.shownNodeTypes, child.variant)
-            })
-
-            return outs
-        }
 
         do {
             // visit
             depth++;
-
-            nodesToTraverse = nodesToTraverse
-            .map(traverse)
+            // debugger
+        
+            toVisit = toVisit
+            .map(this.makeVisitor(depth))
             .reduce((prev, curr) => prev.concat(curr), [])
             .filter(node => {
                 if(visited.has(node.id)) return false;
@@ -200,18 +237,17 @@ export class GraphLogic {
                     return true;
                 }
             })
-            .filter(node => {
-                if(node.filters.shown) return true;
-                return depth < this.maxDepth;
-            })
+        
+        } while(toVisit.length > 0);
 
-        } while(nodesToTraverse.length);
-
+        // debugger;
+        
         return Array.from(visited);
     }
 
     generateLayout() {
-        if(this.shownNodes.length < 1 || this.shownEdges.length < 1) {
+        // || this.shownEdges.length < 1
+        if(this.shownNodes.length < 1) {
             this.nodesLayout = [];
             this.edgesLayout = [];
             this.graphDOT = "";
@@ -226,7 +262,7 @@ export class GraphLogic {
             // engine: 'neato',
             engine: 'dot'
         }));
-    
+        
         this.nodesLayout = graphvizData.objects.map(obj => {    
             let pos = obj.pos.split(',').map(Number);
             let id = parseInt(obj.name)
@@ -241,8 +277,9 @@ export class GraphLogic {
                 id,
             };
         });
-    
-        this.edgesLayout = graphvizData.edges.map((edge, i) => {
+        
+
+        this.edgesLayout = this.shownEdges.length > 1 ? graphvizData.edges.map((edge, i) => {
             let points = edge._draw_[1].points.map(toSvgPointSpace);
             let arrowPts = edge._hdraw_[3].points.map(toSvgPointSpace);
             let id = parseInt(edge.id);
@@ -254,7 +291,7 @@ export class GraphLogic {
                 },
                 id,
             };
-        });
+        }) : [];
 
         this.graphDOT = graphDOT;
     }
@@ -298,6 +335,15 @@ export class GraphLogic {
         `
     }
 }
+
+type visitedNode = {
+    fromDef: ?boolean
+} & node;
+
+type nodeVisitor = (parent: visitedNode) => Array<visitedNode>;
+
+
+
 
 /*
 

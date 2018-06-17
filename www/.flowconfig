@@ -2,6 +2,7 @@
 .*node_modules/underscore.*
 .*node_modules/chai.*
 .*node_modules/@atlaskit.*
+.*node_modules/proxy-object-defaults.*
 
 [include]
 

@@ -6,13 +6,11 @@ import { connect } from 'react-redux'
 import _ from 'underscore';
 
 import './depth.css';
-import {
-    changeDepth
-} from '../actions';
 
-const Depth = ({ maxDepth, changeDepth }) => {
+const Depth = ({ depth, changeDepth }) => {
     return <div styleName='depth'>
-        <FieldTextStateless type="Number" value={maxDepth}
+        <FieldTextStateless label="Depth" type="Number" 
+            value={depth}
             min={0}
             max={10}
             step={1}
@@ -22,13 +20,11 @@ const Depth = ({ maxDepth, changeDepth }) => {
 
 const mapStateToProps = state => {
     return {
-        maxDepth: state.graph.maxDepth
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        changeDepth: (depth) => dispatch(changeDepth(depth))
     }
 }
  

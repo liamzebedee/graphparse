@@ -15,6 +15,7 @@ import {
 
 import Search from './ui/search';
 import NodeControls from './ui/node-controls';
+import Controls from './ui/controls';
 
 import './ui.css';
 import nodeColor, { getVariantName } from './colours';
@@ -40,6 +41,7 @@ class GraphControls extends React.Component {
         return <div styleName="ui-overlay">
             <div styleName='sidebar ui-pane ui-pad ui-rows-pad'>
                 <Search/>
+                <Controls/>
                 <NodeControls/>
             </div>
         </div>
@@ -49,7 +51,6 @@ class GraphControls extends React.Component {
 
 const mapStateToProps = (state) => {
     return {
-        nodeTypes: state.graph.nodeTypes,
         clickedNode: state.graph.clickedNode ? state.graph.nodeLookup[state.graph.clickedNode] : null,
         maxDepth: state.graph.maxDepth,
         showDefinitions: state.graph.showDefinitions,

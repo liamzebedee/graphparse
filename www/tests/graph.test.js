@@ -6,7 +6,7 @@ import {
     GraphLogic,
     mergeByKey,
     edgeRelationId
-} from '../src/graph/graph-logic';
+} from '../src/graph/graph-logic.worker';
 import {
     removeDuplicates
 } from '../src/util';

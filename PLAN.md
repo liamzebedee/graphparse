@@ -3,11 +3,30 @@ space - toggle node visibility
 
 change options in sidebar -> affects currently selected node
 
-click node - select
-click top half - show ins
-click bottom half - show outs
 
 click graph and no node - clear selection
+
+
+what to change first? 
+
+12;30 -> 2.00
+
+1hr.
+user interface
+    as a user I want to click a node so I can select it.
+    as a user I want to <X> a node so I can see its parents
+    as a user I want to <X> a node so I can see its children
+    as a user I want <X> a node so I can hide/show it and its children
+components
+    click actions
+    click
+    node controls
+actions
+    change depth of current node
+    change filters of current node
+reducers
+rendering algorithm
+
 
 
 http://rich-iannone.github.io/DiagrammeR/graphviz_and_mermaid.html

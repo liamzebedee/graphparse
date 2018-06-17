@@ -14,8 +14,13 @@ import {
 } from '../colours';
 
 import {
-    toggleNodeTypeFilter
+    toggleFilter
 } from '../actions';
+
+import {
+    getSelectedNode
+} from '../selectors';
+
 import './filters.css';
 
 const SHOWN_FILTERS = [
@@ -26,38 +31,37 @@ const SHOWN_FILTERS = [
     'File'
 ]
 
-const Filters = ({ currentNode, toggleFilter }) => {
+const Filters = ({ shownNodeTypes, node, toggleFilter }) => {
     return <div styleName='filters'>
+        <CheckboxGroup>
         { getNodeTypes().map((variantName, variant) => {
             if(!_.contains(SHOWN_FILTERS, variantName)) return;
+            
             let checked = false;
-            if(currentNode) {
-                checked = _.contains(currentNode.filters.shownNodeTypes, variant);
+            if(node) {
+                checked = _.contains(shownNodeTypes, variant);
             }
 
             return <CheckboxStateless
-            isChecked={checked}
-            onChange={() => toggleFilter(variant)}
-            isActive={false}
-            label={variantName}
-            isFullWidth={false}
+                isChecked={checked}
+                onChange={toggleFilter}
+                isActive={false}
+                label={variantName}
+                isFullWidth={false}
             />
-        }) } 
+        }) }
+        </CheckboxGroup>
     </div>
 }
 
 const mapStateToProps = state => {
-    let { nodes, selectedNode } = state.graph;
-    let currentNode = _.findWhere(nodes, { id: selectedNode });
-
     return {
-        currentNode,
+        node: getSelectedNode(state.graph)
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        toggleFilter: (variant) => dispatch(toggleNodeTypeFilter(variant))
     }
 }
  
