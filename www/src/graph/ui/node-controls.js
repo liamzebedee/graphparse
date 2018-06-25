@@ -12,7 +12,12 @@ import { ToggleStateless } from '@atlaskit/toggle';
 import {
     changeDepth,
     toggleFilter
-} from './actions';
+} from '../actions';
+
+
+import {
+    getSelectedNode
+} from '../selectors';
 
 const NodeControls = ({ 
     selectedNode, 
@@ -33,8 +38,10 @@ const NodeControls = ({
                         <h5>In</h5>
                         <RelationControl 
                             node={selectedNode} 
-                            changeDepth={(depth) => changeDepth(node, 'ins', depth)}
-                            toggleFilter={(variant) => toggleFilter(node, 'ins', variant)}
+                            shownNodeTypes={selectedNode.selection.ins.shownNodeTypes}
+                            depth={selectedNode.selection.ins.maxDepth}
+                            changeDepth={(depth) => changeDepth(selectedNode.id, 'ins', depth)}
+                            toggleFilter={(variant) => toggleFilter(selectedNode.id, 'ins', variant)}
                             />
                         </section>
                         
@@ -42,8 +49,10 @@ const NodeControls = ({
                         <h5>Out</h5>
                         <RelationControl 
                             node={selectedNode} 
-                            changeDepth={(depth) => changeDepth(node, 'outs', depth)}
-                            toggleFilter={(variant) => toggleFilter(node, 'outs', variant)}/>
+                            shownNodeTypes={selectedNode.selection.ins.shownNodeTypes}
+                            depth={selectedNode.selection.ins.maxDepth}
+                            changeDepth={(depth) => changeDepth(selectedNode.id, 'outs', depth)}
+                            toggleFilter={(variant) => toggleFilter(selectedNode.id, 'outs', variant)}/>
                         </section>
                     </div>
                 </div>
@@ -54,26 +63,21 @@ const NodeControls = ({
 
 const RelationControl = ({ node, depth, changeDepth, toggleFilter, shownNodeTypes }) => {
     return <div>
-        <Filters shownNodeTypes={shownNodeTypes} toggleFilter={toggleFilter}/>
-        <Depth depth={depth} changeDepth={changeDepth}/>
+        <Filters node={node} shownNodeTypes={shownNodeTypes} toggleFilter={toggleFilter}/>
+        <Depth node={node} depth={depth} changeDepth={changeDepth}/>
     </div>
 }
 
 const mapStateToProps = state => {
-    let selectedNode = null;
-    if(state.graph.selectedNode) {
-        selectedNode = _.find(state.graph.nodes, { id: state.graph.selectedNode });
-    }
-
     return {
-        selectedNode,
+        selectedNode: getSelectedNode(state.graph),
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        changeDepth: (node, relationships, depth) => dispatch(changeDepth(node, relationships, depth)),
-        toggleFilter: (node, relationships, variant) => dispatch(toggleFilter(node, relationships, variant)),
+        changeDepth: (id, relationships, depth) => dispatch(changeDepth(id, relationships, depth)),
+        toggleFilter: (id, relationships, variant) => dispatch(toggleFilter(id, relationships, variant)),
     }
 }
  

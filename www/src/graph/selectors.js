@@ -15,7 +15,15 @@ import type {
 } from 'graphparse';
 
 export function getSelectedNode(state: any) {
-    let selectedNodes = state.nodes.filter(node => node.selected);
+    let selectedNodes = state.nodes
+    .filter(node => node.selected)
+    .map(node => {
+        return {
+            ...node,
+            selection: getNodeSelection(node.selection)
+        }
+    });
+
     return selectedNodes.length ? selectedNodes[0] : null;
 }
 
@@ -39,6 +47,9 @@ const DEFAULT_SELECTION: nodeSel = {
 const nodeSelectionLookup = {};
 
 export function getNodeSelection(node: node) : nodeSel {
-    let sel = proxyDefaults(node.selection || {}, DEFAULT_SELECTION);
-    return sel;
+    return _.defaultsDeep(DEFAULT_SELECTION, node.selection);
+}
+
+export function mergeNodeSelection(sel: nodeSel, newVals: any) {
+    return _.merge(sel, newVals);
 }

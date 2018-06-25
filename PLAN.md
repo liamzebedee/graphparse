@@ -341,3 +341,85 @@ center the frame
 
 // other thing with VR:
 // need a visual shape-based constraint/design language
+
+
+digraph G {
+
+load [color=blue];
+toggleNodeTypeFilter [color=blue];
+  
+load -> loadGraph;
+toggleNodeTypeFilter -> toggleFilter;
+
+toggleFilter -> graphReducer;
+
+loadGraph -> processGraph;
+toggleFilter -> processGraph;
+
+subgraph cluster_worker {
+    processGraph -> generateSpanningTree;
+    generateSpanningTree -> buildLayout;
+}
+buildLayout -> graphReducer;
+
+}
+
+
+
+
+where [loadGraph, toggleFilter] are wrapped in generateGraph
+how to ensure sync updates? 
+
+
+// declarative
+/*
+
+state = {
+    graph
+}
+
+graph > buildGraph (spanningtree, etc) > generateLayout
+
+
+actions describe changes
+reducers describe the state tree and how to reduce (return) updates to it
+connectors connect the state to the UI (declaratively)
+
+
+
+            // return {
+            //     ...state,
+            //     nodes: action.nodes.map(node => {
+            //         return {
+            //             ...node,
+            //             selection: {
+            //                 ins: {},
+            //                 outs: {}
+            //             }
+            //         }
+            //     }),
+            //     edges: action.edges,
+            // }
+
+*/
+
+
+
+// function updateNodeFilters(state = initialFilter, action) {
+//     switch(action.type) {
+//         case "TOGGLE_NODE_TYPE_FILTER":
+//             return {
+//                 ...state,
+//                 shownNodeTypes: toggleInArray(state.shownNodeTypes, action.nodeTypeFilterIdx)
+//             }
+
+//         case "CLICK_NODE":
+//             return {
+//                 ...state,
+//                 shown: !state.shown
+//             }
+
+//         default:
+//             return state;
+//     }
+// }

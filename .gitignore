@@ -8,3 +8,4 @@ www/lib/
 www/graph.dot
 www/graph.json
 www/flow-typed/
+out/*

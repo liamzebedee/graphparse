@@ -40,7 +40,7 @@ text {
     cursor: pointer;
 }
 
-.node.active {
+.node .active {
     stroke-width: 3px;
 }
 

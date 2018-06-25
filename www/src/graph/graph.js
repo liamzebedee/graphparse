@@ -8,15 +8,17 @@ import * as d3 from 'd3v4';
 
 import {
     hoverNode,
-    clickNode,
     setGrabbing,
     clearSelection,
-    toggleNodeTypeFilter,
+    selectNode,
+    toggleNodeVisibility,
+    clickNode,
 } from './actions'
 import {
     hexToRgb
 } from '../util'
 import nodeColor from './colours';
+
 
 import TypesOverview from './types-overview';
 
@@ -29,22 +31,6 @@ const worker = new Worker();
 import Blanket from '@atlaskit/blanket';
 
 class D3Graph extends React.Component {
-    constructor() {
-        super()
-        this.graphDOT = null;
-
-        worker.addEventListener("message", (ev) => {
-            let msg = ev.data;
-            switch(msg.type) {
-                case 'layout':
-                    this.setState({
-                        rendering: false,
-                        ...msg.data
-                    })
-            }
-        });
-    }
-
     state = {
         grabbing: false,
 
@@ -55,12 +41,13 @@ class D3Graph extends React.Component {
                 z: 0
             }
         },
-
-        nodes: [],
-        edges: [],
-        graphDOT: "",
-        rendering: false,
     }
+
+    constructor() {
+        super()
+        this.graphDOT = null;
+    }
+
 
     componentDidMount() {
         this.addZoom();
@@ -86,31 +73,12 @@ class D3Graph extends React.Component {
         zoomHandler(d3.select(this.svg));
     }
 
-    static getDerivedStateFromProps(nextProps, prevState) {
-        let {
-            nodes, edges,
-            currentNode,
-            selection,
-
-            showDefinitions,
-        } = nextProps;
-        
-        worker.postMessage({
-            type: 'refresh',
-            data: JSON.parse(JSON.stringify({ nodes, edges, currentNode }))
-        });
-
-        return {
-            rendering: false,
-        }
-    }
-
     render() {
         let zoom = this.state.zoom;
-        let { uiView, clearSelection, clickNode } = this.props;
+        let { uiView, clearSelection, clickNode, nodes, edges, generating } = this.props;
 
         return <div styleName='graph-ctn'>
-            <Blanket isTinted={this.state.rendering} canClickThrough={!this.state.rendering}/>
+            <Blanket isTinted={generating} canClickThrough={!generating}/>
 
             <svg styleName='svg'
             ref={(ref) => this.svg = ref}
@@ -136,16 +104,18 @@ class D3Graph extends React.Component {
                 >
 
                 <g>
-                {this.state.nodes.map(node => {
-                    // console.log(node)
+                {nodes.map(node => {
+                    // return null;
                     return <Node 
-                        key={node.id} clickNode={clickNode} 
+                        key={node.id} 
+                        clickNode={clickNode} 
                         {...node}/>
                 })}
                 </g>
 
                 <g styleName='edges'>
-                {this.state.edges.map((edge, i) => {
+                {edges.map((edge, i) => {
+                    // return null;
                     return <Edge key={edge.id} {...edge}/>
                 })}
                 </g>
@@ -156,15 +126,16 @@ class D3Graph extends React.Component {
     }
 }
 
-const Node = ({ id, interesting, layout, variant, label, clickNode }) => {
+const Node = ({ id, interesting, layout, variant, label, clickNode, selected }) => {
     let { cx, cy, rx, ry } = layout;
     
     return <g 
         styleName='node'
         onMouseOver={() => hoverNode(id)}
         onClick={(ev) => {
-            ev.stopPropagation();
             clickNode(id)
+            ev.stopPropagation();
+            return false;
         }}
         transform={`translate(${cx}, ${cy})`}
         >
@@ -174,7 +145,8 @@ const Node = ({ id, interesting, layout, variant, label, clickNode }) => {
             ry={ry}
             fill={nodeColor(variant)}
             styleName={classNames({
-                'interesting': interesting
+                'interesting': interesting,
+                'active': selected
             })}
         >
         </ellipse>
@@ -230,14 +202,30 @@ const Edge = (edge) => {
 
 
 const mapStateToProps = state => {
+    let g = state.graph;
+
     return {
-        ...state.graph,
+        nodes: g.layout.nodes.map(({ id, layout }) => {
+            return {
+                ...(_.findWhere(g.nodes, { id } )),
+                layout,
+            }
+        }),
+
+        edges: g.layout.edges.map(({ id, layout }) => {
+            return {
+                ...(_.findWhere(g.edges, { id } )),
+                layout,
+            }
+        }),
+
+        clickAction: g.clickAction
     }
 }
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
     return {
-        clickNode: id => {
+        clickNode: (id) => {
             dispatch(clickNode(id))
         },
         hoverNode: id => {

@@ -9,7 +9,7 @@ import {
 } from './actions';
 
 const ClickControl = ({ clickAction, keybinding, children, selectClickAction, currentAction }) => {
-    let active = currentAction == clickAction;
+    let active = currentAction == clickAction.name;
     return <div styleName='click-control' onClick={() => selectClickAction(clickAction) }>
         { active ? <b>{children}</b> : children }
     </div>;

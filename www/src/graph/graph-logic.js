@@ -516,10 +516,6 @@ export function graphLogic(state: graphState) {
 //     state: graphState
 // };
 
-self.addEventListener('message', (ev) => {
-    let msg: graphState = ev.data;
-    self.postMessage(graphLogic(msg));
-})
 
 // $FlowFixMe
 if (module.hot) {

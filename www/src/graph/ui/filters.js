@@ -17,9 +17,6 @@ import {
     toggleFilter
 } from '../actions';
 
-import {
-    getSelectedNode
-} from '../selectors';
 
 import './filters.css';
 
@@ -48,6 +45,7 @@ const Filters = ({ shownNodeTypes, node, toggleFilter }) => {
                 isActive={false}
                 label={variantName}
                 isFullWidth={false}
+                key={variant}
             />
         }) }
         </CheckboxGroup>
@@ -56,7 +54,6 @@ const Filters = ({ shownNodeTypes, node, toggleFilter }) => {
 
 const mapStateToProps = state => {
     return {
-        node: getSelectedNode(state.graph)
     }
 }
 

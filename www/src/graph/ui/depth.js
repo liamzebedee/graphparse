@@ -14,7 +14,7 @@ const Depth = ({ depth, changeDepth }) => {
             min={0}
             max={10}
             step={1}
-            onChange={(ev) => changeDepth(ev.target.value)}/>
+            onChange={(ev) => changeDepth(parseInt(ev.target.value))}/>
     </div>
 }
 

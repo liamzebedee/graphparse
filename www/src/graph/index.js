@@ -11,9 +11,14 @@ import { load } from './actions';
 import queryString from 'query-string';
 
 class GraphUI extends React.Component {
+    state = {
+        firstLoad: true
+    }
+
     componentDidMount() {
         let { name } = queryString.parse(this.props.location.search);
-        this.props.load(name)
+        this.props.load(name, this.state.firstLoad)
+        this.setState({ firstLoad: false })
     }
 
     render() {
@@ -27,7 +32,7 @@ class GraphUI extends React.Component {
 
 
 export default connect(null, dispatch => ({
-    load: (codebaseId) => {
-        dispatch(load(codebaseId));
+    load: (codebaseId, firstLoad) => {
+        dispatch(load(codebaseId, firstLoad));
     }
 }))(GraphUI)

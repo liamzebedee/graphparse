@@ -2,14 +2,13 @@
 import { combineReducers } from 'redux';
 import {Enum} from 'enumify';
 import matchSorter from 'match-sorter';
+import reduceReducers from 'reduce-reducers';
+import _ from 'underscore';
 
 import { searchNodes } from './actions';
 import {
     toggleInArray
 } from '../util'
-
-// $FlowFixMe
-import { BASE } from '/Users/liamz/Documents/open-source/proxy-object-defaults';
 
 import type {
     nodeid,
@@ -20,7 +19,9 @@ import type {
     nodeSel
 } from 'graphparse';
 
-import { getNodeSelection } from './selectors';
+import { getNodeSelection, mergeNodeSelection } from './selectors';
+
+import { graphLogic } from './graph-logic.worker';
 
 
 export class ClickActions extends Enum {}
@@ -30,7 +31,7 @@ ClickActions.initEnum([
     'visibility'
 ]);
 
-type graphState = {|
+export type graphState = {|
     grabbing: boolean,
 
     currentNode: ?nodeid,
@@ -43,7 +44,14 @@ type graphState = {|
 
     nodes: node[],
     edges: edge[],
-    clickAction: ClickActions
+    clickAction: string,
+
+    generating: boolean,
+    spanningTree: nodeid[],
+    layout: {|
+        nodes: nodeLayout[],
+        edges: edgeLayout[],
+    |},
 |};
 
 const initialState: graphState = {
@@ -60,32 +68,53 @@ const initialState: graphState = {
     nodes: [],
     edges: [],
 
-    clickAction: ClickActions.select
+    clickAction: ClickActions.select.name,
+
+    generating: false,
+    spanningTree: [],
+    layout: {
+        nodes: [],
+        edges: []
+    }
 }
 
 
-function updateNode(nodes, id, cb) {
+function updateNode(nodes: node[], id: nodeid, cb: (x: node) => node) : node[] {
     return nodes.map(node => {
         if(node.id !== id) return node;
         else return cb(node);
     })
 }
 
+const processNode = (nodes, edges) => {
+    const nodeExists = (id) => _.findWhere(nodes, { id, }) != null;
+
+    let edgesThatExist = edges.filter(edge => {
+        return nodeExists(edge.source) && nodeExists(edge.target);
+    })
+
+    return (node) => {
+        return {
+            // todo reordered this, maybe it's the src of a bug?
+            ...node,
+            selection: {
+                ins: {},
+                outs: {},
+            },
+            outs: _.where(edgesThatExist, { source: node.id }),
+            ins: _.where(edgesThatExist, { target: node.id }),
+        }
+    };
+}
+
 function graph(state: graphState = initialState, action: any) {
     switch(action.type) {
         case "LOAD_GRAPH":
+            let { nodes, edges } = action;
             return {
                 ...state,
-                nodes: action.nodes.map(node => {
-                    return {
-                        ...node,
-                        selection: {
-                            ins: {},
-                            outs: {}
-                        }
-                    }
-                }),
-                edges: action.edges,
+                nodes: nodes.map(processNode(nodes, edges)),
+                edges,
             }
         
         case "SELECT_NODE_FROM_SEARCH":
@@ -105,7 +134,12 @@ function graph(state: graphState = initialState, action: any) {
                 currentNode: match.id,
             })
         }
-
+        
+        case "CLICK_NODE":
+        case "SELECT_CLICK_ACTION":
+        case "CHANGE_DEPTH":
+            return ui(state, action);
+        
         case "SEARCH_NODES":
             let matches = matchSorter(state.nodes, action.q, { keys: ['label'] })
             return Object.assign({}, state, {
@@ -115,52 +149,106 @@ function graph(state: graphState = initialState, action: any) {
                 }
             })
         
-        case "CLICK_NODE":
-        case "SELECT_CLICK_ACTION":
-            return ui(state, action);
+        case "GENERATING":
+            return {
+                ...state,
+                generating: true
+            }
+        
+        case "GENERATE_COMPLETE":
+            if(action.payload === {}) return {
+                generating: false
+            };
+            else return {
+                ...state,
+                ...action.payload,
+                generating: false,
+            }
         
         default:
             return state;
     }
 }
 
-
-
-
-
-// function updateNodeFilters(state = initialFilter, action) {
-//     switch(action.type) {
-//         case "TOGGLE_NODE_TYPE_FILTER":
-//             return {
-//                 ...state,
-//                 shownNodeTypes: toggleInArray(state.shownNodeTypes, action.nodeTypeFilterIdx)
-//             }
-
-//         case "CLICK_NODE":
-//             return {
-//                 ...state,
-//                 shown: !state.shown
-//             }
-
-//         default:
-//             return state;
-//     }
-// }
-
-
-
 function ui(state, action) {
     switch(action.type) {
         case "SELECT_CLICK_ACTION":
             return {
                 ...state,
-                clickAction: action.action
+                clickAction: action.action.name
             }
-
-        case "CLICK_NODE":
-            return clickNode(state, action)
         
-        // case "TOGGLE_FILTER":
+        case "SELECT_NODE":
+            return {
+                ...state,
+                // $FlowFixMe
+                nodes: state.nodes.map((node) => {
+                    return {
+                        ...node,
+                        selected: node.id === action.id
+                    };
+                })
+            }
+        
+        case "TOGGLE_NODE_RELATIONSHIPS":
+            let shiftKeyDown = false;
+
+            return {
+                ...state,
+                nodes: updateNode(state.nodes, action.id, (node) => {
+                    let sel = getNodeSelection(node);
+                    let newSel = {
+                        outs: {},
+                        ins: {}
+                    };
+
+                    if(shiftKeyDown) {
+                        sel.outs.shown = !sel.outs.shown;
+                    } else {
+                        sel.ins.shown = !sel.ins.shown;
+                    }
+
+                    return {
+                        ...node,
+                        selection: mergeNodeSelection(node.selection, newSel)
+                    }
+                })
+            }
+        
+        case "TOGGLE_NODE_VISIBILITY":
+            return {
+                ...state,
+                nodes: updateNode(state.nodes, action.id, (node) => {
+                    let sel = getNodeSelection(node);
+
+                    return {
+                        ...node,
+                        selection: mergeNodeSelection(node.selection, {
+                            shown: !sel.shown
+                        })
+                    }
+                })
+            }
+        
+        case "CHANGE_DEPTH":
+            return {
+                ...state,
+                nodes: updateNode(state.nodes, action.id, (node) => {
+                    let sel = getNodeSelection(node);
+
+                    return {
+                        ...node,
+                        selection: mergeNodeSelection(node.selection, {
+                            [action.relationships]: {
+                                maxDepth: action.depth
+                            }
+                        })
+                    }
+                })
+            }
+        
+        case "TOGGLE_FILTER":
+            break;
         //     return {
         //         ...state,
         //         nodes: updateNodes(state.nodes, {
@@ -168,60 +256,8 @@ function ui(state, action) {
         //             id: state.selectedNode
         //         })
         //     }
+        
         default: 
-            return state;
-    }
-}
-
-function clickNode(state, action) {
-    switch(state.clickAction) {
-        case ClickActions.select:
-            return {
-                ...state,
-                nodes: state.nodes.map(node => {
-                    return {
-                        ...node,
-                        selected: node.id === action.id
-                    }
-                })
-            }
-        
-        case ClickActions.relationships:
-            let shiftKeyDown = false;
-
-            return {
-                ...state,
-                nodes: updateNode(state.nodes, action.id, (node) => {
-                    let sel = getNodeSelection(node);
-
-                    if(shiftKeyDown) {
-                        sel.outs.shown = !sel.outs.shown;
-                    } else {
-                        sel.ins.shown = !sel.ins.shown;
-                    }
-                    
-                    return {
-                        ...node,
-                        selection: sel[BASE]
-                    }
-                })
-            }
-        
-        case ClickActions.visibility:
-            return {
-                ...state,
-                nodes: updateNode(state.nodes, action.id, (node) => {
-                    let sel = getNodeSelection(node);
-                    sel.shown = !sel.shown;
-
-                    return {
-                        ...node,
-                        selection: sel[BASE]
-                    }
-                })
-            }
-        
-        default:
             return state;
     }
 }

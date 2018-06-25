@@ -6,7 +6,12 @@ import {
 } from 'react-router-redux'
 import rootReducer from './reducers/index';
 
-const enhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+const enhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
+    actionsBlacklist: [
+        'GENERATING',
+        // 'GENERATE_COMPLETE'
+    ]
+}) || compose;
 
 
 export default function configureStore(preloadedState = {}) {
