@@ -1,9 +1,10 @@
 // @flow
 import { combineReducers } from 'redux';
-import {Enum} from 'enumify';
+
 import matchSorter from 'match-sorter';
 import reduceReducers from 'reduce-reducers';
-import _ from 'underscore';
+import underscore from 'underscore';
+import _ from 'lodash';
 
 import { searchNodes } from './actions';
 import {
@@ -16,43 +17,15 @@ import type {
     nodeLayout,
     edge,
     edgeLayout,
-    nodeSel
+    nodeSel,
+    graphState
 } from 'graphparse';
 
 import { getNodeSelection, mergeNodeSelection } from './selectors';
+import { ClickActions } from './types';
 
-import { graphLogic } from './graph-logic.worker';
 
 
-export class ClickActions extends Enum {}
-ClickActions.initEnum([
-    'select',
-    'relationships',
-    'visibility'
-]);
-
-export type graphState = {|
-    grabbing: boolean,
-
-    currentNode: ?nodeid,
-
-    search: {|
-        q: string,
-        matches: node[],
-        state: string,
-    |},
-
-    nodes: node[],
-    edges: edge[],
-    clickAction: string,
-
-    generating: boolean,
-    spanningTree: nodeid[],
-    layout: {|
-        nodes: nodeLayout[],
-        edges: edgeLayout[],
-    |},
-|};
 
 const initialState: graphState = {
     grabbing: false,
@@ -79,30 +52,32 @@ const initialState: graphState = {
 }
 
 
-function updateNode(nodes: node[], id: nodeid, cb: (x: node) => node) : node[] {
+function updateNode(nodes: node[], id: nodeid, cb: (x: node) => any) : node[] {
     return nodes.map(node => {
         if(node.id !== id) return node;
-        else return cb(node);
+        else return _.merge(
+            _.cloneDeep(node),
+            cb(node)
+        );
     })
 }
 
-const processNode = (nodes, edges) => {
-    const nodeExists = (id) => _.findWhere(nodes, { id, }) != null;
+const processNode = (nodes: node[], edges: edge[]) => {
+    const nodeExists = (id) => underscore.findWhere(nodes, { id, }) != null;
 
     let edgesThatExist = edges.filter(edge => {
         return nodeExists(edge.source) && nodeExists(edge.target);
     })
 
-    return (node) => {
+    return (node: node) => {
         return {
-            // todo reordered this, maybe it's the src of a bug?
             ...node,
             selection: {
                 ins: {},
                 outs: {},
             },
-            outs: _.where(edgesThatExist, { source: node.id }),
-            ins: _.where(edgesThatExist, { target: node.id }),
+            outs: underscore.where(edgesThatExist, { source: node.id }),
+            ins: underscore.where(edgesThatExist, { target: node.id }),
         }
     };
 }
@@ -118,36 +93,43 @@ function graph(state: graphState = initialState, action: any) {
             }
         
         case "SELECT_NODE_FROM_SEARCH":
-            return Object.assign({}, state, {
-                currentNode: action.id
-            })
+            return {
+                ...state,
+                currentNode: action.node.id,
+                search: {
+                    q: action.node.label
+                }
+            }
 
         case "SELECT_NODE_BY_LABEL": {
             let matches = matchSorter(state.nodes, action.label, { keys: ['label'] })
             let match = matches[0];
 
-            return Object.assign({}, state, {
+            return {
+                ...state,
                 search: {
                     q: action.label,
                     matches,
                 },
                 currentNode: match.id,
-            })
+            }
         }
         
         case "CLICK_NODE":
         case "SELECT_CLICK_ACTION":
         case "CHANGE_DEPTH":
+        case "TOGGLE_FILTER":
             return ui(state, action);
         
         case "SEARCH_NODES":
             let matches = matchSorter(state.nodes, action.q, { keys: ['label'] })
-            return Object.assign({}, state, {
+            return {
+                ...state,
                 search: {
                     q: action.q,
                     matches,
                 }
-            })
+            }
         
         case "GENERATING":
             return {
@@ -156,12 +138,10 @@ function graph(state: graphState = initialState, action: any) {
             }
         
         case "GENERATE_COMPLETE":
-            if(action.payload === {}) return {
-                generating: false
-            };
-            else return {
+            return {
                 ...state,
-                ...action.payload,
+                layout: action.payload.layout,
+                spanningTree: action.payload.spanningTree,
                 generating: false,
             }
         
@@ -177,58 +157,9 @@ function ui(state, action) {
                 ...state,
                 clickAction: action.action.name
             }
-        
-        case "SELECT_NODE":
-            return {
-                ...state,
-                // $FlowFixMe
-                nodes: state.nodes.map((node) => {
-                    return {
-                        ...node,
-                        selected: node.id === action.id
-                    };
-                })
-            }
-        
-        case "TOGGLE_NODE_RELATIONSHIPS":
-            let shiftKeyDown = false;
 
-            return {
-                ...state,
-                nodes: updateNode(state.nodes, action.id, (node) => {
-                    let sel = getNodeSelection(node);
-                    let newSel = {
-                        outs: {},
-                        ins: {}
-                    };
-
-                    if(shiftKeyDown) {
-                        sel.outs.shown = !sel.outs.shown;
-                    } else {
-                        sel.ins.shown = !sel.ins.shown;
-                    }
-
-                    return {
-                        ...node,
-                        selection: mergeNodeSelection(node.selection, newSel)
-                    }
-                })
-            }
-        
-        case "TOGGLE_NODE_VISIBILITY":
-            return {
-                ...state,
-                nodes: updateNode(state.nodes, action.id, (node) => {
-                    let sel = getNodeSelection(node);
-
-                    return {
-                        ...node,
-                        selection: mergeNodeSelection(node.selection, {
-                            shown: !sel.shown
-                        })
-                    }
-                })
-            }
+        case "CLICK_NODE":
+            return clickNode(state, action)
         
         case "CHANGE_DEPTH":
             return {
@@ -237,7 +168,6 @@ function ui(state, action) {
                     let sel = getNodeSelection(node);
 
                     return {
-                        ...node,
                         selection: mergeNodeSelection(node.selection, {
                             [action.relationships]: {
                                 maxDepth: action.depth
@@ -258,6 +188,64 @@ function ui(state, action) {
         //     }
         
         default: 
+            return state;
+    }
+}
+
+function clickNode(state, action) {
+    switch(state.clickAction) {
+        case ClickActions.select.name:
+            return {
+                ...state,
+                nodes: state.nodes.map(node => {
+                    return {
+                        ...node,
+                        selected: node.id === action.id
+                    }
+                })
+            }
+        
+        case ClickActions.relationships.name:
+            let shiftKeyDown = false;
+            
+            return {
+                ...state,
+                nodes: updateNode(state.nodes, action.id, (node) => {
+                    let sel = getNodeSelection(node);
+                    let newSel = {
+                        outs: {},
+                        ins: {}
+                    };
+
+                    if(!action.shiftKey) {
+                        newSel.outs.shown = !sel.outs.shown;
+                    } else {
+                        newSel.ins.shown = !sel.ins.shown;
+                    }
+
+                    return {
+                        ...node,
+                        selection: mergeNodeSelection(node.selection, newSel)
+                    }
+                })
+            }
+        
+        case ClickActions.visibility.name:
+            return {
+                ...state,
+                nodes: updateNode(state.nodes, action.id, (node) => {
+                    let sel = getNodeSelection(node);
+
+                    return {
+                        ...node,
+                        selection: mergeNodeSelection(node.selection, {
+                            shown: !sel.shown
+                        })
+                    }
+                })
+            }
+        
+        default:
             return state;
     }
 }

@@ -15,11 +15,15 @@ import type {
     edgeid,
     edgeLayout,
     nodeSel,
-    relationshipsSel
+    relationshipsSel,
+    graphState
 } from 'graphparse';
 
-import { getNodeSelection } from './selectors';
-
+import {
+    getNodeSelection,
+    getEdges,
+    getNodeById
+} from './selectors';
 
 
 const UseEdge = 0;
@@ -31,57 +35,18 @@ type visitedNode = {
 
 type nodeVisitor = (parent: visitedNode) => Array<visitedNode>;
 
-function getNodeById(nodes: node[], id: nodeid) {
-    let node: node = _.findWhere(nodes, { id, })
-    if(!node) {
-        throw new Error(`node not found: ${id}`)
-    }
-    return node
-}
 
 
-
-function getEdges(nodes: node[]) : edge[] {
-    return nodes.map(node => {
-        return [].concat(node.ins, node.outs).filter((edge: edge) => {
-            return _.findWhere(nodes, { id: edge.target }) && _.findWhere(nodes, { id: edge.source })
-        })
-    }).reduce((prev, curr) => prev.concat(curr), []);
-}
+// if the edges are shown, show them to max depth
 
 
-// getLayout() {
-//     return {
-//         nodes: mergeByKey('id', this.shownNodes, this.nodesLayout),
-
-//         // TODO
-//         // duplicate edges are filtered out in generateGraphDOT
-//         // this means that merging here will error unless we relax
-//         // since there are edges that don't have a layout due to being removed as duplicates
-//         edges: mergeByKey('id', this.edgesLayout, this.shownEdges, false),
-//         graphDOT: this.graphDOT,
-//     }
-// }
-
-// preFilterNodesAndEdges() {
-//     let tree = this.getSpanningTree().map(id => {
-//         return { id, inTree: true }
-//     })
-//     this.nodes = mergeByKey('id', this.nodes, tree)
-// }
-
-// postFilterNodesAndEdges() {
-//     // this.nodes = this.shownNodes;
-//     this.nodes = this.nodes.map(node => {
-//         return {
-//             ...node,
-//             selection: node.selection[FULL]
-//         }
-//     })
-// }
-
+// The visitor returns a list of nodes to continue visiting. 
+// The philosophy is that we consider edges and we return nodes.
+// We work on the parent and not any 'children' (in or out edges).
 function makeVisitor(nodes: node[], depth: number): nodeVisitor {
-    const relsShownFilter = (relsel: relationshipsSel) => () => relsel.shown;
+    const relsShownFilter = (relsel: relationshipsSel) => {
+        return () => relsel.shown;
+    }
     const shownFilter = (node: node) => node.selection.shown;
     const depthFilter = (relsel: relationshipsSel) => {
         return (node) => depth < relsel.maxDepth;
@@ -112,7 +77,7 @@ function makeVisitor(nodes: node[], depth: number): nodeVisitor {
         return [].concat(
             parent.ins
             .map(edgeContext(edge => edge.source))
-            .filter(depthFilter(parent.selection.ins))
+            // .filter(depthFilter(parent.selection.ins))
             .filter(relsShownFilter(parent.selection.ins))
             .filter(({ node })    => shownFilter(node))
             .filter(({ useEdge }) => usesFilter(parent.selection.ins, useEdge))
@@ -122,7 +87,7 @@ function makeVisitor(nodes: node[], depth: number): nodeVisitor {
 
             parent.outs
             .map(edgeContext(edge => edge.target))
-            .filter(depthFilter(parent.selection.outs))
+            // .filter(depthFilter(parent.selection.outs))
             .filter(relsShownFilter(parent.selection.outs))
             .filter(({ node })    => shownFilter(node))
             .filter(({ useEdge }) => usesFilter(parent.selection.outs, useEdge))
@@ -141,14 +106,20 @@ function generateSpanningTree(state: graphState) : nodeid[] {
 
     let tree: nodeid[] = [];
     let visited: Set<nodeid> = new Set();
-    let depth = 0;
     let toVisit: Array<visitedNode> = [];
 
     if(fromNode == null) {
         return Array.from(visited);
     }
-    let current = getNodeById(nodes, fromNode);
-    current.selection.shown = true; // TODO hack
+    let current = getNodeById(nodes, fromNode)
+    current = {
+        ...current,
+        selection: {
+            ...current.selection,
+            shown: true
+        }
+    }
+    let depth = 0;
     toVisit.push(current)
     visited.add(current.id)
 
@@ -253,130 +224,6 @@ digraph {
 }
 
 */
-/*
-
-
-type traversedNode = {
-    fromDef: ?boolean
-} & node;
-
-let nodesToTraverse: Array<traversedNode> = [];
-let depth = 0;
-let visited: Set<nodeid> = new Set();
-
-if(fromNode == null) {
-    return Array.from(visited);
-}
-let current = this.getNodeById(fromNode);
-nodesToTraverse.push(current)
-visited.add(current.id)
-
-const traverse = (parent: traversedNode) : Array<traversedNode> => {
-    let parentFromDef = parent.fromDef || true;
-    let outs = parent.outs
-
-    .map(out => {
-        let child: traversedNode = this.getNodeById(out.target);
-        child.fromDef = (out.variant == DefEdge);
-        return child;
-    })
-    .filter(child => {
-        if(parentFromDef) {
-            // show defs,uses
-            return true;
-        } else {
-            // show uses
-            if(child.fromDef) return false;
-            return true;
-        }
-    })
-    .filter(child => {
-        // return _.contains(parent.filters.shownNodeTypes, child.variant)
-    })
-
-    return outs
-}
-
-do {
-    // visit
-    depth++;
-
-    nodesToTraverse = nodesToTraverse
-    .map(traverse)
-    .reduce((prev, curr) => prev.concat(curr), [])
-    .filter(node => {
-        if(visited.has(node.id)) return false;
-        else {
-            visited.add(node.id);
-            return true;
-        }
-    })
-    .filter(node => {
-        if(node.filters.shown) return true;
-        return depth < this.maxDepth;
-    })
-
-} while(nodesToTraverse.length);
-
-return Array.from(visited);
-
-
-
-
-
-
-let parentFromDef = parent.fromDef || true;
-            let outs = parent.outs
-        
-            // .filter(node => {
-            //     if(node.filters.shown) return true;
-            //     return depth < this.maxDepth;
-            // })
-
-            .map(out => {
-                let child: visitedNode = this.getNodeById(out.target);
-                child.fromDef = (out.variant == DefEdge);
-                return child;
-            })
-            .filter(child => {
-                if(parentFromDef) {
-                    // show defs,uses
-                    return true;
-                } else {
-                    // show uses
-                    if(child.fromDef) return false;
-                    return true;
-                }
-            })
-            .filter(child => {
-                // return _.contains(parent.filters.shownNodeTypes, child.variant)
-            })
-
-
-
-
-            // // let ins = parent.ins
-            // .map(edge => {
-            //     let node = this.getNodeById(edge.source);
-            //     let useEdge = edge.variant == UseEdge;
-            //     let defEdge = edge.variant == DefEdge;
-            //     return { node, useEdge, defEdge }
-            // })
-            
-
-            // let outs = parent.outs
-            // .map(edge => {
-            //     let node = this.getNodeById(edge.target);
-            //     let useEdge = edge.variant == UseEdge;
-            //     let defEdge = edge.variant == DefEdge;
-            //     return { node, useEdge, defEdge }
-            // })
-            // .filter(({ node }) => shownFilter(node))
-            // .filter(({ useEdge }) => usesFilter(parent.selection.ins, useEdge)
-            // .filter(({ defEdge }) => defsFilter(parent.selection.ins, defEdge)
-            // .filter(({ node }) => nodeTypesFilter(parent.selection.ins.shownNodeTypes, node))
-            // .map(({ node }) => node)
-            */
 
 
 
@@ -388,10 +235,10 @@ type layout = {|
 function buildLayout(state: graphState, nodes: node[]) : layout {
     let layout: layout = {
         nodes: [],
-        edges: []
+        edges: [],
     };
 
-    if(nodes.length < 1) {
+    if(nodes.length == 0) {
         return layout;
     }
 
@@ -405,7 +252,7 @@ function buildLayout(state: graphState, nodes: node[]) : layout {
         engine: 'dot'
     }));
     
-    layout.nodes = graphvizData.objects.map(obj => {    
+    layout.nodes = nodes.length > 0 ? graphvizData.objects.map(obj => {    
         let pos = obj.pos.split(',').map(Number);
         let id = parseInt(obj.name)
 
@@ -418,7 +265,7 @@ function buildLayout(state: graphState, nodes: node[]) : layout {
             },
             id,
         };
-    });
+    }) : [];
 
     layout.edges = edges.length > 1 ? graphvizData.edges.map((edge, i) => {
         let points = edge._draw_[1].points.map(toSvgPointSpace);
@@ -439,9 +286,6 @@ function buildLayout(state: graphState, nodes: node[]) : layout {
     return layout;
 }
 
-import type {
-    graphState,
-} from './reducers';
 
 const arrayEqual = (a, b) => {
     return a.filter(e => !b.includes(e)).length > 0;
@@ -454,11 +298,8 @@ export function graphLogic(state: graphState) {
             selection: getNodeSelection(node),
         }
     })
-    let spanningTree = generateSpanningTree(state)
-    if(arrayEqual(state.spanningTree, spanningTree)) {
-        return {};
-    }
 
+    let spanningTree = generateSpanningTree(state)
     let layout = buildLayout(state, spanningTree.map(id => getNodeById(state.nodes, id)));
 
     return {
@@ -466,55 +307,6 @@ export function graphLogic(state: graphState) {
         layout,
     }
 }
-
-
-
-// yield instructions
-// produce effects
-
-// instruction: load graph
-// effects:
-//  - process ins, outs and selection
-//  - generate spanning tree
-//  - generate a layout
-//  - set this data.
-
-
-
-
-
-    // switch(action.type) {
-    //     case "RENDER_GRAPH":
-    //         return {
-    //             nodes: {},
-    //             edges: {}
-    //         }
-    //     case "RENDER_COMPLETE":
-
-    //     default:
-    //         return state;
-    // }
-
-    // pass to a web worker for layout
-    // action: render graph
-    // action: begin graph render
-    // 
-
-
-    // generate layout for nodes, edges
-        // nodes = set ins and outs from edges, selection is full selection object
-
-        // generate spanning tree from (nodes, edges) data
-
-        // generate graphdot from spanning tree
-        // return if graphdot the same
-
-        // else generate layout from graphdot
-
-
-// type refreshMsg = {
-//     state: graphState
-// };
 
 
 // $FlowFixMe

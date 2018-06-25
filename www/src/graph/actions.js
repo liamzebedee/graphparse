@@ -1,10 +1,22 @@
-// import graphJSON from '../../graph.json';
-import _ from 'underscore';
+// @flow
+import underscore from 'underscore';
+import _ from 'lodash';
+
 import { axios } from '../util';
+import { getNodeById } from './selectors';
 import { Base64 } from 'js-base64';
 
 import { compose } from 'redux'
-import { ClickActions } from './reducers';
+
+import type {
+    nodeid,
+    nodeVariant,
+    graphState,
+    node,
+    edge
+} from 'graphparse';
+
+type relationships = 'ins' | 'outs';
 
 export const hoverNode = compose(regenerateGraph, (id) => {
     return {
@@ -13,46 +25,22 @@ export const hoverNode = compose(regenerateGraph, (id) => {
     }
 })
 
-export const clickNode = (id) => {
-    return (dispatch, getState) => {
-        switch(getState().graph.clickAction) {
-            case ClickActions.select.name:
-                return dispatch(selectNode(id))
-            case ClickActions.relationships.name:
-                return dispatch(toggleNodeRelationships(id))
-            case ClickActions.visibility.name:
-                return dispatch(toggleNodeVisibility(id))
-        }
-    }
-}
-
-export const selectNode = compose(regenerateGraph, (id) => {
+// $FlowFixMe
+export const clickNode = compose(regenerateGraph, (id: nodeid, shiftKey: boolean) => {
     return {
-        type: "SELECT_NODE",
+        type: "CLICK_NODE",
         id,
+        shiftKey,
     };
 })
 
-export const toggleNodeRelationships = compose(regenerateGraph, (id) => {
-    return {
-        type: "TOGGLE_NODE_RELATIONSHIPS",
-        id,
-    };
-})
-
-export const toggleNodeVisibility = compose(regenerateGraph, (id) => {
-    return {
-        type: "TOGGLE_NODE_VISIBILITY",
-        id,
-    };
-})
-
-export const clearSelection = compose(regenerateGraph, function() {
+export const clearSelection = compose(regenerateGraph, function(x: any) {
     return {
         type: "BLUR_SELECTED_NODE"
     }
 })
 
+// $FlowFixMe
 export const toggleFilter = compose(regenerateGraph, function(id: nodeid, relationships: relationships, variant: nodeVariant) {
     return {
         type: "TOGGLE_FILTER",
@@ -62,28 +50,29 @@ export const toggleFilter = compose(regenerateGraph, function(id: nodeid, relati
     }
 })
 
-export const searchNodes = function(q) {
+export const searchNodes = function(q: string) {
     return {
         type: "SEARCH_NODES",
         q
     }
 }
 
-export const selectNodeFromSearch = compose(regenerateGraph, function(id) {
+
+export const selectNodeFromSearch = compose(regenerateGraph, function(node: node) {
     return {
         type: "SELECT_NODE_FROM_SEARCH",
-        id,
+        node,
     }
 })
 
-export const selectNodeByLabel = compose(regenerateGraph, function(label) {
+export const selectNodeByLabel = compose(regenerateGraph, function(label: string) {
     return {
         type: "SELECT_NODE_BY_LABEL",
         label
     }
 })
 
-
+// $FlowFixMe
 export const changeDepth = compose(regenerateGraph, function(id: nodeid, relationships: relationships, depth: number) {
     return {
         type: "CHANGE_DEPTH",
@@ -93,17 +82,26 @@ export const changeDepth = compose(regenerateGraph, function(id: nodeid, relatio
     }
 })
 
+// $FlowFixMe
+type graphResponse = {|
+    nodes: node[],
+    edges: edge[],
+    rootNode: nodeid
+|};
 
-export const load = compose(regenerateGraph, function(graphID, firstLoad) {
+// $FlowFixMe
+export const load = compose(regenerateGraph, function(graphID: string, firstLoad: boolean) {
     return (dispatch, getState) => {
         axios.get(`/graph/public/${Base64.encode(graphID)}`)
         .then(res => {
-            let graph = res.data;
+            let graph: graphResponse = res.data;
             dispatch(loadGraph(
                 graph.nodes,
                 graph.edges,
-            ))
-            if(firstLoad) dispatch(selectNodeFromSearch(graph.rootNode));
+            ));
+
+            let rootNode = getNodeById(graph.nodes, graph.rootNode);
+            if(firstLoad) dispatch(selectNodeFromSearch(rootNode));
         })
         .catch(err => {
             throw err;
@@ -137,7 +135,7 @@ function loadGraph(nodes, edges) {
 
 import { graphLogic } from './graph-logic';
 
-function regenerateGraph(action) {
+function regenerateGraph(action: any) {
     return (dispatch, getState) => {
         dispatch({
             type: "GENERATING"
@@ -145,7 +143,7 @@ function regenerateGraph(action) {
 
         dispatch(action);
 
-        let state: graphState = getState().graph;
+        let state: graphState = _.cloneDeep(getState().graph);
 
         new Promise((resolve, reject) => {
             // worker.addEventListener("message", (ev) => {
@@ -170,7 +168,6 @@ function regenerateGraph(action) {
 
 // import Worker from './graph-logic.worker';
 // const worker = new Worker();
-import type { graphState } from './reducers';
 
 
 

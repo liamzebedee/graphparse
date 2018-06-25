@@ -9,8 +9,6 @@ import type {
     nodeSel
 } from 'graphparse';
 
-type relationships = 'ins' | 'outs';
-
 export function selectClickAction(action: any) {
     return {
         type: "SELECT_CLICK_ACTION",

@@ -14,7 +14,7 @@ import {
 
 import {
     ClickActions
-} from '../reducers';
+} from '../types';
 
 import ClickControl from './click-control';
 

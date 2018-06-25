@@ -1,8 +1,6 @@
 // @flow
 import _ from 'lodash';
-
-// $FlowFixMe
-import proxyDefaults from '/Users/liamz/Documents/open-source/proxy-object-defaults';
+import underscore from 'underscore';
 
 import {
     getNodeTypes,
@@ -11,7 +9,9 @@ import {
 import type {
     relationshipsSel,
     nodeSel,
-    node
+    node,
+    edge,
+    nodeid,
 } from 'graphparse';
 
 export function getSelectedNode(state: any) {
@@ -29,7 +29,7 @@ export function getSelectedNode(state: any) {
 
 const DEFAULT_RELATIONSHIPS_SELECTION: relationshipsSel = {
     shownNodeTypes: getNodeTypes().map((a,i) => i),
-    maxDepth: 2,
+    maxDepth: 0,
     showDefs: true,
     showUses: true,
     shown: false,
@@ -38,18 +38,35 @@ const DEFAULT_RELATIONSHIPS_SELECTION: relationshipsSel = {
 const DEFAULT_SELECTION: nodeSel = {
     shown: true,
     ins: DEFAULT_RELATIONSHIPS_SELECTION,
-    outs: {
-        ...DEFAULT_RELATIONSHIPS_SELECTION,
-        shown: true
-    },
+    outs: DEFAULT_RELATIONSHIPS_SELECTION,
 };
 
 const nodeSelectionLookup = {};
 
 export function getNodeSelection(node: node) : nodeSel {
-    return _.defaultsDeep(DEFAULT_SELECTION, node.selection);
+    return _.defaultsDeep(
+        {},
+        _.cloneDeep(node.selection),
+        DEFAULT_SELECTION
+    );
 }
 
 export function mergeNodeSelection(sel: nodeSel, newVals: any) {
-    return _.merge(sel, newVals);
+    return _.merge(_.cloneDeep(sel), _.cloneDeep(newVals));
+}
+
+export function getNodeById(nodes: node[], id: nodeid) {
+    let node: node = underscore.findWhere(nodes, { id, })
+    if(!node) {
+        throw new Error(`node not found: ${id}`)
+    }
+    return node
+}
+
+export function getEdges(nodes: node[]) : edge[] {
+    return nodes.map(node => {
+        return [].concat(node.ins, node.outs).filter((edge: edge) => {
+            return underscore.findWhere(nodes, { id: edge.target }) && underscore.findWhere(nodes, { id: edge.source })
+        })
+    }).reduce((prev, curr) => prev.concat(curr), []);
 }

@@ -36,7 +36,7 @@ class Search extends React.Component {
 
             <div styleName={classNames('results', { 'active': this.state.searchFocused })}>
                 { matches && matches.length > 0 ? matches.map((node, i) => {
-                    return <NodeMatch key={i} onClick={() => selectNode(node.id)} {...node}/>
+                    return <NodeMatch key={i} onClick={() => selectNode(node)} {...node}/>
                 }) : 'none' }
             </div>
         </div>
@@ -62,7 +62,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
     return {
         searchNodes: (q) => dispatch(searchNodes(q)),
-        selectNode:  (id) => dispatch(selectNodeFromSearch(id)),
+        selectNode:  (node) => dispatch(selectNodeFromSearch(node)),
     }
 }
  

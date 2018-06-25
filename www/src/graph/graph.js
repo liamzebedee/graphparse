@@ -8,17 +8,15 @@ import * as d3 from 'd3v4';
 
 import {
     hoverNode,
+    clickNode,
     setGrabbing,
     clearSelection,
-    selectNode,
-    toggleNodeVisibility,
-    clickNode,
+    toggleNodeTypeFilter,
 } from './actions'
 import {
     hexToRgb
 } from '../util'
 import nodeColor from './colours';
-
 
 import TypesOverview from './types-overview';
 
@@ -41,6 +39,8 @@ class D3Graph extends React.Component {
                 z: 0
             }
         },
+
+        shiftKey: false,
     }
 
     constructor() {
@@ -62,6 +62,14 @@ class D3Graph extends React.Component {
                 this.props.toggleNodeTypeFilter(num)
             })
         })
+
+        document.addEventListener("keydown", this.onKeyDown);
+        document.addEventListener("keyup", this.onKeyUp);
+    }
+
+    componentWillUnmount(){
+        document.removeEventListener("keydown", this.onKeyDown, false);
+        document.removeEventListener("keyup", this.onKeyUp, false);
     }
 
     addZoom = () => {
@@ -73,11 +81,19 @@ class D3Graph extends React.Component {
         zoomHandler(d3.select(this.svg));
     }
 
+    onKeyDown = (ev) => {
+        this.setState({ shiftKey: ev.shiftKey })
+    }
+
+    onKeyUp = (ev) => {
+        this.setState({ shiftKey: ev.shiftKey })
+    }
+
     render() {
         let zoom = this.state.zoom;
         let { uiView, clearSelection, clickNode, nodes, edges, generating } = this.props;
 
-        return <div styleName='graph-ctn'>
+        return <div styleName='graph-ctn' onKeyDown={this.onKeyDown} onKeyUp={this.onKeyUp}>
             <Blanket isTinted={generating} canClickThrough={!generating}/>
 
             <svg styleName='svg'
@@ -133,7 +149,7 @@ const Node = ({ id, interesting, layout, variant, label, clickNode, selected }) 
         styleName='node'
         onMouseOver={() => hoverNode(id)}
         onClick={(ev) => {
-            clickNode(id)
+            clickNode(id, ev.shiftKey);
             ev.stopPropagation();
             return false;
         }}
@@ -217,16 +233,14 @@ const mapStateToProps = state => {
                 ...(_.findWhere(g.edges, { id } )),
                 layout,
             }
-        }),
-
-        clickAction: g.clickAction
+        })
     }
 }
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = dispatch => {
     return {
-        clickNode: (id) => {
-            dispatch(clickNode(id))
+        clickNode: (id, shiftKey) => {
+            dispatch(clickNode(id, shiftKey))
         },
         hoverNode: id => {
             dispatch(hoverNode(id))
