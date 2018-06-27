@@ -32,5 +32,5 @@ func TestPackageNotFound(t *testing.T) {
 	rawRes := httptest.NewRecorder()
 	webAPI().ServeHTTP(rawRes, req)
 
-	assert.Equal(t, http.StatusInternalServerError, rawRes.Code, rawRes.Body.String())
+	assert.Equal(t, http.StatusNotFound, rawRes.Code, rawRes.Body.String())
 }

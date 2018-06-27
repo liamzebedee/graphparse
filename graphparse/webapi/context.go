@@ -69,6 +69,6 @@ func (middleware *graphMiddleware) Middleware(ctx *gin.Context) {
 	if g, err := middleware.getGraph(NewGraphReqKey(string(name))); err == nil {
 		ctx.Set("graph", g)
 	} else {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
+		ctx.AbortWithError(http.StatusNotFound, err)
 	}
 }
