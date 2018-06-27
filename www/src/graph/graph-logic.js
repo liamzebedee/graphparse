@@ -22,7 +22,8 @@ import type {
 import {
     getNodeSelection,
     getEdges,
-    getNodeById
+    getNodeById,
+    getCurrentNodeSelection
 } from './selectors';
 
 
@@ -114,10 +115,7 @@ function generateSpanningTree(state: graphState) : nodeid[] {
     let current = getNodeById(nodes, fromNode)
     current = {
         ...current,
-        selection: {
-            ...current.selection,
-            shown: true
-        }
+        selection: getCurrentNodeSelection(current)
     }
     let depth = 0;
     toVisit.push(current)

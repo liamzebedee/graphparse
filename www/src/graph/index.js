@@ -22,7 +22,7 @@ class GraphUI extends React.Component {
     }
 
     render() {
-        return <div styleName='ctn'>
+        return this.props.error ? this.props.error : <div styleName='ctn'>
             <Graph/>
             <UI/>
         </div>
@@ -31,7 +31,11 @@ class GraphUI extends React.Component {
 
 
 
-export default connect(null, dispatch => ({
+export default connect(state => {
+    return {
+        error: state.graph.error
+    }
+}, dispatch => ({
     load: (codebaseId, firstLoad) => {
         dispatch(load(codebaseId, firstLoad));
     }

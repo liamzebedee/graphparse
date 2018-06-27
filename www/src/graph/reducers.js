@@ -31,6 +31,7 @@ const initialState: graphState = {
     grabbing: false,
 
     currentNode: null,
+    hoveredNode: null,
 
     search: {
         q: "",
@@ -84,6 +85,12 @@ const processNode = (nodes: node[], edges: edge[]) => {
 
 function graph(state: graphState = initialState, action: any) {
     switch(action.type) {
+        case "ERROR":
+            return {
+                ...state,
+                error: action.message
+            }
+
         case "LOAD_GRAPH":
             let { nodes, edges } = action;
             return {
@@ -119,6 +126,8 @@ function graph(state: graphState = initialState, action: any) {
         case "SELECT_CLICK_ACTION":
         case "CHANGE_DEPTH":
         case "TOGGLE_FILTER":
+        case "HOVER_NODE":
+        case "BLUR_HOVER":
             return ui(state, action);
         
         case "SEARCH_NODES":
@@ -156,6 +165,17 @@ function ui(state, action) {
             return {
                 ...state,
                 clickAction: action.action.name
+            }
+        
+        case "HOVER_NODE":
+            return {
+                ...state,
+                hoveredNode: action.id
+            }
+        case "BLUR_HOVER":
+            return {
+                ...state,
+                hoveredNode: null
             }
 
         case "CLICK_NODE":

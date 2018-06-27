@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { connect } from 'react-redux'
 import _ from 'underscore';
@@ -7,7 +8,7 @@ import './node-controls.css';
 import Filters from './filters';
 import Depth from './depth';
 
-import { ToggleStateless } from '@atlaskit/toggle';
+// import { ToggleStateless } from '@atlaskit/toggle';
 
 import {
     changeDepth,
@@ -16,7 +17,8 @@ import {
 
 
 import {
-    getSelectedNode
+    getSelectedNode,
+    getNodeById
 } from '../selectors';
 
 const NodeControls = ({ 
@@ -35,7 +37,7 @@ const NodeControls = ({
                     <h4>Relations</h4>
                     <div styleName='relations'>
                         <section>
-                        <h5>In</h5>
+                        <h5>In ({ selectedNode.ins.length })</h5>
                         <RelationControl 
                             node={selectedNode} 
                             shownNodeTypes={selectedNode.selection.ins.shownNodeTypes}
@@ -46,7 +48,7 @@ const NodeControls = ({
                         </section>
                         
                         <section>
-                        <h5>Out</h5>
+                        <h5>Out ({ selectedNode.outs.length })</h5>
                         <RelationControl 
                             node={selectedNode} 
                             shownNodeTypes={selectedNode.selection.ins.shownNodeTypes}
@@ -70,7 +72,7 @@ const RelationControl = ({ node, depth, changeDepth, toggleFilter, shownNodeType
 
 const mapStateToProps = state => {
     return {
-        selectedNode: getSelectedNode(state.graph),
+        selectedNode: state.graph.hoveredNode ? getNodeById(state.graph.nodes, state.graph.hoveredNode) : getSelectedNode(state.graph),
     }
 }
 

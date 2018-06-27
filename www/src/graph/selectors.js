@@ -29,14 +29,14 @@ export function getSelectedNode(state: any) {
 
 const DEFAULT_RELATIONSHIPS_SELECTION: relationshipsSel = {
     shownNodeTypes: getNodeTypes().map((a,i) => i),
-    maxDepth: 0,
+    maxDepth: 1,
     showDefs: true,
     showUses: true,
-    shown: false,
+    shown: true,
 };
 
 const DEFAULT_SELECTION: nodeSel = {
-    shown: true,
+    shown: false,
     ins: DEFAULT_RELATIONSHIPS_SELECTION,
     outs: DEFAULT_RELATIONSHIPS_SELECTION,
 };
@@ -51,6 +51,18 @@ export function getNodeSelection(node: node) : nodeSel {
     );
 }
 
+const DEFAULT_CURRENT_NODE_SELECTION = {
+    shown: true
+};
+
+export function getCurrentNodeSelection(node: node) : nodeSel {
+    return _.defaultsDeep(
+        {},
+        node.selection,
+        DEFAULT_CURRENT_NODE_SELECTION
+    )
+}
+
 export function mergeNodeSelection(sel: nodeSel, newVals: any) {
     return _.merge(_.cloneDeep(sel), _.cloneDeep(newVals));
 }
@@ -60,7 +72,10 @@ export function getNodeById(nodes: node[], id: nodeid) {
     if(!node) {
         throw new Error(`node not found: ${id}`)
     }
-    return node
+    return {
+        ...node,
+        selection: getNodeSelection(node)
+    }
 }
 
 export function getEdges(nodes: node[]) : edge[] {

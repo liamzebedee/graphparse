@@ -12,6 +12,7 @@ import {
     setGrabbing,
     clearSelection,
     toggleNodeTypeFilter,
+    blurHover
 } from './actions'
 import {
     hexToRgb
@@ -142,12 +143,31 @@ class D3Graph extends React.Component {
     }
 }
 
-const Node = ({ id, interesting, layout, variant, label, clickNode, selected }) => {
+
+
+
+const Node = 
+connect(null, dispatch => {
+    return {
+        clickNode: (id, shiftKey) => {
+            dispatch(clickNode(id, shiftKey))
+        },
+        hoverNode: id => {
+            dispatch(hoverNode(id))
+        },
+        blurHover: () => dispatch(blurHover()),
+    }
+})
+(({ id, interesting, layout, variant, label, clickNode, blurHover, hoverNode, selected }) => {
     let { cx, cy, rx, ry } = layout;
     
     return <g 
         styleName='node'
-        onMouseOver={() => hoverNode(id)}
+        onMouseEnter={() => hoverNode(id)}
+        onMouseLeave={() => blurHover()}
+        // onMouseEnter={() => { debugger }}
+        // onMouseLeave={() =>  { debugger }}
+        
         onClick={(ev) => {
             clickNode(id, ev.shiftKey);
             ev.stopPropagation();
@@ -173,7 +193,7 @@ const Node = ({ id, interesting, layout, variant, label, clickNode, selected }) 
             {label}
         </text>
     </g>
-}
+});
 
 
 const edgeVariantStr = (variant) => {
@@ -239,12 +259,6 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        clickNode: (id, shiftKey) => {
-            dispatch(clickNode(id, shiftKey))
-        },
-        hoverNode: id => {
-            dispatch(hoverNode(id))
-        },
         setGrabbing: (grabbing) => dispatch(setGrabbing(grabbing)),
         clearSelection: () => dispatch(clearSelection()),
         toggleNodeTypeFilter: (i) => dispatch(toggleNodeTypeFilter(i))

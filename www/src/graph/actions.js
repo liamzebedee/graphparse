@@ -18,12 +18,25 @@ import type {
 
 type relationships = 'ins' | 'outs';
 
-export const hoverNode = compose(regenerateGraph, (id) => {
+// export const hoverNode = compose(regenerateGraph, (id) => {
+//     return {
+//         type: "HOVER_NODE",
+//         id,
+//     }
+// })
+
+export const hoverNode = (id: nodeid) => {
     return {
         type: "HOVER_NODE",
         id,
     }
-})
+}
+
+export const blurHover = () => {
+    return {
+        type: "BLUR_HOVER",
+    }
+}
 
 // $FlowFixMe
 export const clickNode = compose(regenerateGraph, (id: nodeid, shiftKey: boolean) => {
@@ -104,7 +117,12 @@ export const load = compose(regenerateGraph, function(graphID: string, firstLoad
             if(firstLoad) dispatch(selectNodeFromSearch(rootNode));
         })
         .catch(err => {
-            throw err;
+            if(err.response.status === 404) {
+                dispatch({
+                    type: "ERROR",
+                    message: "Codebase was not found"
+                })
+            } else throw err;
         })
     }
 })
