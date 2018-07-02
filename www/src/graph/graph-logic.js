@@ -31,7 +31,8 @@ const UseEdge = 0;
 const DefEdge = 1;
 
 type visitedNode = {
-    fromDef: ?boolean
+    fromDef: ?boolean,
+    depth: number,
 } & node;
 
 type nodeVisitor = (parent: visitedNode) => Array<visitedNode>;
@@ -44,12 +45,15 @@ type nodeVisitor = (parent: visitedNode) => Array<visitedNode>;
 // The visitor returns a list of nodes to continue visiting. 
 // The philosophy is that we consider edges and we return nodes.
 // We work on the parent and not any 'children' (in or out edges).
-function makeVisitor(nodes: node[], depth: number): nodeVisitor {
+type depthMap = { [nodeid]: number};
+// , depthMap: depthMap
+
+function makeVisitor(nodes: node[], baseDepth: number): nodeVisitor {
     const relsShownFilter = (relsel: relationshipsSel) => {
         return () => relsel.shown;
     }
     const shownFilter = (node: node) => node.selection.shown;
-    const depthFilter = (relsel: relationshipsSel) => {
+    const depthFilter = (relsel: relationshipsSel, depth: number) => {
         return (node) => depth < relsel.maxDepth;
     }
     const usesFilter = (relsel, useEdge) => useEdge ? relsel.showUses : true;
@@ -60,6 +64,7 @@ function makeVisitor(nodes: node[], depth: number): nodeVisitor {
 
     return (parent: visitedNode) : Array<visitedNode> => {
         // if(!shownFilter(parent)) return [];
+
         if(
             [parent]
             .filter(shownFilter)
@@ -78,7 +83,7 @@ function makeVisitor(nodes: node[], depth: number): nodeVisitor {
         return [].concat(
             parent.ins
             .map(edgeContext(edge => edge.source))
-            // .filter(depthFilter(parent.selection.ins))
+            // .filter(depthFilter(parent.selection.ins, baseDepth))
             .filter(relsShownFilter(parent.selection.ins))
             .filter(({ node })    => shownFilter(node))
             .filter(({ useEdge }) => usesFilter(parent.selection.ins, useEdge))
@@ -88,7 +93,7 @@ function makeVisitor(nodes: node[], depth: number): nodeVisitor {
 
             parent.outs
             .map(edgeContext(edge => edge.target))
-            // .filter(depthFilter(parent.selection.outs))
+            // .filter(depthFilter(parent.selection.outs, baseDepth))
             .filter(relsShownFilter(parent.selection.outs))
             .filter(({ node })    => shownFilter(node))
             .filter(({ useEdge }) => usesFilter(parent.selection.outs, useEdge))
@@ -112,20 +117,25 @@ function generateSpanningTree(state: graphState) : nodeid[] {
     if(fromNode == null) {
         return Array.from(visited);
     }
+    let depth = 0;
     let current = getNodeById(nodes, fromNode)
     current = {
         ...current,
-        selection: getCurrentNodeSelection(current)
+        selection: getCurrentNodeSelection(current),
+        depth,
     }
-    let depth = 0;
     toVisit.push(current)
     visited.add(current.id)
 
     do {
         // visit
         depth++;
-        // debugger
-    
+        // let depthMap: depthMap = {
+        //     fromNode: 0,
+        // };
+
+
+
         toVisit = toVisit
         .map(makeVisitor(nodes, depth))
         .reduce((prev, curr) => prev.concat(curr), [])
@@ -192,6 +202,43 @@ function generateGraphDOT(nodes: node[], edges: edge[]) {
     `
 };
 
+function generateElk(nodes: node[], edges: edge[]) {
+    let edgeWeights = {};
+
+    edges.map(edge => {
+        let id = edgeRelationId(edge);
+        let weight = edgeWeights[id] || 0;
+        edgeWeights[id] = weight+1;
+    })
+
+    let weightedEdges = edges.filter(removeDuplicates(edgeRelationId)).map(edge => {
+        return { 
+            ...edge,
+            weight: edgeWeights[edgeRelationId(edge)],
+        }
+    })
+    return `
+algorithm: layered
+
+${nodes.map(({ id, rank, label, shown }) => {
+    return `
+    node id${id} {
+        nodeLabelPlacement: "INSIDE H_CENTER V_CENTER"
+        label "${label}"
+    }
+    `
+}).join('\n')}
+
+
+
+${weightedEdges.map(({ source, target, id, weight }) => {
+    return `edge id${target} -> id${source}`
+}).join('\n')}
+}
+    `
+}
+
+
 /*
 
 digraph {
@@ -244,6 +291,7 @@ function buildLayout(state: graphState, nodes: node[]) : layout {
 
     // Generate dot layout
     let graphDOT = generateGraphDOT(nodes, edges)
+    // console.log(generateElk(nodes, edges))
     let graphvizData = JSON.parse(Viz(graphDOT, {
         format: 'json',
         // engine: 'neato',

@@ -1,6 +1,28 @@
+TODO:
+- render only +/- nodes and children
+- make layout work better wrt reflows
+
+
+
+
+Don't reflow layout
+
+
+
+
+I want to be able to click through relationships
+once I click the next one, I want to hide the other relations on that previous level
+
+
+
+graphparse:
+show all of the relations of current (ins and outs)
+show specifically nodes which have been included
+
+
 
 space - toggle node visibility
-
+`
 change options in sidebar -> affects currently selected node
 
 

@@ -32,11 +32,11 @@ const DEFAULT_RELATIONSHIPS_SELECTION: relationshipsSel = {
     maxDepth: 1,
     showDefs: true,
     showUses: true,
-    shown: true,
+    shown: false,
 };
 
 const DEFAULT_SELECTION: nodeSel = {
-    shown: false,
+    shown: true,
     ins: DEFAULT_RELATIONSHIPS_SELECTION,
     outs: DEFAULT_RELATIONSHIPS_SELECTION,
 };

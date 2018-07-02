@@ -24,8 +24,8 @@ import TypesOverview from './types-overview';
 const graphCSS = require('!!raw-loader!./graph.css');
 import './graph.css';
 
-import Worker from './graph-logic.worker';
-const worker = new Worker();
+// import Worker from './graph-logic.worker';
+// const worker = new Worker();
 
 import Blanket from '@atlaskit/blanket';
 

@@ -236,7 +236,7 @@ function clickNode(state, action) {
                         outs: {},
                         ins: {}
                     };
-
+                    
                     if(!action.shiftKey) {
                         newSel.outs.shown = !sel.outs.shown;
                     } else {

@@ -23,6 +23,12 @@ module.exports = {
   },
 
   devtool: 'eval-source-map',
+
+  optimization: {
+    splitChunks: {
+      chunks: 'all'
+    },
+  },
   
   plugins: [
     new webpack.LoaderOptionsPlugin({
