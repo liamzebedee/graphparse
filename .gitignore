@@ -9,3 +9,5 @@ www/graph.dot
 www/graph.json
 www/flow-typed/
 out/*
+graphparse/vendor
+www/node_modules

@@ -31,6 +31,6 @@ export function toggleInArray(arr, val) {
 import axiosLib from 'axios';
 
 export const axios = axiosLib.create({
-    baseURL: 'http://localhost:8082/',
+    baseURL: 'http://0.0.0.0:8082/',
     timeout: 10000,
 });

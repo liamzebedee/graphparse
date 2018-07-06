@@ -42,7 +42,7 @@ const initialState: graphState = {
     nodes: [],
     edges: [],
 
-    clickAction: ClickActions.select.name,
+    clickAction: ClickActions.relationships.name,
 
     generating: false,
     spanningTree: [],

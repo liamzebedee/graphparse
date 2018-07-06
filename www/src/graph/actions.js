@@ -170,7 +170,7 @@ function regenerateGraph(action: any) {
             //     else resolve(msg)
             // }, { once: true });
             
-            // worker.postMessage(state);
+            // worker.postMessage(state); 
             resolve(graphLogic(state))
 
         }).then((payload) => {

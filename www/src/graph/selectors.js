@@ -12,6 +12,7 @@ import type {
     node,
     edge,
     nodeid,
+    edgeid
 } from 'graphparse';
 
 export function getSelectedNode(state: any) {
@@ -67,7 +68,7 @@ export function mergeNodeSelection(sel: nodeSel, newVals: any) {
     return _.merge(_.cloneDeep(sel), _.cloneDeep(newVals));
 }
 
-export function getNodeById(nodes: node[], id: nodeid) {
+export function getNodeById(nodes: node[], id: nodeid) : node {
     let node: node = underscore.findWhere(nodes, { id, })
     if(!node) {
         throw new Error(`node not found: ${id}`)
@@ -84,4 +85,12 @@ export function getEdges(nodes: node[]) : edge[] {
             return underscore.findWhere(nodes, { id: edge.target }) && underscore.findWhere(nodes, { id: edge.source })
         })
     }).reduce((prev, curr) => prev.concat(curr), []);
+}
+
+export function getEdgeById(edges: edge[], id: edgeid) : edge {
+    let edge: edge = underscore.findWhere(edges, { id, })
+    if(!edge) {
+        throw new Error(`node not found: ${id}`)
+    }
+    return edge;
 }

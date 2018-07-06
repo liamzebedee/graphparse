@@ -23,31 +23,28 @@ import {
     getNodeSelection,
     getEdges,
     getNodeById,
-    getCurrentNodeSelection
+    getCurrentNodeSelection,
+    getEdgeById
 } from './selectors';
+
+import {
+    compose
+} from 'redux';
 
 
 const UseEdge = 0;
 const DefEdge = 1;
 
 type visitedNode = {
-    fromDef: ?boolean,
-    depth: number,
-} & node;
-
-type nodeVisitor = (parent: visitedNode) => Array<visitedNode>;
-
-
-
-// if the edges are shown, show them to max depth
+    node: node,
+    edge: edge,
+};
+type nodeVisitor = (parent: node) => Array<visitedNode>;
 
 
 // The visitor returns a list of nodes to continue visiting. 
 // The philosophy is that we consider edges and we return nodes.
 // We work on the parent and not any 'children' (in or out edges).
-type depthMap = { [nodeid]: number};
-// , depthMap: depthMap
-
 function makeVisitor(nodes: node[], baseDepth: number): nodeVisitor {
     const relsShownFilter = (relsel: relationshipsSel) => {
         return () => relsel.shown;
@@ -62,7 +59,7 @@ function makeVisitor(nodes: node[], baseDepth: number): nodeVisitor {
         return _.contains(shownNodeTypes, child.variant)
     }
 
-    return (parent: visitedNode) : Array<visitedNode> => {
+    return (parent: node) : Array<visitedNode> => {
         // if(!shownFilter(parent)) return [];
 
         if(
@@ -76,7 +73,12 @@ function makeVisitor(nodes: node[], baseDepth: number): nodeVisitor {
                 let node = getNodeById(nodes, getNode(edge));
                 let useEdge = edge.variant == UseEdge;
                 let defEdge = edge.variant == DefEdge;
-                return { node, useEdge, defEdge }
+                return { 
+                    node, 
+                    edge,
+                    useEdge, 
+                    defEdge
+                }
             }
         }
 
@@ -89,7 +91,9 @@ function makeVisitor(nodes: node[], baseDepth: number): nodeVisitor {
             .filter(({ useEdge }) => usesFilter(parent.selection.ins, useEdge))
             .filter(({ defEdge }) => defsFilter(parent.selection.ins, defEdge))
             .filter(({ node })    => nodeTypesFilter(parent.selection.ins.shownNodeTypes, node))
-            .map(({ node })       => node),
+            .map(({ node, edge }) => {
+                return { node, edge };
+            }),
 
             parent.outs
             .map(edgeContext(edge => edge.target))
@@ -99,30 +103,35 @@ function makeVisitor(nodes: node[], baseDepth: number): nodeVisitor {
             .filter(({ useEdge }) => usesFilter(parent.selection.outs, useEdge))
             .filter(({ defEdge }) => defsFilter(parent.selection.outs, defEdge))
             .filter(({ node })    => nodeTypesFilter(parent.selection.outs.shownNodeTypes, node))
-            .map(({ node })       => node),
+            .map(({ node, edge }) => {
+                return { node, edge };
+            }),
         );
     }
 }
 
+const flattenArray = (prev, curr) => prev.concat(curr);
+
+
 // Returns array of node id's that represent the spanning tree of from currentNode down, until maxdepth
-function generateSpanningTree(state: graphState) : nodeid[] {
+function generateSpanningTree(state: graphState) : graphState {
     let fromNode: ?nodeid = state.currentNode;
 
     let nodes = state.nodes;
 
     let tree: nodeid[] = [];
     let visited: Set<nodeid> = new Set();
-    let toVisit: Array<visitedNode> = [];
+    let edges: Set<edgeid> = new Set();
+    let toVisit: Array<node> = [];
 
     if(fromNode == null) {
-        return Array.from(visited);
+        return state;
     }
     let depth = 0;
     let current = getNodeById(nodes, fromNode)
     current = {
         ...current,
         selection: getCurrentNodeSelection(current),
-        depth,
     }
     toVisit.push(current)
     visited.add(current.id)
@@ -130,15 +139,14 @@ function generateSpanningTree(state: graphState) : nodeid[] {
     do {
         // visit
         depth++;
-        // let depthMap: depthMap = {
-        //     fromNode: 0,
-        // };
-
-
 
         toVisit = toVisit
         .map(makeVisitor(nodes, depth))
-        .reduce((prev, curr) => prev.concat(curr), [])
+        .reduce(flattenArray, [])
+        .map(({ node, edge } : visitedNode) => {
+            edges.add(edge.id);
+            return node;
+        })
         .filter(node => {
             if(visited.has(node.id)) return false;
             else {
@@ -148,9 +156,107 @@ function generateSpanningTree(state: graphState) : nodeid[] {
         })
     
     } while(toVisit.length > 0);
+
+    let g = new Graph(
+        state.nodes,
+        state.edges,
+    );
+
+    g.nodes = Array.from(visited).map(id => getNodeById(state.nodes, id));
+    g.edges = Array.from(edges).map(id => getEdgeById(state.edges, id));
     
-    return Array.from(visited);
+    return {
+        ...state,
+        ...g.pack(),
+    }
 }
+
+
+
+
+class Graph {
+    _nodes: node[];
+    _edges: edge[];
+
+    constructor(nodes, edges) {
+        this._nodes = nodes;
+        this._edges = edges;
+    }
+
+    set edges(edges) {
+        // update nodes
+        this._nodes = this._nodes.map(node => {
+            return {
+                ...node,
+                ins: _.where(edges,  { source: node.id }),
+                outs: _.where(edges, { target: node.id }),
+            }
+        });
+        this._edges = edges.map(edge => {
+            return {
+                ...edge
+            }
+        });
+    }
+
+    set nodes(nodes) {
+        // update edges
+        this._edges = getEdges(nodes);
+        this._nodes = nodes.map(node => {
+            return {
+                ...node
+            }
+        })
+    }
+
+    get edges() {
+        return this._edges;
+    }
+
+    get nodes() {
+        return this._nodes;
+    }
+
+    pack() {
+        let nodes = this._nodes;
+        let edges = this._edges;
+        return {
+            nodes,
+            edges,
+        }
+    }
+}
+
+const getOuts = (edges: edge[], id: nodeid) => {
+    return _.where(edges, { source: id })
+}
+
+const getIns = (edges: edge[], id: nodeid) => {
+    return _.where(edges, { target: id })
+}
+
+
+function postFilterGraph(state : graphState) : graphState {
+    // Hide DEF edges if the node is already linked to.
+    // let { nodes, edges } = graph(state.nodes, state.edges);
+    let g = new Graph(state.nodes, state.edges);
+
+    g.nodes = g.nodes.map(node => {
+        return {
+            ...node,
+            ins: node.ins.length > 1 
+                  ? node.ins.filter(edge => edge.variant != DefEdge) 
+                  : node.ins
+        }
+    });
+
+    return {
+        ...state,
+        ...g.pack()
+    }
+}
+
+
 
 
 
@@ -179,25 +285,21 @@ function generateGraphDOT(nodes: node[], edges: edge[]) {
         }
     })
 
+    // ${weightedEdges.map(({ source, target, id, weight }) => `"${target}" -> "${source}" [id=${id}] [weight=${weight}];`).join('\n')}
+
     return `
         digraph graphname {
             graph [ordering=in];
+            rankdir=LR;
             ${nodes.map(({ id, rank, label, shown }) => {
                 // rank = 1;
 
                 let fixedPos = "";
-                // if(shown) {
-                //     let prevlayout: ?nodeLayout = _.findWhere(this.nodesLayout, { id, });
-                //     if(!prevlayout) throw new Error("Not found");
-
-                //     let { cx, cy } = prevlayout.layout;
-                //     fixedPos = `[pos="${cx},${cy}!"]`;
-                // }
 
                 return `"${id}" [width=${rank}] [height=${rank}] [label="${label}"] ${fixedPos};`
             }).join('\n')}
 
-            ${weightedEdges.map(({ source, target, id, weight }) => `"${target}" -> "${source}" [id=${id}] [weight=${weight}];`).join('\n')}
+            ${weightedEdges.map(({ source, target, id, weight }) => `"${source}" -> "${target}" [id=${id}] [weight=${weight}];`).join('\n')}
         }
     `
 };
@@ -239,37 +341,6 @@ ${weightedEdges.map(({ source, target, id, weight }) => {
 }
 
 
-/*
-
-digraph {
-    node parse.go
-    node generatecodegraph
-
-    parse.go -> generatecodegraph
-    generatecodegraph -> generatecodegraphfromprog
-    generatecodegraphfromprog -> generatecodegraphfromprog_body
- 
-    subgraph generategraphfromprog {
-        node newgraph
-        node pkginfo
-        node visit
-
-        newgraph -> pkginfo
-        pkginfo -> visit
-        visit -> generategraphfromprog_body
-    }
-
-    subgraph generategraphfromprog_body {
-        parseimportspec
-        parse2
-        parse3
-        parse4
-        parse5
-    }
-}
-
-*/
-
 
 
 type layout = {|
@@ -277,7 +348,9 @@ type layout = {|
     edges: edgeLayout[],
 |};
 
-function buildLayout(state: graphState, nodes: node[]) : layout {
+function buildLayout(state: graphState) : layout {
+    let { nodes, edges } = state;
+
     let layout: layout = {
         nodes: [],
         edges: [],
@@ -286,8 +359,6 @@ function buildLayout(state: graphState, nodes: node[]) : layout {
     if(nodes.length == 0) {
         return layout;
     }
-
-    let edges = getEdges(nodes);
 
     // Generate dot layout
     let graphDOT = generateGraphDOT(nodes, edges)
@@ -345,17 +416,10 @@ export function graphLogic(state: graphState) {
         }
     })
 
-    let spanningTree = generateSpanningTree(state)
-    let layout = buildLayout(state, spanningTree.map(id => getNodeById(state.nodes, id)));
-
+    let layout = compose(buildLayout, postFilterGraph, generateSpanningTree)(state);
+    
     return {
-        spanningTree,
+        spanningTree: null,
         layout,
     }
-}
-
-
-// $FlowFixMe
-if (module.hot) {
-    module.hot.accept()
 }

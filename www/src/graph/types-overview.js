@@ -1,4 +1,4 @@
-import 'd3-hierarchy';
+// import 'd3-hierarchy';
 
 import { connect } from 'react-redux';
 import React from 'react';

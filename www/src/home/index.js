@@ -43,13 +43,13 @@ const Home = () => {
       <section className="jumbotron text-center">
         <div className="container">
           <h1 className="jumbotron-heading">Understand Go codebases at scale</h1>
-          <p className="lead text-muted">
+          <div className="lead text-muted">
           <ul>
                 <li>Quickly scan from a birds-eye view where functionality is located</li>
                 <li>Understand relationships between types (usages, call graphs) without searching through files and directories</li>
                 <li>Generate architectural diagrams, from the code itself</li>
             </ul>
-          </p>
+          </div>
           <p>
             <Link to="/repo/?name=github.com/twitchyliquid64/subnet/subnet" className="btn btn-primary my-2">Show example</Link>
             &nbsp;

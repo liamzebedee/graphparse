@@ -4,7 +4,11 @@ import { connect } from 'react-redux'
 import shortcut from 'keyboard-shortcut';
 import copy from 'copy-to-clipboard';
 import _ from 'underscore';
+
 import * as d3 from 'd3v4';
+
+import Blanket from '@atlaskit/blanket';
+// import NodeGroup from 'react-move/NodeGroup';
 
 import {
     hoverNode,
@@ -18,16 +22,11 @@ import {
     hexToRgb
 } from '../util'
 import nodeColor from './colours';
-
 import TypesOverview from './types-overview';
 
 const graphCSS = require('!!raw-loader!./graph.css');
 import './graph.css';
 
-// import Worker from './graph-logic.worker';
-// const worker = new Worker();
-
-import Blanket from '@atlaskit/blanket';
 
 class D3Graph extends React.Component {
     state = {
@@ -37,8 +36,8 @@ class D3Graph extends React.Component {
             transform: {
                 x: 0,
                 y: 0,
-                z: 0
-            }
+                k: 0
+            },
         },
 
         shiftKey: false,
@@ -73,12 +72,23 @@ class D3Graph extends React.Component {
         document.removeEventListener("keyup", this.onKeyUp, false);
     }
 
+    componentWillReceiveProps(nextProps) {
+        if(nextProps.generating == false && this.props.generating == true) {
+                let t = zoomToFit(this.svg, null, d3.select(this.svg), this.zoomHandler);
+                if(t) {
+                    this.setState({
+                        zoom: t
+                    });
+                }
+        }
+    }
+
     addZoom = () => {
         var zoomHandler = d3.zoom()
         .on("zoom", () => {
             this.setState({ zoom: d3.event.transform })
         });
-  
+
         zoomHandler(d3.select(this.svg));
     }
 
@@ -100,7 +110,7 @@ class D3Graph extends React.Component {
             <svg styleName='svg'
             ref={(ref) => this.svg = ref}
             onClick={clearSelection}
-            >
+            id='graph'>
             <defs>
                 <filter id="shadow" x="0" y="0" width="200%" height="200%">
                 <feOffset result="offOut" in="SourceAlpha" dx="10" dy="10" />
@@ -131,6 +141,12 @@ class D3Graph extends React.Component {
                 </g>
 
                 <g styleName='edges'>
+                
+                {/* <NodeGroup
+                    data={edges}
+                    keyAccessor={(d) => d.id}>
+
+                </NodeGroup> */}
                 {edges.map((edge, i) => {
                     // return null;
                     return <Edge key={edge.id} {...edge}/>
@@ -234,6 +250,69 @@ const Edge = (edge) => {
 
 //     let transform = d3.zoomIdentity.translate(translate[0],translate[1]).scale(scale);
 //     return transform;
+// }
+
+
+/*
+616.0430908203125 616.0430908203125
+
+*/
+
+function zoomToFit(svg, paddingPercent, el, zoom) {
+
+    let {
+        width,
+        height,
+        x,
+        y
+    } = svg.getBBox();
+    let container = svg.getBoundingClientRect();
+
+    let midX = x + width / 2;
+    let midY = y + height / 2;
+
+    if (width == 0 || height == 0) return null;
+
+    let fullWidth = container.width;
+    let fullHeight = container.height;
+    var scale = (paddingPercent || 0.75) / Math.max(width / fullWidth, height / fullHeight);
+    var translate = [fullWidth / 2 - scale * midX, fullHeight / 2 - scale * midY];
+    // console.trace("zoomFit", translate, scale);
+    // return { scale, translate }
+
+    // d3.select(el).transition()
+
+    let transform = d3.zoomTransform(el).translate(...translate).scale(scale);
+    return transform;
+    // let transform = d3.zoomIdentity.translate(translate).scale(scale);
+
+    // return transform;
+    // let zz = zoom.translateTo(el, translate).scaleTo(el, scale).event;
+
+    // console.log(zz)
+    // el
+    // .transition()
+    // .duration(200) // milliseconds
+    // .call(zoom.translateBy(translate).scale(scale).event);
+}
+
+// function zoomFit(paddingPercent, transitionDuration) {
+// 	var bounds = root.node().getBBox();
+// 	var parent = root.node().parentElement;
+// 	var fullWidth = parent.clientWidth,
+// 	    fullHeight = parent.clientHeight;
+// 	var width = bounds.width,
+// 	    height = bounds.height;
+// 	var midX = bounds.x + width / 2,
+// 	    midY = bounds.y + height / 2;
+// 	if (width == 0 || height == 0) return; // nothing to fit
+// 	var scale = (paddingPercent || 0.75) / Math.max(width / fullWidth, height / fullHeight);
+// 	var translate = [fullWidth / 2 - scale * midX, fullHeight / 2 - scale * midY];
+// 	console.trace("zoomFit", translate, scale);
+	// root
+	// 	.transition()
+	// 	.duration(transitionDuration || 0) // milliseconds
+	// 	.call(zoom.translate(translate).scale(scale).event);
 // }
 
 

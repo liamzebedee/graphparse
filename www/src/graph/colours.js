@@ -33,7 +33,8 @@
 
 import graphJSON from '../../graph.json';
 import _ from 'underscore';
-import * as d3 from 'd3v4';
+// import * as d3 from 'd3v4';
+import { scaleOrdinal } from 'd3-scale';
 
 const config = `
 Struct              #aec7e8
@@ -70,8 +71,6 @@ export function getVariantName(variant) {
 
 let range = config.map(x => x.colour)
 
-const nodeColor = d3
-    .scaleOrdinal(range)
-    .domain(domain)
+const nodeColor = scaleOrdinal(range).domain(domain)
 
 export default nodeColor;

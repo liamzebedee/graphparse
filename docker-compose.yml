@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  web:
+    image: node
+    command: 'yarn start'
+    volumes:
+     - ./www:/src:rw,cached
+    working_dir: /src
+    ports:
+     - 8080:8080
+     - 8081:8081
+  
+  agent:
+    build: 
+      dockerfile: graphparse.Dockerfile
+      context: .
+    working_dir: /go/src/github.com/liamzebedee/graphparse
+    volumes:
+      - ./graphparse:/go/src/github.com/liamzebedee/graphparse:rw,cached
+    environment:
+      GLIDE_HOME: ./
+    ports:
+     - 8082:8082
